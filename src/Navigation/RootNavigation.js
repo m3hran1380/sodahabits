@@ -2,6 +2,7 @@ import { createStackNavigator } from "@react-navigation/stack";
 import { useSelector, useDispatch } from "react-redux";
 import HomeScreen from "../screens/HomeScreen";
 import RegistrationScreen from "../screens/authScreens/RegistrationScreen";
+import LoginScreen from "../screens/authScreens/LoginScreen";
 import { setUser } from "../features/userSlice";
 import { auth } from "../firestore/firestoreConfig";
 import { onAuthStateChanged } from 'firebase/auth';
@@ -34,7 +35,10 @@ const RootNavigation = () => {
             { user ? 
                 <Stack.Screen component={HomeScreen} name='home screen' />
                 :
-                <Stack.Screen component={RegistrationScreen} name='registration screen' />
+                <>
+                  <Stack.Screen component={RegistrationScreen} name='registration screen' />
+                  <Stack.Screen component={LoginScreen} name='login screen' />
+                </>
             }
             
         </Stack.Navigator>

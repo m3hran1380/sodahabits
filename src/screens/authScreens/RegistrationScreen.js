@@ -1,18 +1,19 @@
-import { Text, StyleSheet, ImageBackground } from 'react-native';
+import { Text, StyleSheet, ImageBackground, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useState } from 'react';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { doc, runTransaction, getDoc } from "firebase/firestore"; 
-import { auth } from '../../firestore/firestoreConfig';
-import { db } from '../../firestore/firestoreConfig';
+import { auth, db } from '../../firestore/firestoreConfig';
 import isEmail from 'is-email';
 import FormInput from '../../components/authComponents/FormInput';
 import SubmitButton from '../../components/authComponents/SubmitButton';
-
+import FormSeparator from '../../components/authComponents/FormSeparator';
+import TextButton from '../../components/authComponents/TextButton';
+import generalStyles from '../../styles/generalStyle';
 
 const backgroundImage = require('../../../assets/images/backgroundImages/gradient-3.jpg');
 
-function RegistrationScreen() {
+function RegistrationScreen({ navigation }) {
 
     const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
@@ -94,8 +95,6 @@ function RegistrationScreen() {
                     await auth.currentUser.delete();
                 }
                 catch (error) {
-                    console.log(error);
-                    console.log(error);
                     setUnknownError(true);
                 }
             }
@@ -112,7 +111,6 @@ function RegistrationScreen() {
                     setIsValidPassword({status: false, error: 'Password is too weak.'})
                     break;
                 default:
-                    console.log(error);
                     setUnknownError(true);
             }
         }
@@ -153,6 +151,14 @@ function RegistrationScreen() {
                 />
                 { unknownError && <Text style={{color: 'red'}}>An unexpected error has occured. Please try again later.</Text>}
                 <SubmitButton onPress={handleSubmit} style={styles.button} text='Sign Up'/>
+
+                <FormSeparator text='or login with google' />
+
+                <View style={styles.loginOptionContainer}>
+                    <Text>Already have an account? </Text>
+                    <TextButton onPress={() => {navigation.navigate('login screen')}}>Login</TextButton>
+                </View>
+
             </SafeAreaView>
         </ImageBackground>
     )
@@ -161,25 +167,14 @@ function RegistrationScreen() {
 export default RegistrationScreen
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        marginHorizontal: 40,
-        paddingTop: 75,
-    },
-    backgroundImage: {
-        flex: 1,
-        resizeMode: 'cover',
-    },
-    h1: {
-        fontSize: 35,
-        fontFamily: 'elephant',
-        textAlign: 'center'
-    },
-    normalText: {
-        fontFamily: 'inter',
-        textAlign: 'center'
-    },
+    ...generalStyles,
     button: {
         marginTop: 30,
+    },
+    loginOptionContainer: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginVertical: 15,
     }
 })
