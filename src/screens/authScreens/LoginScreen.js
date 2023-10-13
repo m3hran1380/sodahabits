@@ -1,4 +1,4 @@
-import { StyleSheet, Text, ImageBackground, View } from 'react-native';
+import { StyleSheet, Text, ImageBackground, View, Keyboard } from 'react-native';
 import { useState } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import generalStyles from '../../styles/generalStyle';
@@ -7,8 +7,12 @@ import SubmitButton from '../../components/authComponents/SubmitButton';
 import FormSeparator from '../../components/authComponents/FormSeparator';
 import TextButton from '../../components/authComponents/TextButton';
 import isEmail from 'is-email';
-import { auth } from '../../firestore/firestoreConfig';
+import { auth, db } from '../../firestore/firestoreConfig';
+import { getDoc, doc } from 'firebase/firestore';
 import { signInWithEmailAndPassword } from 'firebase/auth';
+import { setUser } from '../../features/userSlice';
+import { useDispatch } from 'react-redux';
+import LoadingSpinnerOverlay from '../../components/loadingSpinners/LoadingSpinnerOverlay';
 
 
 const backgroundImage = require('../../../assets/images/backgroundImages/gradient-3.jpg');
@@ -21,10 +25,16 @@ const LoginScreen = ({ navigation }) => {
     const [isValidPassword, setIsValidPassword] = useState({status: true, error: ''});
     const [unknownError, setUnknownError] = useState({status: false, error: ''});
 
+    const [loading, setLoading] = useState(false);
+
+    const dispatch = useDispatch();
+
     const handleSubmit = () => {
+        Keyboard.dismiss();
         setUnknownError({ status: false, error: '' });
         let validEmail, validPassword, validUsername;
         validEmail = validPassword = validUsername = true;
+
         // verify email address:
         if (!email) {
             setIsValidEmail({status: false, error: 'Email is required'})
@@ -47,12 +57,15 @@ const LoginScreen = ({ navigation }) => {
     }
 
     const login = async (email, password) => {
+        setLoading(true);
         try {
             await signInWithEmailAndPassword(auth, email, password);
+            // retrieve the user's data:
+            const userDocument = await getDoc(doc(db, 'users', auth.currentUser.uid));
+            dispatch(setUser(userDocument.data()));
         }
         catch (error) {
-            console.log("hi")
-            console.log(error.code)
+            setLoading(false);
             switch (error.code) {
                 case 'auth/user-not-found':
                     setUnknownError({status: true, error: 'There is no account with this email address.'});
@@ -107,8 +120,9 @@ const LoginScreen = ({ navigation }) => {
                     <Text>Don't have an account? </Text>
                     <TextButton onPress={() => {navigation.navigate('registration screen')}}>SignUp</TextButton>
                 </View>
-
             </SafeAreaView>
+
+            { loading && <LoadingSpinnerOverlay label='Registering...' /> }
         </ImageBackground>
     )
 }

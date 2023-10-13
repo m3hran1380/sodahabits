@@ -1,4 +1,4 @@
-import { Text, StyleSheet, ImageBackground, View } from 'react-native';
+import { Text, StyleSheet, ImageBackground, View, Keyboard } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useState } from 'react';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
@@ -10,6 +10,10 @@ import SubmitButton from '../../components/authComponents/SubmitButton';
 import FormSeparator from '../../components/authComponents/FormSeparator';
 import TextButton from '../../components/authComponents/TextButton';
 import generalStyles from '../../styles/generalStyle';
+import LoadingSpinnerOverlay from '../../components/loadingSpinners/LoadingSpinnerOverlay';
+import { useDispatch } from 'react-redux';
+import { setUser } from '../../features/userSlice';
+
 
 const backgroundImage = require('../../../assets/images/backgroundImages/gradient-3.jpg');
 
@@ -24,8 +28,13 @@ function RegistrationScreen({ navigation }) {
     const [isValidPassword, setIsValidPassword] = useState({status: true, error: ''});
     const [isValidUsername, setIsValidUsername] = useState({status: true, error: ''});
     const [unknownError, setUnknownError] = useState(false);
+
+    const [loading, setLoading] = useState(false);
+
+    const dispatch = useDispatch();
     
     const handleSubmit = () => {
+        Keyboard.dismiss();
         setUnknownError(false);
         let validEmail, validPassword, validUsername;
         validEmail = validPassword = validUsername = true;
@@ -53,6 +62,7 @@ function RegistrationScreen({ navigation }) {
 
         // if no error - register the user:
         if (validEmail && validPassword && validUsername) {
+            setLoading(true);
             register(username, email, password);
         }
     }
@@ -80,26 +90,29 @@ function RegistrationScreen({ navigation }) {
             try {
                 await runTransaction(db, async (transaction) => {
                     const usernameDoc = await transaction.get(usernameRef);
-
                     if (usernameDoc.exists()) {
                         throw new Error('Username already exists.');
                     }
-
                     transaction.set(usernameRef, { uid: user.uid });
-                    transaction.set(userRef, { username: username })
-                })
+                    transaction.set(userRef, { username: username });
+                });
+                
+                dispatch(setUser({username: username}))
             }   
             catch (error) {
+                setLoading(false);
                 setIsValidUsername({status: false, error: error.message});
                 try {
                     await auth.currentUser.delete();
                 }
                 catch (error) {
+                    setLoading(false);
                     setUnknownError(true);
                 }
             }
         }
         catch (error) {
+            setLoading(false);
             switch (error.code) {
                 case 'auth/email-already-in-use':
                     setIsValidEmail({status: false, error: 'Email address is already in use.'})
@@ -160,6 +173,8 @@ function RegistrationScreen({ navigation }) {
                 </View>
 
             </SafeAreaView>
+
+            { loading && <LoadingSpinnerOverlay label='Registering...' /> }
         </ImageBackground>
     )
 }
