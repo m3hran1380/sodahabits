@@ -77,6 +77,7 @@ function RegistrationScreen({ navigation }) {
             const usernameDoc = await getDoc(doc(db, 'usernames', username));
             if (usernameDoc.exists()) {
                 setIsValidUsername({status: false, error: 'Username already exists.'});
+                setLoading(false);
                 return;
             }
 

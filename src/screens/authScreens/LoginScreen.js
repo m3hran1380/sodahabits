@@ -122,7 +122,7 @@ const LoginScreen = ({ navigation }) => {
                 </View>
             </SafeAreaView>
 
-            { loading && <LoadingSpinnerOverlay label='Registering...' /> }
+            { loading && <LoadingSpinnerOverlay label='Logging in...' /> }
         </ImageBackground>
     )
 }
