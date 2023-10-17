@@ -31,6 +31,7 @@ const AnimatedTextInput = ({ placeholder, style, setError, setValue, inputValue 
                     style={styles.textInput}
                     value={inputValue} 
                     onChangeText={handleInput}
+                    maxLength={20}
                 /> 
             }
         </Animated.View>

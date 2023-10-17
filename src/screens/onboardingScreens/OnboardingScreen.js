@@ -5,12 +5,14 @@ import generalStyles from '../../styles/generalStyle';
 import NextButton from '../../components/buttons/NextButton';
 import { useState } from 'react';
 import { db } from '../../firestore/firestoreConfig';
-import { updateDoc, doc } from 'firebase/firestore';
+import { doc, writeBatch, collection } from 'firebase/firestore';
 import { useDispatch, useSelector } from 'react-redux';
 import { setUser } from '../../features/userSlice';
-import { createHabits, getTodaysHabits } from '../../firestore/firestoreFunctions';
+import { createHabits, getTodaysHabits } from '../../businessLogic/firestoreFunctions';
 import { setAppLoading } from '../../features/appSlice';
 import DismissKeyboard from '../../components/DismissKeyboard';
+import { getMonday } from '../../businessLogic/firestoreFunctions';
+
 
 const OnboardingScreen = () => {
 
@@ -48,10 +50,28 @@ const OnboardingScreen = () => {
       await createHabits(user.uid, [firstHabit, secondHabit, thirdHabit])
       const todayHabits = await getTodaysHabits(user.uid);
       dispatch(setUser({todayHabits: todayHabits.habits}))
-      // update the userDoc to tick off onboarding
-      await updateDoc(doc(db, 'users', user.uid), {
-        onboarding: true,
-      });
+
+      // update the userDoc to tick off onboarding + create the WeeklyTracker
+      
+      try {
+        const batch = writeBatch(db);
+        // create weekly tracker document
+        const weeklyTrackerDocRef = doc(collection(db, 'users', user.uid, 'weeklytrackers'));
+        batch.set(weeklyTrackerDocRef, {
+          timestamp: getMonday(new Date()),
+          habitStatus: Array(7).fill(0).map(() => {return {primaryStatus: Array(3).fill('pending'), secondaryStatus: Array(3).fill('pending') }}),
+        })
+        // set onboarding to true
+        batch.update(doc(db, 'users', user.uid), {
+          onboarding: true,
+        });
+        await batch.commit();
+      }
+      catch (error) {
+        console.log('Error while creating weekly tracker in onboarding');
+        console.log(error);
+      }
+    
       dispatch(setUser({onboarding: true}));
       dispatch(setAppLoading(false));
     }

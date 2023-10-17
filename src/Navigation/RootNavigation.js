@@ -2,15 +2,15 @@ import { createStackNavigator } from "@react-navigation/stack";
 import { useSelector, useDispatch } from "react-redux";
 import RegistrationScreen from "../screens/authScreens/RegistrationScreen";
 import LoginScreen from "../screens/authScreens/LoginScreen";
-import { setUser, clearUser } from "../features/userSlice";
+import { clearUser, setUser } from "../features/userSlice";
 import { auth } from "../firestore/firestoreConfig";
 import { onAuthStateChanged } from 'firebase/auth';
 import { useEffect } from 'react';
 import OnboardingScreen from "../screens/onboardingScreens/OnboardingScreen";
-import { getUserData, getTodaysHabits } from "../firestore/firestoreFunctions";
 import AuthenticatedNavigation from "./AuthenticatedNavigation";
 import SplashScreen from "../components/loadingSpinners/SplashScreen";
 import { setAppLoading } from "../features/appSlice";
+import { initialiseApp } from "../businessLogic/initialisationFunctions";
 
 
 const Stack = createStackNavigator();
@@ -27,21 +27,9 @@ const RootNavigation = () => {
       try {
         // don't go to home page till we have retrieved the necessary data.
         {!loadingState && dispatch(setAppLoading(true))}
-
         if (user) {
-          const data = await getUserData(user.uid);
-          if (data) {
-            if (data.onboarding) {
-              const todayHabits = await getTodaysHabits(user.uid);
-              dispatch(setUser({uid: user.uid, ...data, todayHabits: todayHabits.habits}));
-            }
-            else {
-              dispatch(setUser({uid: user.uid, ...data}));
-            }
-          }
-          else {
-            dispatch(setUser({uid: user.uid}));
-          }
+          const userData = await initialiseApp(user.uid);
+          dispatch(setUser(userData));
         }
         else {
           dispatch(clearUser())
