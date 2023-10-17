@@ -6,21 +6,24 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { actualScreenWidth } from '../../styles/generalStyle';
 import { useSelector } from 'react-redux';
 import HabitItem from '../../components/homeComponents/HabitItem';
+import { useDispatch } from 'react-redux';
+import { setAppLoading } from '../../features/appSlice';
 
 const HomeScreen = () => {
     const user = useSelector((state) => state.user.currentUser);
     const locationImage = require('../../../assets/images/locations/FevalaHome.png');
 
+    const dispatch = useDispatch();
+
     const handleSignOut = async () => {
         try {
+            dispatch(setAppLoading(true))
             await signOut(auth);
         }
         catch (error) {
             console.log(error);
         }
     }
-
-    console.log(user);
 
     return (
         <View style={styles.parentContainer}>

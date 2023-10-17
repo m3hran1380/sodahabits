@@ -9,64 +9,77 @@ import { useEffect } from 'react';
 import OnboardingScreen from "../screens/onboardingScreens/OnboardingScreen";
 import { getUserData, getTodaysHabits } from "../firestore/firestoreFunctions";
 import AuthenticatedNavigation from "./AuthenticatedNavigation";
+import SplashScreen from "../components/loadingSpinners/SplashScreen";
+import { setAppLoading } from "../features/appSlice";
 
 
 const Stack = createStackNavigator();
 
 const RootNavigation = () => {
-    const dispatch = useDispatch();
+  const dispatch = useDispatch();
 
-    // check for authentication status:
-    useEffect(() => {
-      const unsub = onAuthStateChanged(auth, async (user) => {
-        try {
-          if (user) {
-            const data = await getUserData(user.uid);
-            if (data) {
-              if (data.onboarding) {
-                const todayHabits = await getTodaysHabits(user.uid);
-                dispatch(setUser({uid: user.uid, ...data, todayHabits: todayHabits.habits}));
-              }
-              else {
-                dispatch(setUser({uid: user.uid, ...data}));
-              }
+  const loadingState = useSelector(state => state.app.loading);
+  const userState = useSelector((state) => state.user.currentUser);
+
+  // check for authentication status:
+  useEffect(() => {
+    const unsub = onAuthStateChanged(auth, async (user) => {
+      try {
+        // don't go to home page till we have retrieved the necessary data.
+        {!loadingState && dispatch(setAppLoading(true))}
+
+        if (user) {
+          const data = await getUserData(user.uid);
+          if (data) {
+            if (data.onboarding) {
+              const todayHabits = await getTodaysHabits(user.uid);
+              dispatch(setUser({uid: user.uid, ...data, todayHabits: todayHabits.habits}));
             }
             else {
-              dispatch(setUser({uid: user.uid}));
+              dispatch(setUser({uid: user.uid, ...data}));
             }
           }
           else {
-            dispatch(clearUser())
+            dispatch(setUser({uid: user.uid}));
           }
         }
-        catch (error) {
-          console.log("error inside root navigation", error);
+        else {
+          dispatch(clearUser())
         }
-      });
-      return unsub;
-    }, [])
+        dispatch(setAppLoading(false));
+      }
+      catch (error) {
+        console.log("error inside root navigation", error);
+      }
+    });
+    return unsub;
+  }, [])
 
-    const user = useSelector((state) => state.user.currentUser);
 
+  if (userState === null || loadingState) {
     return (
-        <Stack.Navigator screenOptions={{headerShown: false}}>
-            { user ? 
-                <>
-                  { user.onboarding ? 
-                    <Stack.Screen component={AuthenticatedNavigation} name='authenticated navigation' />
-                    :
-                    <Stack.Screen component={OnboardingScreen} name='onboarding screen' />
-                  }
-                </>
-                :
-                <>
-                  <Stack.Screen component={RegistrationScreen} name='registration screen' />
-                  <Stack.Screen component={LoginScreen} name='login screen' />
-                </>
-            }
-            
-        </Stack.Navigator>
+      <SplashScreen />  
     )
+  }
+
+  return (
+    <Stack.Navigator screenOptions={{headerShown: false}}>
+      { userState ? 
+        <>
+          { userState.onboarding ? 
+            <Stack.Screen component={AuthenticatedNavigation} name='authenticated navigation' />
+            :
+            <Stack.Screen component={OnboardingScreen} name='onboarding screen' />
+          }
+        </>
+        :
+        <>
+          <Stack.Screen component={RegistrationScreen} name='registration screen' />
+          <Stack.Screen component={LoginScreen} name='login screen' />
+        </>
+      }
+    </Stack.Navigator>
+  )
 }
 
 export default RootNavigation

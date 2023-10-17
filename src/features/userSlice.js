@@ -14,7 +14,7 @@ const userSlice = createSlice({
             state.currentUser = {...state.currentUser, ...action.payload};
         },
         clearUser: (state) => {
-            state.currentUser = null;
+            state.currentUser = false;
         },
     }
 });

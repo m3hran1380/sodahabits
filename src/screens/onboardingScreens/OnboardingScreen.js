@@ -5,12 +5,12 @@ import generalStyles from '../../styles/generalStyle';
 import NextButton from '../../components/buttons/NextButton';
 import { useState } from 'react';
 import { db } from '../../firestore/firestoreConfig';
-import { collection, addDoc, serverTimestamp, updateDoc, doc } from 'firebase/firestore';
+import { updateDoc, doc } from 'firebase/firestore';
 import { useDispatch, useSelector } from 'react-redux';
-import LoadingSpinnerOverlay from '../../components/loadingSpinners/LoadingSpinnerOverlay';
 import { setUser } from '../../features/userSlice';
-import { createHabits } from '../../firestore/firestoreFunctions';
-
+import { createHabits, getTodaysHabits } from '../../firestore/firestoreFunctions';
+import { setAppLoading } from '../../features/appSlice';
+import DismissKeyboard from '../../components/DismissKeyboard';
 
 const OnboardingScreen = () => {
 
@@ -20,8 +20,6 @@ const OnboardingScreen = () => {
   const [firstError, setFirstError] = useState(false);
   const [secondError, setSecondError] = useState(false);
   const [thirdError, setThirdError] = useState(false);
-
-  const [loading, setLoading] = useState(false);
 
   const dispatch = useDispatch();
   const user = useSelector((state) => state.user.currentUser);
@@ -45,23 +43,26 @@ const OnboardingScreen = () => {
 
   const registerHabits = async () => {    
     try {
-      setLoading(true);
+      dispatch(setAppLoading(true));
+      // create the habits and retrieve them from firestore
       await createHabits(user.uid, [firstHabit, secondHabit, thirdHabit])
-
+      const todayHabits = await getTodaysHabits(user.uid);
+      dispatch(setUser({todayHabits: todayHabits.habits}))
       // update the userDoc to tick off onboarding
       await updateDoc(doc(db, 'users', user.uid), {
         onboarding: true,
       });
       dispatch(setUser({onboarding: true}));
+      dispatch(setAppLoading(false));
     }
     catch (error) {
-      setLoading(false);
+      dispatch(setAppLoading(false));
       console.log(error)
     }
   }
 
   return (
-    <>
+    <DismissKeyboard>
       <SafeAreaView style={styles.container}>
         <View style={styles.innerContainer}>
           <Text style={[styles.normalText, {textAlign: 'left', marginBottom: 15}]}>Enter your primary habits</Text>
@@ -89,9 +90,7 @@ const OnboardingScreen = () => {
         </View>
         <NextButton style={styles.button} onPress={handlePress} />
       </SafeAreaView>
-
-      { loading && <LoadingSpinnerOverlay/> }
-    </>
+    </DismissKeyboard>
   )
 }
 

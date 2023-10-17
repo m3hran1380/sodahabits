@@ -10,10 +10,9 @@ import SubmitButton from '../../components/authComponents/SubmitButton';
 import FormSeparator from '../../components/authComponents/FormSeparator';
 import TextButton from '../../components/authComponents/TextButton';
 import generalStyles from '../../styles/generalStyle';
-import LoadingSpinnerOverlay from '../../components/loadingSpinners/LoadingSpinnerOverlay';
 import { useDispatch } from 'react-redux';
 import { setUser } from '../../features/userSlice';
-
+import DismissKeyboard from '../../components/DismissKeyboard';
 
 const backgroundImage = require('../../../assets/images/backgroundImages/gradient-3.jpg');
 
@@ -23,15 +22,15 @@ function RegistrationScreen({ navigation }) {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
 
+    const dispatch = useDispatch();
+
     // --------------------------- FORM VALIDATION ---------------------------------------//
     const [isValidEmail, setIsValidEmail] = useState({status: true, error: ''});
     const [isValidPassword, setIsValidPassword] = useState({status: true, error: ''});
     const [isValidUsername, setIsValidUsername] = useState({status: true, error: ''});
     const [unknownError, setUnknownError] = useState(false);
 
-    const [loading, setLoading] = useState(false);
-
-    const dispatch = useDispatch();
+    const [loading, setLoading] = useState(false); 
     
     const handleSubmit = () => {
         Keyboard.dismiss();
@@ -132,50 +131,50 @@ function RegistrationScreen({ navigation }) {
 
     return (
         <ImageBackground source={backgroundImage} style={styles.backgroundImage} >
-            <SafeAreaView style={styles.container}>
-                <Text style={styles.h1}>Create Account</Text>
-                <Text style={styles.normalText}>Keep on top of your habits!</Text>
-                <FormInput 
-                    label='Username'
-                    placeholder='Enter your username'
-                    inputValue={username}
-                    setValue={setUsername}
-                    inputStyle={!isValidUsername.status && {borderColor: 'red'}}
-                    resetInputState={setIsValidUsername}
-                    state={isValidUsername}
-                />
-                <FormInput 
-                    label='Email'
-                    placeholder='Enter your email address'
-                    inputValue={email}
-                    setValue={setEmail}
-                    inputStyle={!isValidEmail.status && {borderColor: 'red'}}
-                    resetInputState={setIsValidEmail}
-                    state={isValidEmail}
-                />
-                <FormInput 
-                    label='Password'
-                    placeholder='Enter your password'
-                    inputValue={password}
-                    setValue={setPassword}
-                    isPassword={true}
-                    inputStyle={!isValidPassword.status && {borderColor: 'red'}}
-                    resetInputState={setIsValidPassword}
-                    state={isValidPassword}
-                />
-                { unknownError && <Text style={{color: 'red'}}>An unexpected error has occured. Please try again later.</Text>}
-                <SubmitButton onPress={handleSubmit} style={styles.button} text='Sign Up'/>
+            <DismissKeyboard>
+                <SafeAreaView style={styles.container}>
+                    <Text style={styles.h1}>Create Account</Text>
+                    <Text style={styles.normalText}>Keep on top of your habits!</Text>
+                    <FormInput 
+                        label='Username'
+                        placeholder='Enter your username'
+                        inputValue={username}
+                        setValue={setUsername}
+                        inputStyle={!isValidUsername.status && {borderColor: 'red'}}
+                        resetInputState={setIsValidUsername}
+                        state={isValidUsername}
+                    />
+                    <FormInput 
+                        label='Email'
+                        placeholder='Enter your email address'
+                        inputValue={email}
+                        setValue={setEmail}
+                        inputStyle={!isValidEmail.status && {borderColor: 'red'}}
+                        resetInputState={setIsValidEmail}
+                        state={isValidEmail}
+                    />
+                    <FormInput 
+                        label='Password'
+                        placeholder='Enter your password'
+                        inputValue={password}
+                        setValue={setPassword}
+                        isPassword={true}
+                        inputStyle={!isValidPassword.status && {borderColor: 'red'}}
+                        resetInputState={setIsValidPassword}
+                        state={isValidPassword}
+                    />
+                    { unknownError && <Text style={{color: 'red'}}>An unexpected error has occured. Please try again later.</Text>}
+                    <SubmitButton loading={loading} onPress={handleSubmit} style={styles.button} text='Sign Up'/>
 
-                <FormSeparator text='or login with google' />
+                    <FormSeparator text='or login with google' />
 
-                <View style={styles.loginOptionContainer}>
-                    <Text>Already have an account? </Text>
-                    <TextButton onPress={() => {navigation.navigate('login screen')}}>Login</TextButton>
-                </View>
+                    <View style={styles.loginOptionContainer}>
+                        <Text>Already have an account? </Text>
+                        <TextButton onPress={() => {navigation.navigate('login screen')}}>Login</TextButton>
+                    </View>
 
-            </SafeAreaView>
-
-            { loading && <LoadingSpinnerOverlay label='Registering...' /> }
+                </SafeAreaView>
+            </DismissKeyboard>
         </ImageBackground>
     )
 }

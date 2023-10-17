@@ -12,7 +12,7 @@ import { getDoc, doc } from 'firebase/firestore';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { setUser } from '../../features/userSlice';
 import { useDispatch } from 'react-redux';
-import LoadingSpinnerOverlay from '../../components/loadingSpinners/LoadingSpinnerOverlay';
+import DismissKeyboard from '../../components/DismissKeyboard';
 
 
 const backgroundImage = require('../../../assets/images/backgroundImages/gradient-3.jpg');
@@ -26,13 +26,12 @@ const LoginScreen = ({ navigation }) => {
     const [unknownError, setUnknownError] = useState({status: false, error: ''});
 
     const [loading, setLoading] = useState(false);
-
     const dispatch = useDispatch();
 
     const handleSubmit = () => {
         Keyboard.dismiss();
         setUnknownError({ status: false, error: '' });
-        let validEmail, validPassword, validUsername;
+        let validEmail, validPassword;
         validEmail = validPassword = validUsername = true;
 
         // verify email address:
@@ -58,6 +57,7 @@ const LoginScreen = ({ navigation }) => {
 
     const login = async (email, password) => {
         setLoading(true);
+
         try {
             await signInWithEmailAndPassword(auth, email, password);
             // retrieve the user's data:
@@ -87,42 +87,42 @@ const LoginScreen = ({ navigation }) => {
 
     return (
         <ImageBackground source={backgroundImage} style={styles.backgroundImage} >
-            <SafeAreaView style={styles.container}>
-                <Text style={styles.h1}>Hey, welcome Back!</Text>
-                <Text style={styles.normalText}>Continue with email</Text>
+            <DismissKeyboard>
+                <SafeAreaView style={styles.container}>
+                    <Text style={styles.h1}>Hey, welcome Back!</Text>
+                    <Text style={styles.normalText}>Continue with email</Text>
 
-                <FormInput 
-                    label='Email'
-                    placeholder='Enter your email address'
-                    inputValue={email}
-                    setValue={setEmail}
-                    inputStyle={!isValidEmail.status && {borderColor: 'red'}}
-                    resetInputState={setIsValidEmail}
-                    state={isValidEmail}
-                    style={{marginTop: 20}}
-                />
-                <FormInput 
-                    label='Password'
-                    placeholder='Enter your password'
-                    inputValue={password}
-                    setValue={setPassword}
-                    isPassword={true}
-                    inputStyle={!isValidPassword.status && {borderColor: 'red'}}
-                    resetInputState={setIsValidPassword}
-                    state={isValidPassword}
-                />
-                { unknownError.status && <Text style={{color: 'red'}}>{unknownError.error}</Text>}
-                <SubmitButton onPress={handleSubmit} style={styles.button} text='Login'/>
-                
-                <FormSeparator text='or login with google' />
+                    <FormInput 
+                        label='Email'
+                        placeholder='Enter your email address'
+                        inputValue={email}
+                        setValue={setEmail}
+                        inputStyle={!isValidEmail.status && {borderColor: 'red'}}
+                        resetInputState={setIsValidEmail}
+                        state={isValidEmail}
+                        style={{marginTop: 20}}
+                    />
+                    <FormInput 
+                        label='Password'
+                        placeholder='Enter your password'
+                        inputValue={password}
+                        setValue={setPassword}
+                        isPassword={true}
+                        inputStyle={!isValidPassword.status && {borderColor: 'red'}}
+                        resetInputState={setIsValidPassword}
+                        state={isValidPassword}
+                    />
+                    { unknownError.status && <Text style={{color: 'red'}}>{unknownError.error}</Text>}
+                    <SubmitButton loading={loading} onPress={handleSubmit} style={styles.button} text='Login'/>
+                    
+                    <FormSeparator text='or login with google' />
 
-                <View style={styles.registerOptionContainer}>
-                    <Text>Don't have an account? </Text>
-                    <TextButton onPress={() => {navigation.navigate('registration screen')}}>SignUp</TextButton>
-                </View>
-            </SafeAreaView>
-
-            { loading && <LoadingSpinnerOverlay label='Logging in...' /> }
+                    <View style={styles.registerOptionContainer}>
+                        <Text>Don't have an account? </Text>
+                        <TextButton onPress={() => {navigation.navigate('registration screen')}}>SignUp</TextButton>
+                    </View>
+                </SafeAreaView>
+            </DismissKeyboard>
         </ImageBackground>
     )
 }

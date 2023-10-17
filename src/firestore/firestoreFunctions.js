@@ -40,7 +40,6 @@ export const convertToLocaleTime = (firestoreTimeStamp) => {
 
 export const getTodaysHabits = async (userId) => {
     let latestHabitData = await getUserHabits(userId);
-
     // check see if the latest habit data matches today's date 
     const latestHabitDate = convertToLocaleTime(latestHabitData.timestamp).toLocaleDateString();
     const now = new Date();
