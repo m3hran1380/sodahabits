@@ -2,7 +2,7 @@ import { StyleSheet, TextInput, Pressable, Text } from 'react-native'
 import Animated, { withSpring, useAnimatedStyle } from 'react-native-reanimated';
 import { AntDesign } from '@expo/vector-icons/';
 import { useState } from 'react';
-import { screenWidth } from '../../styles/generalStyle';
+import { availableScreenWidth } from '../../styles/generalStyle';
 
 const AnimatedTextInput = ({ placeholder, style, setError, setValue, inputValue }) => {
     const [acceptInput, setAcceptInput] = useState(false);
@@ -14,7 +14,7 @@ const AnimatedTextInput = ({ placeholder, style, setError, setValue, inputValue 
 
     const animatedInputStyle = useAnimatedStyle(() => {
         return {
-            width: withSpring(acceptInput ? screenWidth : 50),
+            width: withSpring(acceptInput ? availableScreenWidth : 50),
         }
     })
 
@@ -31,7 +31,7 @@ const AnimatedTextInput = ({ placeholder, style, setError, setValue, inputValue 
                     style={styles.textInput}
                     value={inputValue} 
                     onChangeText={handleInput}
-                    maxLength={20}
+                    maxLength={16}
                 /> 
             }
         </Animated.View>

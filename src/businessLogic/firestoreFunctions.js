@@ -1,4 +1,4 @@
-import { getDocs, getDoc, doc, query, collection, orderBy, limit, addDoc, serverTimestamp } from 'firebase/firestore';
+import { getDocs, getDoc, doc, query, collection, orderBy, limit, addDoc, serverTimestamp, updateDoc } from 'firebase/firestore';
 import { db } from '../firestore/firestoreConfig';
 
 
@@ -135,6 +135,7 @@ export const retrieveLatestWeeklyTrackers = async (userId, amount) => {
         if (!weeklyTrackerData.empty) {
             weeklyTrackerData.forEach((doc) => {
                 latestTrackers.push({
+                    id: doc.id,
                     ...doc.data(),
                     // replace the timestamp retrieved with a local timestamp
                     timestamp: convertToLocaleTime(doc.data().timestamp)                    
@@ -167,8 +168,8 @@ export const syncWeeklyTrackers = async (userId) => {
         }
         else {
             // this is for creating the tracker document that corresponds to the current week
-            // get today's index:
-            const todayIndex = (now.getDay() - 1) < 0 ? 6 : (now.getDay() - 1);
+            // get today's index - we then use this index to set the previous days before today to not-complete as they've been missed.
+            const todayIndex = getTodayIndex();
             await createCurrentWeekTrackerDocument(userId, latestTrackerMonday, todayIndex);
         }
     }    
@@ -216,5 +217,32 @@ const createCurrentWeekTrackerDocument = async (userId, timeStamp, todayIndex) =
     }
     catch (error) {
         console.log('Error while creating weekly tracker documents', error);
+    }
+}
+
+
+export const getTodayIndex = () => {
+    const now = new Date();
+    const todayIndex = (now.getDay() - 1) < 0 ? 6 : (now.getDay() - 1);
+    return todayIndex;
+}
+
+
+// update the status of a habit to completed or pending
+export const updateHabitStatus = async (userId, habitIndex, habitType, newHabitStatus) => {
+    try {
+        const latestWeeklyTrackerList = await retrieveLatestWeeklyTrackers(userId, 1);
+        const currentWeeklyTracker = latestWeeklyTrackerList[0];
+        const todayIndex = getTodayIndex();
+
+        // update status of the habit
+        currentWeeklyTracker.habitStatus[todayIndex][`${habitType}Status`][habitIndex] = newHabitStatus;
+        const docRef = doc(db, 'users', userId, 'weeklytrackers', currentWeeklyTracker.id);
+        await updateDoc(docRef, currentWeeklyTracker);
+        
+    }
+    catch (error) {
+        // if we can't update habit status, the app state should be reverted back - (optimistic update)
+        throw error;
     }
 }

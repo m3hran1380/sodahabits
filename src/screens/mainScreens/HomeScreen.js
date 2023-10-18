@@ -5,9 +5,11 @@ import generalStyles, { colors } from '../../styles/generalStyle';
 import { LinearGradient } from 'expo-linear-gradient';
 import { actualScreenWidth } from '../../styles/generalStyle';
 import { useSelector } from 'react-redux';
-import HabitItem from '../../components/homeComponents/HabitItem';
+import HabitItem from '../../components/homeComponents/habitComponents/HabitItem';
 import { useDispatch } from 'react-redux';
 import { setAppLoading } from '../../features/appSlice';
+import DaysLabel from '../../components/homeComponents/habitComponents/DaysLabel';
+
 
 const HomeScreen = () => {
     const user = useSelector((state) => state.user.currentUser);
@@ -37,12 +39,13 @@ const HomeScreen = () => {
                 />
             </View>
             <View style={[styles.container, {paddingTop: 0}]}>
+                <DaysLabel />
                 {
+                    // render the primary habits
                     Object.keys(user.todayHabits.primary).map(key => user.todayHabits.primary[key].name).map((habitName, index) => {
-                        return <HabitItem key={index} habitName={habitName} />
+                        return <HabitItem key={index} habitIndex={index} habitName={habitName} primary={true} />
                     })
                 }
-
                 <Button title='Sign Out' onPress={handleSignOut}/>
             </View>
         </View>

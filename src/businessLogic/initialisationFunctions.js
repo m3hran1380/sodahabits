@@ -6,6 +6,8 @@ export const initialiseApp = async (userId) => {
     const data = await getUserData(userId);
     if (data) {
         if (data.onboarding) {
+            // this section is only ran when the user logs in after their registration. 
+            // (we don't need to synchronise weekly trackers upon registration)
             const todayHabits = await getTodaysHabits(userId);
 
             // sync the weekly trackers to ensure we have one document for each week till now
