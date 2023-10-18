@@ -51,28 +51,36 @@ const OnboardingScreen = () => {
       const todayHabits = await getTodaysHabits(user.uid);
       dispatch(setUser({todayHabits: todayHabits.habits}))
 
-      // update the userDoc to tick off onboarding + create the WeeklyTracker
+      // this list is going to have only one element for now as the user just signed up
+      const weeklyTrackerList = [];
       
+      // update the userDoc to tick off onboarding + create the WeeklyTracker
       try {
         const batch = writeBatch(db);
         // create weekly tracker document
         const weeklyTrackerDocRef = doc(collection(db, 'users', user.uid, 'weeklytrackers'));
-        batch.set(weeklyTrackerDocRef, {
+
+        const currentWeekTracker = {
           timestamp: getMonday(new Date()),
           habitStatus: Array(7).fill(0).map(() => {return {primaryStatus: Array(3).fill('pending'), secondaryStatus: Array(3).fill('pending') }}),
-        })
+        }
+        batch.set(weeklyTrackerDocRef, currentWeekTracker);
         // set onboarding to true
         batch.update(doc(db, 'users', user.uid), {
           onboarding: true,
         });
         await batch.commit();
+
+        // convert the timestamp to ISOSTRING timestamps so they can be stored in redux store;
+        currentWeekTracker.timestamp = currentWeekTracker.timestamp.toISOString();
+        weeklyTrackerList.push(currentWeekTracker);
       }
       catch (error) {
         console.log('Error while creating weekly tracker in onboarding');
         console.log(error);
       }
     
-      dispatch(setUser({onboarding: true}));
+      dispatch(setUser({onboarding: true, weeklyTrackers: weeklyTrackerList}));
       dispatch(setAppLoading(false));
     }
     catch (error) {

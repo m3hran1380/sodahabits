@@ -1,4 +1,4 @@
-import { getUserData, getTodaysHabits, syncWeeklyTrackers } from "./firestoreFunctions";
+import { getUserData, getTodaysHabits, syncWeeklyTrackers, retrieveLatestWeeklyTrackers } from "./firestoreFunctions";
 
 
 export const initialiseApp = async (userId) => {
@@ -7,8 +7,19 @@ export const initialiseApp = async (userId) => {
     if (data) {
         if (data.onboarding) {
             const todayHabits = await getTodaysHabits(userId);
+
+            // sync the weekly trackers to ensure we have one document for each week till now
             await syncWeeklyTrackers(userId);
-            userData = {uid: userId, ...data, todayHabits: todayHabits.habits}
+
+            // retrieve the last 10 weekly trackers (retrieve more upon request)
+            const latestWeeklyTrackers = await retrieveLatestWeeklyTrackers(userId, 10);
+
+            // convert the timestamps to ISOSTRING timestamps so they can be stored in redux store
+            latestWeeklyTrackers.forEach((tracker) => {
+                tracker.timestamp = tracker.timestamp.toISOString();
+            })
+
+            userData = {uid: userId, ...data, todayHabits: todayHabits.habits, weeklyTrackers: latestWeeklyTrackers}
         }
         else {
             userData = {uid: userId, ...data}

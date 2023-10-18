@@ -126,21 +126,23 @@ export const getMonday = (date) => {
 // make sure we have a weekly tracker record for every week since the start of the user's account:
 
 // this function retrieves the latest weekly tracker
-const retrieveLatestWeeklyTracker = async (userId) => {
+export const retrieveLatestWeeklyTrackers = async (userId, amount) => {
     try {
-        const weeklyTrackerDocQuery = query(collection(db, 'users', userId, 'weeklytrackers'), orderBy('timestamp', 'desc'), limit(1));
+        const weeklyTrackerDocQuery = query(collection(db, 'users', userId, 'weeklytrackers'), orderBy('timestamp', 'desc'), limit(amount));
         const weeklyTrackerData = await getDocs(weeklyTrackerDocQuery);
-        let latestTracker;
+        const latestTrackers = [];
+
         if (!weeklyTrackerData.empty) {
             weeklyTrackerData.forEach((doc) => {
-                latestTracker = {
-                    id: doc.id,
-                    ...doc.data()
-                }
+                latestTrackers.push({
+                    ...doc.data(),
+                    // replace the timestamp retrieved with a local timestamp
+                    timestamp: convertToLocaleTime(doc.data().timestamp)                    
+                })
             });
         }
         else { return };
-        return latestTracker;
+        return latestTrackers;
     }
     catch (error) {
         console.log(error);
@@ -149,10 +151,11 @@ const retrieveLatestWeeklyTracker = async (userId) => {
 
 // this function makes sure we have a record for any missing week
 export const syncWeeklyTrackers = async (userId) => {
-    const latestTrackerData = await retrieveLatestWeeklyTracker(userId);
+    const RetrievedTrackerData = await retrieveLatestWeeklyTrackers(userId, 1);
+    const latestTrackerData = RetrievedTrackerData[0];
     const now = new Date();
     const currentWeekMonday = getMonday(now);
-    const latestTrackerMonday = getMonday(convertToLocaleTime(latestTrackerData.timestamp));
+    const latestTrackerMonday = getMonday(latestTrackerData.timestamp);
 
     while (latestTrackerMonday < currentWeekMonday) {
         // while we haven't reached the current week, create weeklytracker documents
