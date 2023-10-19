@@ -90,7 +90,7 @@ const HabitItem = ({ habitName, habitIndex, primary }) => {
             }
         })
     
-
+    
     return (
         <GestureDetector gesture={panGesture}>
             <View style={styles.container}>

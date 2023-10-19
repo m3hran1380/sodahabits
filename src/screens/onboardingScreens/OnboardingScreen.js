@@ -61,7 +61,6 @@ const OnboardingScreen = () => {
                     habitStatus: Array(7).fill(0).map(() => {return {primaryStatus: Array(3).fill('pending'), secondaryStatus: Array(3).fill('pending') }}),
                 }
 
-
                 // set the days prior to the registration day to null.
                 const todayIndex = getTodayIndex();
                 for (let i=0; i<todayIndex; i++) {
