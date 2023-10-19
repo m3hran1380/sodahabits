@@ -31,6 +31,7 @@ export const colors = {
     primaryColor: '#635E5E',
     backgroundColorPrimary: '#122746',
     habitColorPrimary: '#363b64',
+    habitColorSuccess: '#1a965c',
     colorSuccess: '#06d447',
     colorFailure: '#d9004c',
     colorNull: '#dddddd',

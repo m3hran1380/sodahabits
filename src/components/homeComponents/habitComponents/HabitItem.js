@@ -11,8 +11,8 @@ import { getTodayIndex, updateHabitStatus } from '../../../businessLogic/firesto
 import { setUser } from '../../../features/userSlice';
 
 
-const HabitItem = ({ habitName, habitIndex, primary }) => {
-
+const HabitItem = ({ habitName, habitIndex, primary, habitStatus }) => {
+    
     const dispatch = useDispatch();
     const user = useSelector((state) => state.user.currentUser);
 
@@ -89,11 +89,11 @@ const HabitItem = ({ habitName, habitIndex, primary }) => {
                 btnOffset.value = withTiming(0);
             }
         })
-    
+
     
     return (
         <GestureDetector gesture={panGesture}>
-            <View style={styles.container}>
+            <View style={[styles.container, {backgroundColor: habitStatus === 'complete' ? colors.habitColorSuccess : colors.habitColorPrimary}]}>
                 <Animated.View style={[styles.completeBtn, completeBtnStyle]}>
                     <AntDesign name='check' size={30} style={{color: 'white'}} />
                 </Animated.View>
@@ -123,7 +123,6 @@ export default HabitItem
 const styles = StyleSheet.create({
   container: {
       borderRadius: 10,
-      backgroundColor: colors.habitColorPrimary,
       height: 45,
       paddingHorizontal: 15,
       marginVertical: 5,
