@@ -42,7 +42,7 @@ const HomeScreen = () => {
                 <DaysLabel />
                 {
                     // render the primary habits
-                    Object.keys(user.todayHabits.primary).map(key => user.todayHabits.primary[key].name).map((habitName, index) => {
+                    Object.keys(user.todayHabits.habits.primary).map(key => user.todayHabits.habits.primary[key].name).map((habitName, index) => {
                         return <HabitItem key={index} habitIndex={index} habitName={habitName} primary={true} />
                     })
                 }

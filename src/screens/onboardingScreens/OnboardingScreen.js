@@ -48,7 +48,7 @@ const OnboardingScreen = () => {
             // create the habits and retrieve them from firestore
             await createHabits(user.uid, [firstHabit, secondHabit, thirdHabit])
             const todayHabits = await getTodaysHabits(user.uid);
-            dispatch(setUser({todayHabits: todayHabits.habits}))
+            dispatch(setUser({todayHabits: {habits: todayHabits.habits, id: todayHabits.id}}))
 
             // this list is going to have only one element for now as the user just signed up
             const weeklyTrackerList = [];
@@ -73,11 +73,11 @@ const OnboardingScreen = () => {
 
                 // create weeklytrack document and update the user's onboarding status as a batch operation
                 const batch = writeBatch(db);
-                const weeklyTrackerDocRef = doc(collection(db, 'users', user.uid, 'weeklytrackers'));
+                const weeklyTrackerDocRef = doc(collection(db, 'usersprivate', user.uid, 'weeklytrackers'));
 
                 batch.set(weeklyTrackerDocRef, currentWeekTracker);
                 // set onboarding to true
-                batch.update(doc(db, 'users', user.uid), {
+                batch.update(doc(db, 'usersprivate', user.uid), {
                     onboarding: true,
                 });
                 await batch.commit();

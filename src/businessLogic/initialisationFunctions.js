@@ -20,8 +20,7 @@ export const initialiseApp = async (userId) => {
             latestWeeklyTrackers.forEach((tracker) => {
                 tracker.timestamp = tracker.timestamp.toISOString();
             })
-
-            userData = {uid: userId, ...data, todayHabits: todayHabits.habits, weeklyTrackers: latestWeeklyTrackers}
+            userData = {uid: userId, ...data, todayHabits: {habits: todayHabits.habits, id: todayHabits.id}, weeklyTrackers: latestWeeklyTrackers}
         }
         else {
             userData = {uid: userId, ...data}

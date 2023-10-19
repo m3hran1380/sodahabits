@@ -84,7 +84,8 @@ function RegistrationScreen({ navigation }) {
             const user = userCredential.user;
             
             const usernameRef = doc(db, 'usernames', username);
-            const userRef = doc(db, 'users', user.uid);
+            const userPrivateRef = doc(db, 'usersprivate', user.uid);
+            const userPublicRef = doc(db, 'userspublic', user.uid);
 
             // transaction to check if username exists and if it doesn't 
             try {
@@ -94,7 +95,8 @@ function RegistrationScreen({ navigation }) {
                         throw new Error('Username already exists.');
                     }
                     transaction.set(usernameRef, { uid: user.uid });
-                    transaction.set(userRef, { username: username });
+                    transaction.set(userPrivateRef, { username: username });
+                    transaction.set(userPublicRef, { username: username });
                 });
                 
                 dispatch(setUser({username: username}))

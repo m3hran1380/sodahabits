@@ -1,10 +1,10 @@
-import { getDocs, getDoc, doc, query, collection, orderBy, limit, addDoc, serverTimestamp, updateDoc } from 'firebase/firestore';
+import { getDocs, getDoc, doc, query, collection, orderBy, limit, addDoc, serverTimestamp, writeBatch } from 'firebase/firestore';
 import { db } from '../firestore/firestoreConfig';
 
 
 // retrieves the user document corresponding to the provided userID.
 export const getUserData = async (userId) => {
-    const docRef = doc(db, 'users', userId);
+    const docRef = doc(db, 'usersprivate', userId);
     const docSnapshot = await getDoc(docRef);
     if (docSnapshot.exists()) {
         return docSnapshot.data();
@@ -17,7 +17,7 @@ export const getUserData = async (userId) => {
 
 // this function retrieves the user's latest recorded habits from the database.
 export const getUserLatestHabitsRecord = async (userId) => {
-    const habitDocQuery = query(collection(db, 'users', userId, 'dailyhabits'), orderBy('timestamp', 'desc'), limit(1));
+    const habitDocQuery = query(collection(db, 'usersprivate', userId, 'dailyhabits'), orderBy('timestamp', 'desc'), limit(1));
     const habitData = await getDocs(habitDocQuery);
     let latestHabitData;
     if (!habitData.empty) {
@@ -72,7 +72,7 @@ export const getTodaysHabits = async (userId) => {
 
 // creates a daily habit document for the provided userID
 export const createHabits = async (userId, primaryHabits=[], secondaryHabits=[]) => {
-    const dailyHabitRef = collection(db, 'users', userId, 'dailyhabits');
+    const dailyHabitRef = collection(db, 'usersprivate', userId, 'dailyhabits');
 
     try {
         await addDoc(dailyHabitRef, {
@@ -128,7 +128,7 @@ export const getMonday = (date) => {
 // this function retrieves the latest weekly tracker
 export const retrieveLatestWeeklyTrackers = async (userId, amount) => {
     try {
-        const weeklyTrackerDocQuery = query(collection(db, 'users', userId, 'weeklytrackers'), orderBy('timestamp', 'desc'), limit(amount));
+        const weeklyTrackerDocQuery = query(collection(db, 'usersprivate', userId, 'weeklytrackers'), orderBy('timestamp', 'desc'), limit(amount));
         const weeklyTrackerData = await getDocs(weeklyTrackerDocQuery);
         const latestTrackers = [];
 
@@ -178,7 +178,7 @@ export const syncWeeklyTrackers = async (userId) => {
 // this function creates weekly track documents for weeks with no activity
 const createIncompleteWeeklyTrackerDocument = async (userId, timeStamp) => {
     try {
-        const weeklyTrackerDocRef = collection(db, 'users', userId, 'weeklytrackers');
+        const weeklyTrackerDocRef = collection(db, 'usersprivate', userId, 'weeklytrackers');
         await addDoc(weeklyTrackerDocRef, {
             timestamp: timeStamp,
             habitStatus: Array(7).fill(0).map(() => {
@@ -196,7 +196,7 @@ const createIncompleteWeeklyTrackerDocument = async (userId, timeStamp) => {
 // this function creates weekly track documents for current week
 const createCurrentWeekTrackerDocument = async (userId, timeStamp, todayIndex) => {
     try {
-        const weeklyTrackerDocRef = collection(db, 'users', userId, 'weeklytrackers');
+        const weeklyTrackerDocRef = collection(db, 'usersprivate', userId, 'weeklytrackers');
 
         const habitStatus = Array(7).fill(0).map(() => {
             return {primaryStatus: Array(3).fill('pending'), secondaryStatus: Array(3).fill('pending') }
@@ -221,6 +221,7 @@ const createCurrentWeekTrackerDocument = async (userId, timeStamp, todayIndex) =
 }
 
 
+// return today's index
 export const getTodayIndex = () => {
     const now = new Date();
     const todayIndex = (now.getDay() - 1) < 0 ? 6 : (now.getDay() - 1);
@@ -228,21 +229,34 @@ export const getTodayIndex = () => {
 }
 
 
-// update the status of a habit to completed or pending
+// update the status of a habit to completed or pending in both the weekly tracker and todayHabit collections
 export const updateHabitStatus = async (userId, habitIndex, habitType, newHabitStatus) => {
     try {
         const latestWeeklyTrackerList = await retrieveLatestWeeklyTrackers(userId, 1);
         const currentWeeklyTracker = latestWeeklyTrackerList[0];
         const todayIndex = getTodayIndex();
+        const todayHabitDocument = await getTodaysHabits(userId); 
 
-        // update status of the habit
+        // update status of the habit in both the weekly tracker and dailyhabit documents;
         currentWeeklyTracker.habitStatus[todayIndex][`${habitType}Status`][habitIndex] = newHabitStatus;
-        const docRef = doc(db, 'users', userId, 'weeklytrackers', currentWeeklyTracker.id);
-        await updateDoc(docRef, currentWeeklyTracker);
+        todayHabitDocument.habits[habitType][habitIndex].status = newHabitStatus;
+
+        const trackerDocRef = doc(db, 'usersprivate', userId, 'weeklytrackers', currentWeeklyTracker.id);
+        const dailyhabitDocRef = doc(db, 'usersprivate', userId, 'dailyhabits', todayHabitDocument.id);
+       
+        const batch = writeBatch(db);
+        batch.update(trackerDocRef, currentWeeklyTracker);
+        batch.update(dailyhabitDocRef, todayHabitDocument);
         
+        await batch.commit(); 
     }
     catch (error) {
         // if we can't update habit status, the app state should be reverted back - (optimistic update)
         throw error;
     }
+}
+
+
+const updateTodayHabitDocument = async (userId, habitIndex, habitType, ) => {
+    pass
 }

@@ -45,45 +45,30 @@ const HabitItem = ({ habitName, habitIndex, primary }) => {
         }
     });
 
-    const handleAccept = () => {
-        const currentWeeklyTrackerListReduxState = user.weeklyTrackers;
-        // make a copy of the weeklyTrackers redux state - this is redux states are immutable and we cannot directly change them.
-        // so im making a copy to then update the state with.
-        const currentWeeklyTrackerList = JSON.parse(JSON.stringify(currentWeeklyTrackerListReduxState));
+    const handleSwipe = (swipeType) => {
+        const newStatus = swipeType === 'left' ? 'pending' : 'complete';
+        const oldStatus = newStatus === 'pending' ? 'complete' : 'pending';
+
+        const currentWeeklyTrackerList = JSON.parse(JSON.stringify(user.weeklyTrackers));
         const todayIndex = getTodayIndex();
-        currentWeeklyTrackerList[0].habitStatus[todayIndex][`${primary ? 'primary' : 'secondary'}Status`][habitIndex] = 'complete';
-        dispatch(setUser({weeklyTrackers: currentWeeklyTrackerList}));
+        currentWeeklyTrackerList[0].habitStatus[todayIndex][`${primary ? 'primary' : 'secondary'}Status`][habitIndex] = newStatus;
+        const todayHabitsCopy = JSON.parse(JSON.stringify(user.todayHabits));
+        todayHabitsCopy.habits[`${primary ? 'primary' : 'secondary'}`][habitIndex].status = newStatus;
+
+        dispatch(setUser({weeklyTrackers: currentWeeklyTrackerList, todayHabits: todayHabitsCopy}));
 
         // update the firestore
-        updateHabitStatus(user.uid, habitIndex, primary ? 'primary' : 'secondary' , 'complete')
+        updateHabitStatus(user.uid, habitIndex, primary ? 'primary' : 'secondary' , newStatus)
             .catch(error => {
                 console.log('Error while updating habit status ', error);
-                // revert the redux state back to its original state:
-                const currentWeeklyTrackerListReduxState = user.weeklyTrackers;
-                const currentWeeklyTrackerList = JSON.parse(JSON.stringify(currentWeeklyTrackerListReduxState));
-                currentWeeklyTrackerList[0].habitStatus[todayIndex][`${primary ? 'primary' : 'secondary'}Status`][habitIndex] = 'pending';
-                dispatch(setUser({weeklyTrackers: currentWeeklyTrackerList}));
+                const currentWeeklyTrackerList = JSON.parse(JSON.stringify(user.weeklyTrackers));
+                currentWeeklyTrackerList[0].habitStatus[todayIndex][`${primary ? 'primary' : 'secondary'}Status`][habitIndex] = oldStatus;
+                // update the todayHabits property of user state
+                const todayHabitsCopy = JSON.parse(JSON.stringify(user.todayHabits));
+                todayHabitsCopy.habits[`${primary ? 'primary' : 'secondary'}`][habitIndex].status = oldStatus;
+                dispatch(setUser({weeklyTrackers: currentWeeklyTrackerList, todayHabits: todayHabitsCopy}));
             })
     }
-
-    const handleReject = () => {
-        const currentWeeklyTrackerListReduxState = user.weeklyTrackers;
-        const currentWeeklyTrackerList = JSON.parse(JSON.stringify(currentWeeklyTrackerListReduxState));
-        const todayIndex = getTodayIndex();
-        currentWeeklyTrackerList[0].habitStatus[todayIndex][`${primary ? 'primary' : 'secondary'}Status`][habitIndex] = 'pending';
-        dispatch(setUser({weeklyTrackers: currentWeeklyTrackerList}));
-
-        // update the firestore
-        updateHabitStatus(user.uid, habitIndex, primary ? 'primary' : 'secondary' , 'pending')
-            .catch(error => {
-                console.log('Error while updating habit status ', error);
-                const currentWeeklyTrackerListReduxState = user.weeklyTrackers;
-                const currentWeeklyTrackerList = JSON.parse(JSON.stringify(currentWeeklyTrackerListReduxState));
-                currentWeeklyTrackerList[0].habitStatus[todayIndex][`${primary ? 'primary' : 'secondary'}Status`][habitIndex] = 'complete';
-                dispatch(setUser({weeklyTrackers: currentWeeklyTrackerList}));
-            })
-    }
-
 
     const panGesture = Gesture.Pan()
         .onChange((event) => {
@@ -94,18 +79,19 @@ const HabitItem = ({ habitName, habitIndex, primary }) => {
         .onEnd(() => {
             if (btnOffset.value > (availableScreenWidth / 2)) {
                 btnOffset.value = withSequence(withTiming(availableScreenWidth), withDelay(100, withTiming(0, {duration: 0})));
-                runOnJS(handleAccept)();
+                runOnJS(handleSwipe)('right');
             }
             else if (btnOffset.value < -(availableScreenWidth / 2)) {
                 btnOffset.value = withSequence(withTiming(-availableScreenWidth), withDelay(100, withTiming(0, {duration: 0})));
-                runOnJS(handleReject)();
+                runOnJS(handleSwipe)('left');
             }
             else {
                 btnOffset.value = withTiming(0);
             }
         })
     
-    
+
+    console.log(user.todayHabits.habits);
 
     return (
         <GestureDetector gesture={panGesture}>

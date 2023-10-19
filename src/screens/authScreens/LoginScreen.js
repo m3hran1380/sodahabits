@@ -61,7 +61,7 @@ const LoginScreen = ({ navigation }) => {
         try {
             await signInWithEmailAndPassword(auth, email, password);
             // retrieve the user's data:
-            const userDocument = await getDoc(doc(db, 'users', auth.currentUser.uid));
+            const userDocument = await getDoc(doc(db, 'usersprivate', auth.currentUser.uid));
             dispatch(setUser(userDocument.data()));
         }
         catch (error) {
