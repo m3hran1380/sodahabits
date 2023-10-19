@@ -91,8 +91,6 @@ const HabitItem = ({ habitName, habitIndex, primary }) => {
         })
     
 
-    console.log(user.todayHabits.habits);
-
     return (
         <GestureDetector gesture={panGesture}>
             <View style={styles.container}>

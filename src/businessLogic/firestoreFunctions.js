@@ -1,4 +1,4 @@
-import { getDocs, getDoc, doc, query, collection, orderBy, limit, addDoc, serverTimestamp, writeBatch } from 'firebase/firestore';
+import { getDocs, getDoc, doc, query, collection, orderBy, limit, addDoc, serverTimestamp, writeBatch, updateDoc } from 'firebase/firestore';
 import { db } from '../firestore/firestoreConfig';
 
 
@@ -41,7 +41,6 @@ export const convertToLocaleTime = (firestoreTimeStamp) => {
 }
 
 
-
 // this function checks to see if the latest recorded habits correspond to today or not
 // if so it returns them, otherwise it creates habits for today and returns those.
 export const getTodaysHabits = async (userId) => {
@@ -53,16 +52,27 @@ export const getTodaysHabits = async (userId) => {
 
     // if the last logged habits date does not match today's date create a new habit document for the user
     if (!(latestHabitDate == todayDate)) {
+        // make sure the previous habit document has any pending statuses set to not-complete
+        ['primary', 'secondary'].forEach((habitType) => {
+            for (let key in latestHabitData.habits[habitType]) {
+                const currentHabit = latestHabitData.habits[habitType][key];
+                if (currentHabit) {
+                    currentHabit.status = currentHabit.status === 'pending' ? 'not-complete' : currentHabit.status;
+                }
+            }
+        });
+        // update the firestore
+        const updateDocRef = doc(db, 'usersprivate', userId, 'dailyhabits', latestHabitData.id);
+        await updateDoc(updateDocRef, latestHabitData);
 
+        // create a new habit for the user:
         const primaryHabits = latestHabitData.habits.primary;
         const secondarHabits = latestHabitData.habits.secondary;
-        
         const primaryHabitsNames = Object.keys(primaryHabits).map(key => primaryHabits[key]?.name);
         const secondaryHabitNames = Object.keys(secondarHabits).map(key => secondarHabits[key]?.name);
-
         await createHabits(userId, primaryHabitsNames, secondaryHabitNames);
 
-        latestHabitData = await getUserLatestHabitsRecord(userId);
+        latestHabitData = await getUserLatestHabitsRecord(userId);        
     }
 
     // return todays habit data;
@@ -158,21 +168,29 @@ export const syncWeeklyTrackers = async (userId) => {
     const currentWeekMonday = getMonday(now);
     const latestTrackerMonday = getMonday(latestTrackerData.timestamp);
 
-    while (latestTrackerMonday < currentWeekMonday) {
-        // while we haven't reached the current week, create weeklytracker documents
-        // and mark the habits as not-complete as the user has missed them.
-        latestTrackerMonday.setDate(latestTrackerMonday.getDate() + 7);
+    if (latestTrackerMonday < currentWeekMonday) {
+        while (latestTrackerMonday < currentWeekMonday) {
+            // while we haven't reached the current week, create weeklytracker documents
+            // and mark the habits as not-complete as the user has missed them.
+            latestTrackerMonday.setDate(latestTrackerMonday.getDate() + 7);
 
-        if (latestTrackerMonday < currentWeekMonday) {
-            await createIncompleteWeeklyTrackerDocument(userId, latestTrackerMonday);
-        }
-        else {
-            // this is for creating the tracker document that corresponds to the current week
-            // get today's index - we then use this index to set the previous days before today to not-complete as they've been missed.
-            const todayIndex = getTodayIndex();
-            await createCurrentWeekTrackerDocument(userId, latestTrackerMonday, todayIndex);
-        }
-    }    
+            if (latestTrackerMonday < currentWeekMonday) {
+                await createIncompleteWeeklyTrackerDocument(userId, latestTrackerMonday);
+            }
+            else {
+                // this is for creating the tracker document that corresponds to the current week
+                // get today's index - we then use this index to set the previous days before today to not-complete as they've been missed.
+                const todayIndex = getTodayIndex();
+                await createCurrentWeekTrackerDocument(userId, latestTrackerMonday, todayIndex);
+            }
+        }    
+    }
+    else {
+        // make sure that any habit status in the prior days within the current week 
+        // that are still set to pending are changed to not-complete.
+        await syncMissedDaysInCurrentWeekTracker(userId);
+    }   
+    
 }
 
 // this function creates weekly track documents for weeks with no activity
@@ -219,6 +237,37 @@ const createCurrentWeekTrackerDocument = async (userId, timeStamp, todayIndex) =
         console.log('Error while creating weekly tracker documents', error);
     }
 }
+
+
+// this function checks the days prior to today in the current week and ensures any habit with the status of 'pending'
+// is set to not-complete.
+const syncMissedDaysInCurrentWeekTracker = async (userId) => {
+    // retrieve the latest weekly tracker document
+    const retrievedTracker = await retrieveLatestWeeklyTrackers(userId, 1);
+    const currentWeeklyTrackerHabitStatus = retrievedTracker[0].habitStatus;
+
+    const todayIndex = getTodayIndex();
+
+    for (let i=0; i<todayIndex; i++) {
+        const currentItem = currentWeeklyTrackerHabitStatus[i];
+        ['primaryStatus', 'secondaryStatus'].forEach(statusKey => {
+            // Check each status in the current array (either 'primaryStatus' or 'secondaryStatus').
+            currentItem[statusKey] = currentItem[statusKey].map(status => {
+                // If the status is 'pending', change it to 'not-complete'. Otherwise, leave it as is.
+                return status === 'pending' ? 'not-complete' : status;
+            });
+        });
+    }
+
+    // update the firestore with the updated weekly tracker
+    try {
+        const trackerRef = doc(db, 'usersprivate', userId, 'weeklytrackers', retrievedTracker[0].id);
+        await updateDoc(trackerRef, retrievedTracker[0]);
+    }
+    catch (error) {
+        console.log('Error while trying to sync current week missed days: ', error);
+    }
+}   
 
 
 // return today's index
