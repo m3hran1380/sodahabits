@@ -73,7 +73,7 @@ function RegistrationScreen({ navigation }) {
             // check if the username is already taken or not (we will also check again after this stage
             // in case another user makes an account with same username at the same time)
             
-            const usernameDoc = await getDoc(doc(db, 'usernames', username));
+            const usernameDoc = await getDoc(doc(db, 'usernames', username.toLowerCase()));
             if (usernameDoc.exists()) {
                 setIsValidUsername({status: false, error: 'Username already exists.'});
                 setLoading(false);
@@ -83,7 +83,7 @@ function RegistrationScreen({ navigation }) {
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
             const user = userCredential.user;
             
-            const usernameRef = doc(db, 'usernames', username);
+            const usernameRef = doc(db, 'usernames', username.toLowerCase());
             const userPrivateRef = doc(db, 'usersprivate', user.uid);
             const userPublicRef = doc(db, 'userspublic', user.uid);
 
@@ -95,11 +95,11 @@ function RegistrationScreen({ navigation }) {
                         throw new Error('Username already exists.');
                     }
                     transaction.set(usernameRef, { uid: user.uid });
-                    transaction.set(userPrivateRef, { username: username });
-                    transaction.set(userPublicRef, { username: username });
+                    transaction.set(userPrivateRef, { username: username.toLowerCase() });
+                    transaction.set(userPublicRef, { username: username.toLowerCase() });
                 });
                 
-                dispatch(setUser({username: username}))
+                dispatch(setUser({username: username.toLowerCase()}))
             }   
             catch (error) {
                 setLoading(false);

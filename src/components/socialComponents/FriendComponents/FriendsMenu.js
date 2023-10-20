@@ -1,15 +1,16 @@
 import { StyleSheet, Text, View } from 'react-native';
-import generalStyles from '../../styles/generalStyle';
-import { actualScreenHeight, colors } from '../../styles/generalStyle';
-import InviteButton from './InviteButton';
+import generalStyles from '../../../styles/generalStyle';
+import { actualScreenHeight, colors } from '../../../styles/generalStyle';
+import InviteButton from '../InviteButton';
 
 
-const FriendsMenu = () => {
+
+const FriendsMenu = ({ openModal }) => {
     return (
         <View style={styles.container}>
             <Text style={generalStyles.h2}>Friends</Text>
             <View style={styles.friendBox}>
-                <InviteButton title='Add friends' />
+                <InviteButton style={styles.addBtn} handlePress={openModal} title='Add friends' />
             </View>
         </View>
     )
@@ -26,7 +27,10 @@ const styles = StyleSheet.create({
         backgroundColor: colors.backgroundColorSecondary,
         borderRadius: 10,
         marginTop: 10,
-        justifyContent: 'center',
+        justifyContent: 'flex-end',
         alignItems: 'center'
+    },
+    addBtn: {
+        marginBottom: 10,
     }
 })

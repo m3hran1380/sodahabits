@@ -1,6 +1,6 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import HomeScreen from '../screens/mainScreens/HomeScreen';
-import SocialScreen from '../screens/mainScreens/SocialScreen';
+import SocialScreenNavigator from '../screens/mainScreens/SocialScreen/SocialScreenNavigator';
 import VendingMachineScreen from '../screens/mainScreens/VendingMachineScreen';
 import LocationScreen from '../screens/mainScreens/LocationScreen';
 import TabBarButton from '../components/navigationComponents/TabBarButton';
@@ -81,8 +81,8 @@ const AuthenticatedNavigation = () => {
 
 
     return (
-        <Tab.Navigator screenOptions={{headerShown: false, tabBarShowLabel: false, tabBarStyle: {...barStyle}}}>
-            <Tab.Screen name='social' component={SocialScreen} 
+        <Tab.Navigator screenOptions={{headerShown: false, tabBarShowLabel: false, tabBarStyle: {...barStyle}, tabBarHideOnKeyboard: true}}>
+            <Tab.Screen name='social' component={SocialScreenNavigator} 
                 options={{
                     tabBarButton: (props) => <TabBarButton screen='social' {...props} />
                 }}

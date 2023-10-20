@@ -7,6 +7,12 @@ const generalStyles = {
         paddingTop: 75,
         paddingBottom: 40,
     },
+    containerNoMargin: {
+        flex: 1,
+        paddingHorizontal: 30,
+        paddingTop: 75,
+        paddingBottom: 40,
+    },
     backgroundImage: {
         flex: 1,
         resizeMode: 'cover',
@@ -36,7 +42,9 @@ export const actualScreenHeight = Dimensions.get('window').height;
 export const colors = {
     primaryColor: '#635E5E',
     backgroundColorPrimary: '#122746',
-    backgroundColorSecondary: '#1074bc',
+    backgroundColorSecondary: '#435477',
+    backgroundColorTertiary: '#E3F0FF',
+    backgroundColorQuarternary: "#B4C3EC",
     habitColorPrimary: '#363b64',
     habitColorSuccess: '#1a965c',
     colorSuccess: '#06d447',

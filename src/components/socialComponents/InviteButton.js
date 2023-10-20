@@ -2,9 +2,9 @@ import { StyleSheet, Text, Pressable, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons/';
 import { actualScreenWidth } from '../../styles/generalStyle';
 
-const InviteButton = ({title}) => {
+const InviteButton = ({title, handlePress, style}) => {
     return (
-        <Pressable>
+        <Pressable style={style} onPress={handlePress}>
             {({ pressed }) => (
                 <View style={styles.container}>
                     <View style={[styles.innerContainer, pressed ? {bottom: 0} : {bottom: 3}]}>
@@ -22,7 +22,7 @@ export default InviteButton
 const styles = StyleSheet.create({
     container: {
         width: actualScreenWidth * 0.30,
-        borderRadius: 5,
+        borderRadius: 10,
         backgroundColor: 'black',
     },
     innerContainer: {
@@ -32,7 +32,7 @@ const styles = StyleSheet.create({
         justifyContent: 'space-around',
         alignItems: 'center',
         borderWidth: 1,
-        borderRadius: 5,
+        borderRadius: 10,
         borderColor: 'black',
         backgroundColor: 'white',
     },
