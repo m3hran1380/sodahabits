@@ -14,6 +14,8 @@ export default function App() {
   const [fontsLoaded] = useFonts({
     'elephant': require('./assets/fonts/ElephantRegular.ttf'),
     'inter': require('./assets/fonts/Inter-Regular.ttf'),
+    'space-grotesk': require('./assets/fonts/SpaceGrotesk-Regular.ttf'),
+    'space-grotesk-bold': require('./assets/fonts/SpaceGrotesk-Bold.ttf')
   });
 
   const onLayoutRootView = useCallback(async () => {

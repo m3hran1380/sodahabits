@@ -13,8 +13,14 @@ const generalStyles = {
     },
     h1: {
         fontSize: 35,
-        fontFamily: 'elephant',
+        fontFamily: 'space-grotesk-bold',
         textAlign: 'center'
+    },
+    h2: {
+        fontSize: 25,
+        fontFamily: 'space-grotesk-bold',
+        textAlign: 'left',
+        color: 'white',
     },
     normalText: {
         fontFamily: 'inter',
@@ -25,11 +31,12 @@ const generalStyles = {
 
 export const availableScreenWidth = Dimensions.get('window').width - generalStyles.container.marginHorizontal * 2;
 export const actualScreenWidth = Dimensions.get('window').width;
-
+export const actualScreenHeight = Dimensions.get('window').height;
 
 export const colors = {
     primaryColor: '#635E5E',
     backgroundColorPrimary: '#122746',
+    backgroundColorSecondary: '#1074bc',
     habitColorPrimary: '#363b64',
     habitColorSuccess: '#1a965c',
     colorSuccess: '#06d447',

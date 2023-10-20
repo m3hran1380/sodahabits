@@ -82,14 +82,14 @@ const AuthenticatedNavigation = () => {
 
     return (
         <Tab.Navigator screenOptions={{headerShown: false, tabBarShowLabel: false, tabBarStyle: {...barStyle}}}>
-            <Tab.Screen name='home' component={HomeScreen} 
-                options={{
-                    tabBarButton: (props) => <TabBarButton screen='home' {...props} />
-                }}
-            />
             <Tab.Screen name='social' component={SocialScreen} 
                 options={{
                     tabBarButton: (props) => <TabBarButton screen='social' {...props} />
+                }}
+            />
+            <Tab.Screen name='home' component={HomeScreen} 
+                options={{
+                    tabBarButton: (props) => <TabBarButton screen='home' {...props} />
                 }}
             />
             <Tab.Screen name='vending machine' component={VendingMachineScreen} 
