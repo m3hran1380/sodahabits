@@ -1,7 +1,6 @@
-import { StyleSheet, View } from 'react-native'
+import { StyleSheet, Pressable } from 'react-native'
 import { AntDesign } from '@expo/vector-icons/';
 import { colors } from '../../../styles/generalStyle';
-import { Pressable } from 'react-native';
 
 
 const CircularCloseButton = ({ style, handlePress }) => {

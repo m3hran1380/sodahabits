@@ -23,9 +23,10 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: 'black',
         borderRadius: 10,
-        paddingVertical: 4,
         paddingHorizontal: 8,
+        height: 40,
         backgroundColor: 'white',
+        justifyContent: 'center',
     },
     textInput: {
         backgroundColor: 'white',

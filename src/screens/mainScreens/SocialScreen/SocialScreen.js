@@ -1,5 +1,5 @@
-import { StyleSheet, Text, View } from 'react-native';
-import generalStyles, { actualScreenHeight, actualScreenWidth } from '../../../styles/generalStyle';
+import { StyleSheet, Text, View, Keyboard, Pressable } from 'react-native';
+import generalStyles from '../../../styles/generalStyle';
 import { colors } from '../../../styles/generalStyle';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import FriendsMenu from '../../../components/socialComponents/FriendComponents/FriendsMenu';
@@ -7,8 +7,7 @@ import DismissKeyboard from '../../../components/DismissKeyboard';
 import AddFriendsModal from '../../../components/socialComponents/FriendComponents/AddFriendsModal';
 import { useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
 import { useState } from 'react';
-import { Pressable } from 'react-native';
-import { Keyboard } from 'react-native';
+
 
 
 const SocialScreen = () => {
@@ -16,6 +15,7 @@ const SocialScreen = () => {
     const [modalStatus, setModalStatus] = useState(false);
 
     const closeModal = () => {
+        Keyboard.dismiss();
         setModalStatus(false);
         friendModalOpen.value = false;
     }

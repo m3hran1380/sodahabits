@@ -29,7 +29,7 @@ const generalStyles = {
         color: 'white',
     },
     normalText: {
-        fontFamily: 'inter',
+        fontFamily: 'space-grotesk',
         textAlign: 'center',
         fontSize: 17,
     },

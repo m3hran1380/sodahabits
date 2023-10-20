@@ -1,4 +1,4 @@
-import { getDocs, getDoc, doc, query, collection, orderBy, limit, addDoc, serverTimestamp, writeBatch, updateDoc } from 'firebase/firestore';
+import { getDocs, getDoc, doc, query, collection, orderBy, limit, addDoc, serverTimestamp, writeBatch, updateDoc, startAt, endAt } from 'firebase/firestore';
 import { db } from '../firestore/firestoreConfig';
 
 
@@ -306,6 +306,22 @@ export const updateHabitStatus = async (userId, habitIndex, habitType, newHabitS
 }
 
 
-const updateTodayHabitDocument = async (userId, habitIndex, habitType, ) => {
-    pass
+// retrieve public users - search for by username
+export const retrieveUsers = async (username) => {
+    try {
+        const searchStartValue = username.toLowerCase();
+        const searchEndValue = username.toLowerCase() + '\uf8ff' // '\uf8ff' is a high code point in the Unicode range
+        const queryRef = query(collection(db, 'userspublic'), orderBy('username'), startAt(searchStartValue), endAt(searchEndValue));
+        const snapshot = await getDocs(queryRef);
+
+        const usernames = [];
+        snapshot.forEach((doc) => {
+            usernames.push({uid: doc.id, ...doc.data()})
+        })
+        return usernames;
+    } 
+    catch (error) {
+        console.log("error while fetching users by username: ", error);
+        return [];
+    }
 }
