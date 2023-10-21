@@ -1,14 +1,14 @@
 import { StyleSheet, Text, View } from 'react-native';
-import generalStyles, { availableScreenWidth } from '../../../styles/generalStyle';
-import { colors } from '../../../styles/generalStyle';
+import generalStyles, { availableScreenWidth } from '../../../../styles/generalStyle';
+import { colors } from '../../../../styles/generalStyle';
 import HabitTrackerDot from './HabitTrackerDot';
 import { useSelector, useDispatch } from 'react-redux';
 import Animated, { useSharedValue, useAnimatedStyle, withTiming, withSequence, withDelay, runOnJS } from 'react-native-reanimated';
 import { GestureDetector, Gesture } from 'react-native-gesture-handler';
 import { AntDesign } from '@expo/vector-icons/';
 import { MaterialCommunityIcons } from '@expo/vector-icons/';
-import { getTodayIndex, updateHabitStatus } from '../../../businessLogic/firestoreFunctions';
-import { setUser } from '../../../features/userSlice';
+import { getTodayIndex, updateHabitStatus } from '../../../../businessLogic/firestoreFunctions';
+import { setUser } from '../../../../features/userSlice';
 
 
 const HabitItem = ({ habitName, habitIndex, primary, habitStatus }) => {

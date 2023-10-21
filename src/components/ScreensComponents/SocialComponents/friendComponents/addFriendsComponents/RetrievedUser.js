@@ -1,11 +1,26 @@
 import { StyleSheet, Text, View, Image, Pressable } from 'react-native';
-import generalStyles, { colors } from '../../../styles/generalStyle';
+import generalStyles, { colors } from '../../../../../styles/generalStyle';
 import { Ionicons } from '@expo/vector-icons/';
+import { useSelector } from 'react-redux';
+import { sendFriendRequest } from '../../../../../businessLogic/firestoreFunctions';
 
 
-const defaultPFP = require('../../../../assets/images/profilePictures/default-pfp.png');
+const defaultPFP = require('../../../../../../assets/images/profilePictures/default-pfp.png');
 
-const RetrievedUser = ({ userData }) => {
+const RetrievedUser = ({ userData, setStatus }) => {
+
+    const user = useSelector((state) => state.user.currentUser);
+
+    const sendRequest = async () => {
+        try {
+            await sendFriendRequest(user.uid, userData.uid);
+            setStatus({error: false, message: 'Friend request sent!'})
+        }
+        catch (error) {
+            setStatus({error: true, message: error})
+        }
+    }
+
     return ( 
         <View style={styles.container}>
             <View style={styles.imageContainer}>
@@ -18,7 +33,7 @@ const RetrievedUser = ({ userData }) => {
             <View style={styles.textContainer}>
                 <Text style={[generalStyles.normalText, styles.text]}>{userData.username}</Text>
             </View>
-            <Pressable style={({pressed}) => [styles.addIconContainer, pressed && {backgroundColor: 'black'}]}>
+            <Pressable onPress={sendRequest} style={({pressed}) => [styles.addIconContainer, pressed && {backgroundColor: 'black'}]}>
                 {({pressed}) => {
                     return <Ionicons name='person-add' size={20} style={[styles.addIcon, pressed && {color: 'white'}]} />
                 }}

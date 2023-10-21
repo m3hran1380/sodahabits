@@ -1,6 +1,6 @@
 import ContentLoader, { Rect, Circle } from "react-content-loader/native";
 import { View, StyleSheet } from "react-native";
-import { availableScreenWidth, colors } from "../../../styles/generalStyle";
+import { availableScreenWidth, colors } from "../../../../../styles/generalStyle";
 
 const UserLoadingSkeleton = () => (
     <View style={styles.container}>

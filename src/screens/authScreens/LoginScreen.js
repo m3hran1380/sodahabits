@@ -12,7 +12,7 @@ import { getDoc, doc } from 'firebase/firestore';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { setUser } from '../../features/userSlice';
 import { useDispatch } from 'react-redux';
-import DismissKeyboard from '../../components/DismissKeyboard';
+import DismissKeyboard from '../../components/sharedComponents/DismissKeyboard';
 
 
 const backgroundImage = require('../../../assets/images/backgroundImages/gradient-3.jpg');

@@ -1,5 +1,5 @@
 import { StyleSheet, Text, View } from 'react-native'
-import generalStyles from '../../../styles/generalStyle'
+import generalStyles from '../../../../styles/generalStyle'
 
 const DaysLabel = () => {
     return (

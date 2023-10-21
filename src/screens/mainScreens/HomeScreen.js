@@ -1,14 +1,14 @@
-import { StyleSheet, Text, Image, View, Button, Dimensions } from 'react-native'
+import { StyleSheet, Image, View, Button } from 'react-native'
 import { signOut } from 'firebase/auth';
 import { auth } from '../../firestore/firestoreConfig';
 import generalStyles, { colors } from '../../styles/generalStyle';
 import { LinearGradient } from 'expo-linear-gradient';
 import { actualScreenWidth } from '../../styles/generalStyle';
 import { useSelector } from 'react-redux';
-import HabitItem from '../../components/homeComponents/habitComponents/HabitItem';
+import HabitItem from '../../components/ScreensComponents/HomeComponents/habitComponents/HabitItem';
 import { useDispatch } from 'react-redux';
 import { setAppLoading } from '../../features/appSlice';
-import DaysLabel from '../../components/homeComponents/habitComponents/DaysLabel';
+import DaysLabel from '../../components/ScreensComponents/HomeComponents/habitComponents/DaysLabel';
 
 
 const HomeScreen = () => {

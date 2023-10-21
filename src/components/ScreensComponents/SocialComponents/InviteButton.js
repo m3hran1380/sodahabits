@@ -1,6 +1,5 @@
 import { StyleSheet, Text, Pressable, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons/';
-import { actualScreenWidth } from '../../styles/generalStyle';
 
 const InviteButton = ({title, handlePress, style}) => {
     return (
@@ -21,11 +20,13 @@ export default InviteButton
 
 const styles = StyleSheet.create({
     container: {
-        width: actualScreenWidth * 0.30,
+        width: 130,
+        height: 40,
         borderRadius: 10,
         backgroundColor: 'black',
     },
     innerContainer: {
+        height: 40,
         paddingVertical: 5,
         paddingHorizontal: 10,
         flexDirection: 'row',

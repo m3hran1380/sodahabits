@@ -1,5 +1,5 @@
 import { StyleSheet, View } from 'react-native';
-import { colors } from '../../../styles/generalStyle';
+import { colors } from '../../../../styles/generalStyle';
 
 
 const HabitTrackerDot = ({ status }) => {

@@ -10,7 +10,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { setUser } from '../../features/userSlice';
 import { createHabits, getTodaysHabits } from '../../businessLogic/firestoreFunctions';
 import { setAppLoading } from '../../features/appSlice';
-import DismissKeyboard from '../../components/DismissKeyboard';
+import DismissKeyboard from '../../components/sharedComponents/DismissKeyboard';
 import { getMonday, getTodayIndex } from '../../businessLogic/firestoreFunctions';
 
 

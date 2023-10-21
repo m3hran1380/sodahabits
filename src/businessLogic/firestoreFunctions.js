@@ -1,4 +1,4 @@
-import { getDocs, getDoc, doc, query, collection, orderBy, limit, addDoc, serverTimestamp, writeBatch, updateDoc, startAt, endAt } from 'firebase/firestore';
+import { getDocs, getDoc, doc, query, collection, orderBy, limit, addDoc, serverTimestamp, writeBatch, updateDoc, startAt, endAt, setDoc, runTransaction } from 'firebase/firestore';
 import { db } from '../firestore/firestoreConfig';
 
 
@@ -307,7 +307,7 @@ export const updateHabitStatus = async (userId, habitIndex, habitType, newHabitS
 
 
 // retrieve public users - search for by username
-export const retrieveUsers = async (username) => {
+export const retrieveUsers = async (username, userId) => {
     try {
         const searchStartValue = username.toLowerCase();
         const searchEndValue = username.toLowerCase() + '\uf8ff' // '\uf8ff' is a high code point in the Unicode range
@@ -316,12 +316,48 @@ export const retrieveUsers = async (username) => {
 
         const usernames = [];
         snapshot.forEach((doc) => {
-            usernames.push({uid: doc.id, ...doc.data()})
+            // make sure we don't retrieve the user itself
+            if (doc.id !== userId) {
+                usernames.push({uid: doc.id, ...doc.data()})
+            }
         })
         return usernames;
     } 
     catch (error) {
         console.log("error while fetching users by username: ", error);
         return [];
+    }
+}
+
+
+// this function sends a friend request from the sender to the receiver.
+export const sendFriendRequest = async (senderId, receiverId) => {
+
+    // check to see if an incoming/outgoing friend request between these 2 users alrdy exists or not;
+    const outgoingRequestRef = doc(db, 'friendrequests', `${senderId}${receiverId}`)
+    const incomingRequestRef = doc(db, 'friendrequests', `${receiverId}${senderId}`)
+    try {
+        await runTransaction(db, async (transaction) => {
+            const outgoingDoc = await transaction.get(outgoingRequestRef);
+            const incomingDoc = await transaction.get(incomingRequestRef);
+
+            if (outgoingDoc.exists()) {
+                throw "You've already sent this user a friend request."
+            }
+            else if (incomingDoc.exists()) {
+                throw "This user has already sent you a friend request."
+            }
+
+            // if there is no incoming/outgoing requests send one:
+            transaction.set(outgoingRequestRef, {
+                senderId: senderId,
+                receiverId: receiverId,
+                status: 'pending',
+                timestamp: serverTimestamp(),
+            });
+        })
+    }
+    catch (error) {
+        throw error;
     }
 }

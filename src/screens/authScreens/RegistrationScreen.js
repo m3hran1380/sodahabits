@@ -12,7 +12,7 @@ import TextButton from '../../components/authComponents/TextButton';
 import generalStyles from '../../styles/generalStyle';
 import { useDispatch } from 'react-redux';
 import { setUser } from '../../features/userSlice';
-import DismissKeyboard from '../../components/DismissKeyboard';
+import DismissKeyboard from '../../components/sharedComponents/DismissKeyboard';
 
 const backgroundImage = require('../../../assets/images/backgroundImages/gradient-3.jpg');
 
