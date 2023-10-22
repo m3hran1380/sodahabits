@@ -2,7 +2,7 @@ import { View, TextInput, Text, StyleSheet, Pressable } from 'react-native';
 import { useState } from 'react';
 import { AntDesign } from '@expo/vector-icons/';
 
-const FormInput = ({ label, placeholder, setValue, inputValue, isPassword, style, inputStyle, resetInputState, state }) => {
+const FormInput = ({ label, placeholder, setValue, inputValue, isPassword, style, inputStyle, resetInputState, state, limit }) => {
 
     const [isSecure, setIsSecure] = useState(isPassword);
 
@@ -25,6 +25,7 @@ const FormInput = ({ label, placeholder, setValue, inputValue, isPassword, style
                         onChangeText={handleInput} 
                         placeholder={placeholder} 
                         secureTextEntry={isSecure}
+                        maxLength={limit ? limit : undefined}
                         style={[styles.input, {...inputStyle}, isPassword && {paddingRight: 50}]}
                     />
                     {isPassword && 

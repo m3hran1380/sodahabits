@@ -28,6 +28,12 @@ const generalStyles = {
         textAlign: 'left',
         color: 'white',
     },
+    h3: {
+        fontSize: 18,
+        fontFamily: 'space-grotesk-bold',
+        textAlign: 'left',
+        color: 'white',
+    },
     normalText: {
         fontFamily: 'space-grotesk',
         textAlign: 'center',

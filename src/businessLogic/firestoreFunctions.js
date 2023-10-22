@@ -1,4 +1,4 @@
-import { getDocs, getDoc, doc, query, collection, orderBy, limit, addDoc, serverTimestamp, writeBatch, updateDoc, startAt, endAt, setDoc, runTransaction } from 'firebase/firestore';
+import { getDocs, getDoc, doc, query, collection, orderBy, limit, addDoc, serverTimestamp, writeBatch, updateDoc, startAt, endAt, runTransaction } from 'firebase/firestore';
 import { db } from '../firestore/firestoreConfig';
 
 
@@ -359,5 +359,23 @@ export const sendFriendRequest = async (senderId, receiverId) => {
     }
     catch (error) {
         throw error;
+    }
+}
+
+
+export const getUsersById = async (ids) => {
+    const usersDocuments = [];
+    try {
+        for (const id of ids) {
+            const retrievedDocument = await getDoc(doc(db, 'userspublic', id));
+            if (retrievedDocument.exists()) {
+                usersDocuments.push({id: retrievedDocument.id, ...retrievedDocument.data()});
+            }
+        }
+        return usersDocuments;
+    }
+    catch (error) {
+        console.log("error while getting user documents by id: ", error);
+        return [];
     }
 }

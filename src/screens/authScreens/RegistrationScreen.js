@@ -145,6 +145,7 @@ function RegistrationScreen({ navigation }) {
                         inputStyle={!isValidUsername.status && {borderColor: 'red'}}
                         resetInputState={setIsValidUsername}
                         state={isValidUsername}
+                        limit={12}
                     />
                     <FormInput 
                         label='Email'
