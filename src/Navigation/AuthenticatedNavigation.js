@@ -9,9 +9,6 @@ import { AppState } from 'react-native';
 import { initialiseApp } from '../businessLogic/initialisationFunctions';
 import { useSelector, useDispatch } from 'react-redux';
 import { setUser } from '../features/userSlice';
-import { collection, onSnapshot, orderBy, query, where } from 'firebase/firestore';
-import { db } from '../firestore/firestoreConfig';
-import { setIncomingRequests, setOutgoingRequests } from '../features/friendSlice';
 
 
 const barStyle = {
@@ -80,39 +77,6 @@ const AuthenticatedNavigation = () => {
             clearTimeout(timerId); // make sure to clear the timer when the component unmounts
         };
     }, [appState, setMidnightTimer]);
-
-
-    // setup a live listener on the incoming/outgoing friend requests
-    useEffect(() => {
-        const incomingFriendRequestQuery = query(collection(db, 'friendrequests'),
-         where('receiverId', '==', user.uid), where('status', '==', 'pending'), orderBy('timestamp', 'desc'));
-        const unsubIncoming = onSnapshot(incomingFriendRequestQuery, (querySnapshot) => {
-            const incomingRequests = [];
-            querySnapshot.forEach((doc) => {
-                const request = {id: doc.id, ...doc.data()};
-                delete request.timestamp;
-                incomingRequests.push(request)
-            });
-            dispatch(setIncomingRequests(incomingRequests))
-        }, (error) => console.log('error in incoming snapshot: ', error))
-
-        const outgoingFriendRequestQuery = query(collection(db, 'friendrequests'),
-         where('senderId', '==', user.uid), where('status', '==', 'pending'), orderBy('timestamp', 'desc'));
-        const unsubOutgoing = onSnapshot(outgoingFriendRequestQuery, (querySnapshot) => {
-            const outgoingRequests = [];
-            querySnapshot.forEach((doc) => {
-                const request = {id: doc.id, ...doc.data()};
-                delete request.timestamp;
-                outgoingRequests.push(request)
-            });
-            dispatch(setOutgoingRequests(outgoingRequests))
-        }, (error) => console.log('error in outgoing snapshot: ', error))
-
-        return () => {
-            unsubIncoming();
-            unsubOutgoing();
-        }
-    })
 
 
     return (

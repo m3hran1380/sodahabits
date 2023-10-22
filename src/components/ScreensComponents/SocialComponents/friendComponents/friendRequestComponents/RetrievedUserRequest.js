@@ -1,11 +1,31 @@
 import { StyleSheet, Text, View, Image, Pressable } from 'react-native';
 import generalStyles, { colors } from '../../../../../styles/generalStyle';
 import { Ionicons, Feather } from '@expo/vector-icons/';
+import { acceptFriendRequest } from '../../../../../businessLogic/firestoreFunctions';
+import { useSelector } from 'react-redux';
 
 
 const defaultPFP = require('../../../../../../assets/images/profilePictures/default-pfp.png');
 
 const RetrievedUserRequest = ({ userData, type }) => {
+
+    const user = useSelector(state => state.user.currentUser);
+
+    const acceptRequest = async () => {
+        let senderId;
+        let receiverId;
+
+        if (type === 'incoming') {
+            senderId = userData.id;
+            receiverId = user.uid;
+        } 
+        else if (type === 'outgoing') {
+            senderId = user.uid;
+            receiverId = userData.id;
+        }
+        await acceptFriendRequest(senderId, receiverId);
+    }
+
 
     return ( 
         <View style={styles.container}>
@@ -27,7 +47,7 @@ const RetrievedUserRequest = ({ userData, type }) => {
                                 return <Feather name='x' size={20} style={[styles.icon, pressed && {color: 'white'}]} />
                             }}
                         </Pressable>
-                        <Pressable style={({pressed}) => [styles.acceptIconContainer, pressed && {backgroundColor: 'black'}]}>
+                        <Pressable onPress={acceptRequest} style={({pressed}) => [styles.acceptIconContainer, pressed && {backgroundColor: 'black'}]}>
                             {({pressed}) => {
                                 return <Ionicons name='checkmark' size={20} style={[styles.icon, pressed && {color: 'white'}]} />
                             }}

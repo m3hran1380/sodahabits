@@ -1,4 +1,4 @@
-import { getDocs, getDoc, doc, query, collection, orderBy, limit, addDoc, serverTimestamp, writeBatch, updateDoc, startAt, endAt, runTransaction } from 'firebase/firestore';
+import { getDocs, getDoc, doc, query, collection, orderBy, limit, addDoc, serverTimestamp, writeBatch, updateDoc, startAt, endAt, runTransaction, arrayUnion } from 'firebase/firestore';
 import { db } from '../firestore/firestoreConfig';
 
 
@@ -377,5 +377,29 @@ export const getUsersById = async (ids) => {
     catch (error) {
         console.log("error while getting user documents by id: ", error);
         return [];
+    }
+}
+
+
+export const acceptFriendRequest = async (senderId, receiverId) => {
+    try {
+        // update the friendrequests collection only - this will trigger
+        // a cloud function that will update the corresponding users friends array automatically
+        await updateDoc(doc(db, 'friendrequests', `${senderId}${receiverId}`), {
+            status: 'accepted'
+        });
+    }
+    catch (error) {
+        console.log('Error while accepting friend request: ', error);
+    }
+}
+
+
+export const removeFriendRequest = async (senderId, receiverId) => {
+    try {
+
+    }
+    catch (error) {
+        console.log('Error while rejecting/removing friend request: ', error)
     }
 }

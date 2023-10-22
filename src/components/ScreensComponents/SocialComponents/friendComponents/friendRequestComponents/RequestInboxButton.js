@@ -59,6 +59,7 @@ const styles = StyleSheet.create({
         right: -5,
     },
     number: {
-        color: 'white'
+        color: 'white',
+        bottom: 1,
     },
 })
