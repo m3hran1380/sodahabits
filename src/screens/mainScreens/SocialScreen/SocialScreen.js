@@ -47,6 +47,8 @@ const SocialScreen = () => {
     }
     // -------- end --------- //
 
+
+
     const friendModalStyle = useAnimatedStyle(() => {
         return {
             transform: [
@@ -61,6 +63,7 @@ const SocialScreen = () => {
             ]
         }
     })
+
 
     return (
         <View style={styles.parentContainer}>

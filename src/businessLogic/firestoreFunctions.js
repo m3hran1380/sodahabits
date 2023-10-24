@@ -1,4 +1,4 @@
-import { getDocs, getDoc, doc, query, collection, orderBy, limit, addDoc, serverTimestamp, writeBatch, updateDoc, startAt, endAt, runTransaction, arrayUnion } from 'firebase/firestore';
+import { getDocs, getDoc, doc, query, collection, orderBy, limit, addDoc, serverTimestamp, writeBatch, updateDoc, startAt, endAt, runTransaction, deleteDoc } from 'firebase/firestore';
 import { db } from '../firestore/firestoreConfig';
 
 
@@ -390,16 +390,46 @@ export const acceptFriendRequest = async (senderId, receiverId) => {
         });
     }
     catch (error) {
-        console.log('Error while accepting friend request: ', error);
+        console.log('Error while accepting friend request status: ', error);
     }
 }
 
 
-export const removeFriendRequest = async (senderId, receiverId) => {
+// this function is used to delete friend requests 
+export const deleteFriendRequest = async (senderId, receiverId) => {
     try {
-
+        // delete the friendrequests document - this will trigger
+        // a cloud function that will update the corresponding users friends array automatically
+        await deleteDoc(doc(db, 'friendrequests', `${senderId}${receiverId}`));
     }
     catch (error) {
-        console.log('Error while rejecting/removing friend request: ', error)
+        console.log('Error while rejecting friend request status: ', error);
     }
 }
+
+
+// this function is used to remove friends 
+export const removeFriend = async (firstUserId, secondUserId) => {
+    try {
+        // delete the friendrequests document - this will trigger
+        // a cloud function that will update the corresponding users friends array automatically
+        
+        // firs we need to find the associated friendrequests document:
+
+        const firstPossibleId = `${firstUserId}${secondUserId}`;
+        const secondPossibleId = `${secondUserId}${firstUserId}`;
+
+        let doc1 = await getDoc(doc(db, 'friendrequests', firstPossibleId));
+
+        if (doc1.exists()) {
+            await deleteDoc(doc(db, 'friendrequests', firstPossibleId));
+        } 
+        else {
+            await deleteDoc(doc(db, 'friendrequests', secondPossibleId));
+        }
+    }
+    catch (error) {
+        console.log('Error while removing friend: ', error);
+    }
+}
+

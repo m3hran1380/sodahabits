@@ -10,7 +10,6 @@ import { initialiseApp } from '../businessLogic/initialisationFunctions';
 import { useSelector, useDispatch } from 'react-redux';
 import { setUser } from '../features/userSlice';
 
-
 const barStyle = {
     justifyContent: 'center',
     alignItems: 'center',
@@ -28,7 +27,6 @@ const AuthenticatedNavigation = () => {
     const [appState, setAppState] = useState(AppState.currentState);
     const user = useSelector((state) => state.user.currentUser);
     const dispatch = useDispatch();
-
 
     // this section involves the timers that are set out to perform actions in specific times
     const executeAtMidnight = async () => {

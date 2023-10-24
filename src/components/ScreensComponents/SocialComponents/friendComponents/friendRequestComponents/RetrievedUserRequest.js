@@ -1,7 +1,7 @@
 import { StyleSheet, Text, View, Image, Pressable } from 'react-native';
 import generalStyles, { colors } from '../../../../../styles/generalStyle';
 import { Ionicons, Feather } from '@expo/vector-icons/';
-import { acceptFriendRequest } from '../../../../../businessLogic/firestoreFunctions';
+import { acceptFriendRequest, deleteFriendRequest } from '../../../../../businessLogic/firestoreFunctions';
 import { useSelector } from 'react-redux';
 
 
@@ -12,18 +12,20 @@ const RetrievedUserRequest = ({ userData, type }) => {
     const user = useSelector(state => state.user.currentUser);
 
     const acceptRequest = async () => {
-        let senderId;
-        let receiverId;
+        await acceptFriendRequest(userData.id, user.uid, 'accepted');
+    }
 
+    const rejectRequest = async () => {
+        let senderId, receiverId;
         if (type === 'incoming') {
-            senderId = userData.id;
             receiverId = user.uid;
-        } 
-        else if (type === 'outgoing') {
-            senderId = user.uid;
-            receiverId = userData.id;
+            senderId = userData.id;
         }
-        await acceptFriendRequest(senderId, receiverId);
+        else {
+            receiverId = userData.id;
+            senderId = user.uid;
+        }
+        await deleteFriendRequest(senderId, receiverId);
     }
 
 
@@ -42,7 +44,7 @@ const RetrievedUserRequest = ({ userData, type }) => {
             <View style={styles.buttonContainer}>
                 { type === 'incoming' ? 
                     <>
-                        <Pressable style={({pressed}) => [styles.rejectIconContainer, pressed && {backgroundColor: 'black'}]}>
+                        <Pressable onPress={rejectRequest} style={({pressed}) => [styles.rejectIconContainer, pressed && {backgroundColor: 'black'}]}>
                             {({pressed}) => {
                                 return <Feather name='x' size={20} style={[styles.icon, pressed && {color: 'white'}]} />
                             }}
@@ -54,7 +56,7 @@ const RetrievedUserRequest = ({ userData, type }) => {
                         </Pressable>
                     </> 
                     :
-                    <Pressable style={({pressed}) => [styles.rejectIconContainer, pressed && {backgroundColor: 'black'}]}>
+                    <Pressable onPress={rejectRequest} style={({pressed}) => [styles.rejectIconContainer, pressed && {backgroundColor: 'black'}]}>
                         {({pressed}) => {
                             return <Feather name='x' size={20} style={[styles.icon, pressed && {color: 'white'}]} />
                         }}
