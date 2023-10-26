@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, StatusBar } from 'react-native';
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
 import { NavigationContainer } from '@react-navigation/native';
@@ -33,6 +33,7 @@ export default function App() {
       <NavigationContainer>
         <Provider store={store}>
           <View style={styles.container} onLayout={onLayoutRootView}>
+            <StatusBar style="auto" />
             <RootNavigation />
           </View>
         </Provider>

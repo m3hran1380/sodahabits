@@ -9,6 +9,10 @@ import { AppState } from 'react-native';
 import { initialiseApp } from '../businessLogic/initialisationFunctions';
 import { useSelector, useDispatch } from 'react-redux';
 import { setUser } from '../features/userSlice';
+import OptionScreen from '../components/sharedComponents/optionsComponents/OptionScreen';
+import AppNavbar from '../components/sharedComponents/navbarComponents/AppNavbar';
+import HamburgerIcon from '../components/sharedComponents/navbarComponents/HamburgerIcon';
+
 
 const barStyle = {
     justifyContent: 'center',
@@ -25,7 +29,12 @@ const Tab = createBottomTabNavigator();
 
 const AuthenticatedNavigation = () => {
     const [appState, setAppState] = useState(AppState.currentState);
+    // states used for the options menu
+    const [showOptions, setShowOptions] = useState(false);
+    const [toggleOptions, setToggleOptions] = useState(false);
+
     const user = useSelector((state) => state.user.currentUser);
+
     const dispatch = useDispatch();
 
     // this section involves the timers that are set out to perform actions in specific times
@@ -77,29 +86,43 @@ const AuthenticatedNavigation = () => {
     }, [appState, setMidnightTimer]);
 
 
+    // following useEffect displays the options menu once the status is toggled by the hamburgericon
+    useEffect(() => {
+        if (toggleOptions) {
+            setShowOptions(true);
+        }
+    }, [toggleOptions])
+
+
     return (
-        <Tab.Navigator screenOptions={{headerShown: false, tabBarShowLabel: false, tabBarStyle: {...barStyle}, tabBarHideOnKeyboard: true}}>
-            <Tab.Screen name='social' component={SocialScreenNavigator} 
-                options={{
-                    tabBarButton: (props) => <TabBarButton screen='social' {...props} />
-                }}
-            />
-            <Tab.Screen name='home' component={HomeScreen} 
-                options={{
-                    tabBarButton: (props) => <TabBarButton screen='home' {...props} />
-                }}
-            />
-            <Tab.Screen name='vending machine' component={VendingMachineScreen} 
-                options={{
-                    tabBarButton: (props) => <TabBarButton screen='vending machine' {...props} />
-                }}
-            />
-            <Tab.Screen name='location' component={LocationScreen} 
-                options={{
-                    tabBarButton: (props) => <TabBarButton screen='location' {...props} />
-                }}
-            />
-        </Tab.Navigator>
+        <>
+            <HamburgerIcon setToggleOptions={setToggleOptions} />
+            <AppNavbar />
+            {showOptions && <OptionScreen toggleOptions={toggleOptions} setShowOptions={setShowOptions} />}
+            
+            <Tab.Navigator screenOptions={{headerShown: false, tabBarShowLabel: false, tabBarStyle: {...barStyle}, tabBarHideOnKeyboard: true}}>
+                <Tab.Screen name='home' component={HomeScreen} 
+                    options={{
+                        tabBarButton: (props) => <TabBarButton screen='home' {...props} />
+                    }}
+                />
+                <Tab.Screen name='social' component={SocialScreenNavigator} 
+                    options={{
+                        tabBarButton: (props) => <TabBarButton screen='social' {...props} />
+                    }}
+                />
+                <Tab.Screen name='vending machine' component={VendingMachineScreen} 
+                    options={{
+                        tabBarButton: (props) => <TabBarButton screen='vending machine' {...props} />
+                    }}
+                />
+                <Tab.Screen name='location' component={LocationScreen} 
+                    options={{
+                        tabBarButton: (props) => <TabBarButton screen='location' {...props} />
+                    }}
+                />
+            </Tab.Navigator>
+        </>
     )
 }
 
