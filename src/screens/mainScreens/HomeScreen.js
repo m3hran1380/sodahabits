@@ -6,26 +6,12 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { actualScreenWidth } from '../../styles/generalStyle';
 import { useSelector } from 'react-redux';
 import HabitItem from '../../components/ScreensComponents/HomeComponents/habitComponents/HabitItem';
-import { useDispatch } from 'react-redux';
-import { setAppLoading } from '../../features/appSlice';
 import DaysLabel from '../../components/ScreensComponents/HomeComponents/habitComponents/DaysLabel';
 
 
 const HomeScreen = () => {
     const user = useSelector((state) => state.user.currentUser);
     const locationImage = require('../../../assets/images/locations/FevalaHome.png');
-
-    const dispatch = useDispatch();
-
-    const handleSignOut = async () => {
-        try {
-            dispatch(setAppLoading(true))
-            await signOut(auth);
-        }
-        catch (error) {
-            console.log(error);
-        }
-    }
 
     return (
         <View style={styles.parentContainer}>
@@ -51,7 +37,6 @@ const HomeScreen = () => {
                         return <HabitItem key={index} habitIndex={index} habitStatus={habitStatus} habitName={habitName} primary={true} />
                     })
                 }
-                <Button title='Sign Out' onPress={handleSignOut}/>
             </View>
         </View>
     )

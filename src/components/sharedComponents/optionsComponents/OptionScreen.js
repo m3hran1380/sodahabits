@@ -1,7 +1,7 @@
 import { StyleSheet, Text, View } from 'react-native'
 import LottieView from 'lottie-react-native';
 import { useRef, useEffect } from 'react';
-import Animated, { withTiming, useSharedValue, runOnJS, useAnimatedStyle, Easing } from 'react-native-reanimated';
+import Animated, {FadeOut} from 'react-native-reanimated';
 import { calculateAdjustedDimensions } from '../../../businessLogic/utilityFunctions';
 import OptionScreenOptions from './OptionScreenOptions';
 
@@ -11,37 +11,16 @@ adjustedWidth *= 0.8
 adjustedHeight *= 0.8
 
 
-const OptionScreen = ({ toggleOptions, setShowOptions }) => {
+const OptionScreen = ({ setSpecificOptionSelected, setLoggingOut }) => {
     const animationRef = useRef();
-    const opacity = useSharedValue(1);
     
     useEffect(() => {
         animationRef.current.play(0,14);
     }, []);
 
-    
-    useEffect(() => {
-        if (!toggleOptions) {
-            opacity.value = withTiming(0, {
-                duration: 500,
-                easing: Easing.ease,
-              }, (isFinished) => {
-                if (isFinished) {
-                    runOnJS(setShowOptions)(false);
-                }
-              })
-        }   
-    }, [toggleOptions])
-
-
-    const optionsStyle = useAnimatedStyle(() => {
-        return {
-            opacity: opacity.value,
-        }
-    })
 
     return (
-        <Animated.View style={[styles.container, optionsStyle]}>
+        <Animated.View exiting={FadeOut.duration(500)} style={styles.container}>
             <LottieView
                 autoPlay={false}
                 loop={false}
@@ -49,7 +28,12 @@ const OptionScreen = ({ toggleOptions, setShowOptions }) => {
                 ref={animationRef}
                 style={styles.lottie}
             />
-            <OptionScreenOptions adjustedWidth={adjustedWidth} adjustedHeight={adjustedHeight} />
+            <OptionScreenOptions 
+                setSpecificOptionSelected={setSpecificOptionSelected}
+                adjustedWidth={adjustedWidth} 
+                adjustedHeight={adjustedHeight} 
+                setLoggingOut={setLoggingOut}   
+            />
         </Animated.View>
     )
 }
@@ -59,7 +43,7 @@ export default OptionScreen;
 const styles = StyleSheet.create({
     container: {
         ...StyleSheet.absoluteFillObject,
-        zIndex: 1000,
+        zIndex: 100,
         backgroundColor: 'rgba(0,0,0,0.8)',
         justifyContent: 'center',
         alignItems: 'center'

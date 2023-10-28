@@ -5,13 +5,14 @@ import VendingMachineScreen from '../screens/mainScreens/VendingMachineScreen';
 import LocationScreen from '../screens/mainScreens/LocationScreen';
 import TabBarButton from '../components/navigationComponents/TabBarButton';
 import React, { useEffect, useState, useCallback } from 'react';
-import { AppState } from 'react-native';
+import { AppState, View } from 'react-native';
 import { initialiseApp } from '../businessLogic/initialisationFunctions';
 import { useSelector, useDispatch } from 'react-redux';
 import { setUser } from '../features/userSlice';
 import OptionScreen from '../components/sharedComponents/optionsComponents/OptionScreen';
 import AppNavbar from '../components/sharedComponents/navbarComponents/AppNavbar';
 import HamburgerIcon from '../components/sharedComponents/navbarComponents/HamburgerIcon';
+import SplashScreen from '../components/loadingSpinners/SplashScreen';
 
 
 const barStyle = {
@@ -31,7 +32,11 @@ const AuthenticatedNavigation = () => {
     const [appState, setAppState] = useState(AppState.currentState);
     // states used for the options menu
     const [showOptions, setShowOptions] = useState(false);
-    const [toggleOptions, setToggleOptions] = useState(false);
+    const [specificOptionSelected, setSpecificOptionSelected] = useState(false);
+    // state used to overlay the loading spinner on top of the page - we don't use the appwide loading state here
+    // as it doesn't work nicely with the fadeout animation of the options component.
+    const [loggingOut, setLoggingOut] = useState(false);
+
 
     const user = useSelector((state) => state.user.currentUser);
 
@@ -86,21 +91,11 @@ const AuthenticatedNavigation = () => {
     }, [appState, setMidnightTimer]);
 
 
-    // following useEffect displays the options menu once the status is toggled by the hamburgericon
-    useEffect(() => {
-        if (toggleOptions) {
-            setShowOptions(true);
-        }
-    }, [toggleOptions])
-
-
     return (
-        <>
-            <HamburgerIcon setToggleOptions={setToggleOptions} />
-            <AppNavbar />
-            {showOptions && <OptionScreen toggleOptions={toggleOptions} setShowOptions={setShowOptions} />}
-            
-            <Tab.Navigator screenOptions={{headerShown: false, tabBarShowLabel: false, tabBarStyle: {...barStyle}, tabBarHideOnKeyboard: true}}>
+        <View style={{flex: 1}}>
+            <Tab.Navigator 
+                screenOptions={{headerShown: false, tabBarShowLabel: false, tabBarStyle: {...barStyle}, tabBarHideOnKeyboard: true}}
+            >   
                 <Tab.Screen name='home' component={HomeScreen} 
                     options={{
                         tabBarButton: (props) => <TabBarButton screen='home' {...props} />
@@ -122,7 +117,21 @@ const AuthenticatedNavigation = () => {
                     }}
                 />
             </Tab.Navigator>
-        </>
+
+            <AppNavbar />
+            <HamburgerIcon 
+                setSpecificOptionSelected={setSpecificOptionSelected} 
+                specificOptionSelected={specificOptionSelected} 
+                setShowOptions={setShowOptions} 
+            />
+            {showOptions && <OptionScreen 
+                specificOptionSelected={specificOptionSelected} 
+                setSpecificOptionSelected={setSpecificOptionSelected} 
+                setLoggingOut={setLoggingOut}
+            />}
+
+            {loggingOut && <SplashScreen animated={true} />}
+        </View>
     )
 }
 

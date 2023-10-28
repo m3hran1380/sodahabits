@@ -1,66 +1,78 @@
-import Animated, { useAnimatedStyle, withTiming, useSharedValue, interpolate, Extrapolate } from 'react-native-reanimated';
-import { StyleSheet, Pressable, View } from 'react-native';
+import Animated, { useAnimatedStyle, withTiming, interpolate, Extrapolate } from 'react-native-reanimated';
+import { StyleSheet, Pressable } from 'react-native';
 import { useState } from 'react';
 
-
-const HamburgerIcon = ({ setToggleOptions }) => {
-    const active = useSharedValue(false);
+const HamburgerIcon = ({ setShowOptions, setSpecificOptionSelected, specificOptionSelected }) => {
     const [collapsed, setCollapsed] = useState(false);
 
     const handlePress = () => {
-        setToggleOptions(val => !val);
-        active.value = !active.value;
-        setCollapsed(val => !val);
+        if (specificOptionSelected) {
+            setSpecificOptionSelected(false);
+        }
+        else {
+            setShowOptions(val => !val);
+            setCollapsed(val => !val);
+        }
     };
 
     
     const topBarStyle = useAnimatedStyle(() => {
         const rotate = interpolate(
-            active.value ? 1 : 0,
-            [0, 1],
-            [0, 45], 
+            !collapsed ? 0 : specificOptionSelected ? -1 : 1,
+            [-1, 0, 1],
+            [-45, 0, 45], 
             Extrapolate.CLAMP
         );
+        const width = withTiming(specificOptionSelected ? 20 : 35);
+
         return {
             transform: [
-                { translateY: active.value ? withTiming(10) : withTiming(0) }, // Moving down to meet the middle
-                { rotate: active.value ? withTiming(`${rotate}deg`) : withTiming('0deg') },
+                { translateY: !collapsed ? withTiming(0) : specificOptionSelected ? withTiming(4) : withTiming(10) },
+                { translateX : specificOptionSelected ? withTiming(-2.5) : withTiming(0) }, 
+                { rotate: collapsed ? withTiming(`${rotate}deg`) : withTiming('0deg') },
             ],
+            width: width,
         };
     });
 
 
     const middleBarStyle = useAnimatedStyle(() => {
         return {
-            opacity: active.value ? withTiming(0) : withTiming(1), // Fading out the middle bar
+            opacity: specificOptionSelected ? withTiming(1) : !collapsed ? withTiming(1) : withTiming(0),
         };
     });
     
 
     const bottomBarStyle = useAnimatedStyle(() => {
         const rotate = interpolate(
-            active.value ? 1 : 0,
-            [0, 1],
-            [0, -45], // Rotating -45 degrees to form the other half of the "X"
+            !collapsed ? 0 : specificOptionSelected ? -1 : 1,
+            [-1, 0, 1],
+            [45, 0, -45], // Rotating -45 degrees to form the other half of the "X"
             Extrapolate.CLAMP
         );
+        const width = withTiming(specificOptionSelected ? 20 : 35);
+
         return {
             transform: [
-                { translateY: active.value ? withTiming(-10) : withTiming(0) }, // Moving up to meet the middle
-                { rotate: active.value ? withTiming(`${rotate}deg`) : withTiming('0deg') },
+                { translateY: !collapsed ? withTiming(0) : specificOptionSelected ? withTiming(-4) : withTiming(-10) }, 
+                { translateX : specificOptionSelected ? withTiming(-2.5) : withTiming(0) }, 
+                { rotate: collapsed ? withTiming(`${rotate}deg`) : withTiming('0deg') },
             ],
+            width: width,
         };
     });
 
+    // for the zIndex bug
+    const zIndexValue = Math.floor(Math.random() * (3000 - 2000 + 1)) + 2000;
 
     return (
-        <View style={styles.parentContainer}>
+        <Animated.View style={[styles.parentContainer, {zIndex: zIndexValue}]}>
             <Pressable onPress={handlePress} style={styles.container}>
                 <Animated.View style={[styles.hamburgerElement, topBarStyle, collapsed && {backgroundColor: 'grey'}]}/>
                 <Animated.View style={[styles.hamburgerElement, middleBarStyle, collapsed && {backgroundColor: 'grey'}]}/>
                 <Animated.View style={[styles.hamburgerElement, bottomBarStyle, collapsed && {backgroundColor: 'grey'}]}/>
             </Pressable>
-        </View>
+        </Animated.View>
     )
 }
 
@@ -79,7 +91,6 @@ const styles = StyleSheet.create({
         borderRadius: 2,
     },
     parentContainer: {
-        zIndex: 2000,
         position: 'absolute',
         height: 50,
         justifyContent: 'center',

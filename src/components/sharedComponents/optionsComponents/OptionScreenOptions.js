@@ -4,19 +4,24 @@ import NotificationsIcon from '../../../../assets/svgs/Icons/optionIcons/notific
 import BillingIcon from '../../../../assets/svgs/Icons/optionIcons/billing.svg';
 import FAQIcon from '../../../../assets/svgs/Icons/optionIcons/faq.svg';
 import FeedbackIcon from '../../../../assets/svgs/Icons/optionIcons/feedback.svg';
-import generalStyles from '../../../styles/generalStyle';
+import LogoutIcon from '../../../../assets/svgs/Icons/optionIcons/logout.svg';
+import Animated, {FadeIn} from 'react-native-reanimated';
+import { signOut } from 'firebase/auth';
+import { auth } from '../../../firestore/firestoreConfig';
 
 
-const OptionScreenOptions = ({ adjustedWidth, adjustedHeight }) => {
+const OptionScreenOptions = ({ adjustedWidth, adjustedHeight, setSpecificOptionSelected, setLoggingOut }) => {
 
     const parentContainerStyle = {
         width: adjustedWidth,
         height: adjustedHeight,
+        alignItems: 'center',
     }
     const iconsContainerStyle = {
-        height: adjustedHeight * 0.7,
+        height: adjustedHeight,
         width: adjustedWidth / 2.05,
         paddingVertical: adjustedHeight * 0.025,
+        justifyContent: 'space-between',
     }
     const labelsContainerStyle = {
         height: adjustedHeight * 0.7,
@@ -27,52 +32,76 @@ const OptionScreenOptions = ({ adjustedWidth, adjustedHeight }) => {
         alignItems: 'flex-end',
     }
 
+    const optionsData = [
+        {
+            iconAdjustment: '11%',
+            icon: UserSettingIcon, 
+            labelAdjustment: '12%',
+            labelText: ['Account info']
+        },
+        {
+            iconAdjustment: '0%',
+            icon: NotificationsIcon, 
+            labelAdjustment: '15%',
+            labelText: ['Notification Preferences']
+        },
+        {
+            iconAdjustment: '3%',
+            icon: BillingIcon, 
+            labelAdjustment: '13%',
+            labelText: ['Billing &', 'Subscription']
+        },
+        {
+            iconAdjustment: '13%',
+            icon: FAQIcon, 
+            labelAdjustment: '10%',
+            labelText: ['FAQ']
+        },
+        {
+            iconAdjustment: '28%',
+            icon: FeedbackIcon, 
+            labelAdjustment: '0%',
+            labelText: ['Feedback']
+        }
+    ];
+
+    // option icon press handler functions:
+    const handleSignOut = async () => {
+        try {
+            setLoggingOut(true);
+            await signOut(auth);
+        }
+        catch (error) {
+            console.log(error);
+        }
+    }
+
+
     return (
-        <View style={[styles.container, parentContainerStyle]}>
+        <Animated.View entering={FadeIn.duration(500)} style={[styles.container, parentContainerStyle]}>
             <View style={iconsContainerStyle}>
-                <Pressable style={[styles.iconContainer, styles.firstIcon]}>
-                    <UserSettingIcon width='60%' height='60%' />
-                </Pressable>
-
-                <Pressable style={[styles.iconContainer, styles.secondIcon]}>
-                    <NotificationsIcon width='60%' height='60%' />
-                </Pressable>
-
-                <Pressable style={[styles.iconContainer, styles.thirdIcon]}>
-                    <BillingIcon width='60%' height='60%' />
-                </Pressable>
-
-                <Pressable style={[styles.iconContainer, styles.fourthIcon]}>
-                    <FAQIcon width='60%' height='60%' />              
-                </Pressable>
-
-                <Pressable style={[styles.iconContainer, styles.fifthIcon]}>
-                    <FeedbackIcon width='60%' height='60%' />
+                <View style={{height: '70%'}}>
+                    {optionsData.map((optionData, index) => (
+                        <Pressable onPress={setSpecificOptionSelected} key={index} style={[styles.iconContainer, {left: optionData.iconAdjustment}]}>
+                            <optionData.icon width='60%' height='60%' />
+                        </Pressable>   
+                    ))}
+                </View> 
+                <Pressable onPress={handleSignOut} style={[styles.iconContainer, {left: '35%'}]}>
+                    <LogoutIcon width='50%' height='50%' />
                 </Pressable>
             </View>
+
             <View style={labelsContainerStyle}>
-                <View style={[styles.labelContainer, styles.firstLabel]}>
-                    <Text style={styles.labelText}>Account info</Text>
-                </View>
-                
-                <View style={[styles.labelContainer, styles.secondLabel]}>
-                    <Text style={styles.labelText}>Notification preferences</Text>
-                </View>
-
-                <View style={[styles.labelContainer, styles.thirdLabel]}>
-                    <Text style={styles.labelText}>Billing &</Text>
-                    <Text style={styles.labelText}>subscriptions</Text>
-                </View>
-
-                <View style={[styles.labelContainer, styles.fourthLabel]}>
-                    <Text style={styles.labelText}>FAQs</Text>
-                </View>
-
-                <View style={[styles.labelContainer, styles.fifthLabel]}>
-                    <Text style={styles.labelText}>Feedback</Text>
-                </View>
+                {optionsData.map((optionData, index) => (
+                    <View key={index} style={[styles.labelContainer, {right: optionData.labelAdjustment}]}>
+                        {optionData.labelText.map((text, index) => (
+                            <Text key={index} style={styles.labelText}>{text}</Text>
+                        ))}
+                    </View> 
+                ))}
             </View>
-        </View>
+        </Animated.View>
     )
 }
 
@@ -90,42 +119,11 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
     },
-    firstIcon: {
-        left: '11%'
-    },  
-    secondIcon: {
-        left: '0%'
-    },
-    thirdIcon: {
-        left: '3%',
-    },
-    fourthIcon: {
-        left: '13%'
-    },
-    fifthIcon: {
-        left: '28%'
-    },
     labelContainer: {
         height: '20%',
         width: '70%',
         justifyContent: 'center',
         alignItems: 'center',
-        // backgroundColor: 'red'
-    },
-    firstLabel: {
-        right: '17%',
-    },
-    secondLabel: {
-        right: '22%',
-    },
-    thirdLabel: {
-        right: '18%',
-    },
-    fourthLabel: {
-        right: '10%',
-    },
-    fifthLabel: {
-        right: '2%',
     },
     labelText: {
         color: 'white'
