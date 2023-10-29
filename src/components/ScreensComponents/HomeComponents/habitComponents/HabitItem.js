@@ -3,7 +3,7 @@ import generalStyles, { availableScreenWidth } from '../../../../styles/generalS
 import { colors } from '../../../../styles/generalStyle';
 import HabitTrackerDot from './HabitTrackerDot';
 import { useSelector, useDispatch } from 'react-redux';
-import Animated, { useSharedValue, useAnimatedStyle, withTiming, withSequence, withDelay, runOnJS, FadeOutUp, FadeInDown, FadeIn } from 'react-native-reanimated';
+import Animated, { useSharedValue, useAnimatedStyle, withTiming, withSequence, withDelay, runOnJS } from 'react-native-reanimated';
 import { GestureDetector, Gesture } from 'react-native-gesture-handler';
 import { AntDesign } from '@expo/vector-icons/';
 import { MaterialCommunityIcons } from '@expo/vector-icons/';
@@ -12,6 +12,7 @@ import { setUser } from '../../../../features/userSlice';
 import { useState } from 'react';
 import CameraIcon from '../../../../../assets/svgs/Icons/habitItemIcons/camera.svg';
 import NotesIcon from '../../../../../assets/svgs/Icons/habitItemIcons/notes.svg';
+import { useNavigation } from '@react-navigation/native';
 
 
 const HabitItem = ({ habitName, habitIndex, primary, habitStatus }) => {
@@ -20,6 +21,7 @@ const HabitItem = ({ habitName, habitIndex, primary, habitStatus }) => {
     const user = useSelector((state) => state.user.currentUser);
     // this state is for displaying the picture and note taking options.
     const [extraOptionsEnabled, setExtraOptionsEnabled] = useState(false); 
+    const navigation = useNavigation();
 
     // change this later - currently it only retrieves latest tracker - this should be based on a prop so we can retrieve previous weeks as well.
     const currentTracker = user.weeklyTrackers[0].habitStatus;
@@ -131,7 +133,7 @@ const HabitItem = ({ habitName, habitIndex, primary, habitStatus }) => {
                         })
                         :
                         <>
-                            <Pressable>
+                            <Pressable onPress={() => navigation.navigate('camera screen')}>
                                 <CameraIcon style={styles.svgIcons}/>
                             </Pressable>
                             <Pressable>

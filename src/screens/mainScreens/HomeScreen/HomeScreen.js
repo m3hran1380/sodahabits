@@ -1,7 +1,7 @@
-import { StyleSheet, Image, View } from 'react-native'
+import { StyleSheet, View } from 'react-native'
 import generalStyles, { colors } from '../../../styles/generalStyle';
 import { LinearGradient } from 'expo-linear-gradient';
-import { actualScreenWidth, actualScreenHeight } from '../../../styles/generalStyle';
+import { actualScreenWidth } from '../../../styles/generalStyle';
 import { useSelector } from 'react-redux';
 import HabitItem from '../../../components/ScreensComponents/HomeComponents/habitComponents/HabitItem';
 import DaysLabel from '../../../components/ScreensComponents/HomeComponents/habitComponents/DaysLabel';

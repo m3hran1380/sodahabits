@@ -13,6 +13,8 @@ import OptionScreen from '../components/sharedComponents/optionsComponents/Optio
 import AppNavbar from '../components/sharedComponents/navbarComponents/AppNavbar';
 import HamburgerIcon from '../components/sharedComponents/navbarComponents/HamburgerIcon';
 import SplashScreen from '../components/loadingSpinners/SplashScreen';
+import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
+
 
 
 const barStyle = {
@@ -36,6 +38,7 @@ const AuthenticatedNavigation = () => {
     // state used to overlay the loading spinner on top of the page - we don't use the appwide loading state here
     // as it doesn't work nicely with the fadeout animation of the options component.
     const [loggingOut, setLoggingOut] = useState(false);
+    const camera = useSelector(state => state.app.camera);
 
 
     const user = useSelector((state) => state.user.currentUser);
@@ -97,8 +100,15 @@ const AuthenticatedNavigation = () => {
                 screenOptions={{headerShown: false, tabBarShowLabel: false, tabBarStyle: {...barStyle}, tabBarHideOnKeyboard: true}}
             >   
                 <Tab.Screen name='home' component={HomeScreenNavigator} 
-                    options={{
-                        tabBarButton: (props) => <TabBarButton screen='home' {...props} />
+                    options={({ route }) => {
+                        if (getFocusedRouteNameFromRoute(route) === 'camera screen') {
+                            return {
+                                tabBarStyle: { display: 'none' }
+                            }
+                        }
+                        return {
+                            tabBarButton: (props) => <TabBarButton screen='home' {...props} />
+                        }
                     }}
                 />
                 <Tab.Screen name='social' component={SocialScreenNavigator} 
@@ -117,18 +127,22 @@ const AuthenticatedNavigation = () => {
                     }}
                 />
             </Tab.Navigator>
-
-            <AppNavbar />
-            <HamburgerIcon 
-                setSpecificOptionSelected={setSpecificOptionSelected} 
-                specificOptionSelected={specificOptionSelected} 
-                setShowOptions={setShowOptions} 
-            />
-            {showOptions && <OptionScreen 
-                specificOptionSelected={specificOptionSelected} 
-                setSpecificOptionSelected={setSpecificOptionSelected} 
-                setLoggingOut={setLoggingOut}
-            />}
+            
+            {!camera &&
+                <>
+                <AppNavbar />
+                <HamburgerIcon 
+                    setSpecificOptionSelected={setSpecificOptionSelected} 
+                    specificOptionSelected={specificOptionSelected} 
+                    setShowOptions={setShowOptions} 
+                />
+                {showOptions && <OptionScreen 
+                    specificOptionSelected={specificOptionSelected} 
+                    setSpecificOptionSelected={setSpecificOptionSelected} 
+                    setLoggingOut={setLoggingOut}
+                />}
+                </>
+            }
 
             {loggingOut && <SplashScreen animated={true} />}
         </View>
