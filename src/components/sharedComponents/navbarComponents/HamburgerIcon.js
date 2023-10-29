@@ -15,7 +15,6 @@ const HamburgerIcon = ({ setShowOptions, setSpecificOptionSelected, specificOpti
         }
     };
 
-    
     const topBarStyle = useAnimatedStyle(() => {
         const rotate = interpolate(
             !collapsed ? 0 : specificOptionSelected ? -1 : 1,

@@ -10,7 +10,7 @@ import { signOut } from 'firebase/auth';
 import { auth } from '../../../firestore/firestoreConfig';
 
 
-const OptionScreenOptions = ({ adjustedWidth, adjustedHeight, setSpecificOptionSelected, setLoggingOut }) => {
+const OptionScreenOptions = ({ adjustedWidth, adjustedHeight, setSpecificOptionSelected, setLoggingOut, setSelectedScreenIndex }) => {
 
     const parentContainerStyle = {
         width: adjustedWidth,
@@ -46,13 +46,13 @@ const OptionScreenOptions = ({ adjustedWidth, adjustedHeight, setSpecificOptionS
             labelText: ['Notification Preferences']
         },
         {
-            iconAdjustment: '3%',
+            iconAdjustment: '1%',
             icon: BillingIcon, 
             labelAdjustment: '13%',
             labelText: ['Billing &', 'Subscription']
         },
         {
-            iconAdjustment: '13%',
+            iconAdjustment: '16%',
             icon: FAQIcon, 
             labelAdjustment: '10%',
             labelText: ['FAQ']
@@ -76,13 +76,21 @@ const OptionScreenOptions = ({ adjustedWidth, adjustedHeight, setSpecificOptionS
         }
     }
 
+    const handleOptionPressed = (index) => {
+        setSpecificOptionSelected(true); 
+        setSelectedScreenIndex(index);
+    }
+
 
     return (
         <Animated.View entering={FadeIn.duration(500)} style={[styles.container, parentContainerStyle]}>
             <View style={iconsContainerStyle}>
                 <View style={{height: '70%'}}>
                     {optionsData.map((optionData, index) => (
-                        <Pressable onPress={setSpecificOptionSelected} key={index} style={[styles.iconContainer, {left: optionData.iconAdjustment}]}>
+                        <Pressable 
+                            onPress={() => {handleOptionPressed(index)}} 
+                            key={index} style={[styles.iconContainer, {left: optionData.iconAdjustment}]}
+                        >
                             <optionData.icon width='60%' height='60%' />
                         </Pressable>   
                     ))}

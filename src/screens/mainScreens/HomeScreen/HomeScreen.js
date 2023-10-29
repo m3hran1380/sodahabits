@@ -1,22 +1,30 @@
-import { StyleSheet, Image, View, Button } from 'react-native'
-import { signOut } from 'firebase/auth';
-import { auth } from '../../firestore/firestoreConfig';
-import generalStyles, { colors } from '../../styles/generalStyle';
+import { StyleSheet, Image, View } from 'react-native'
+import generalStyles, { colors } from '../../../styles/generalStyle';
 import { LinearGradient } from 'expo-linear-gradient';
-import { actualScreenWidth } from '../../styles/generalStyle';
+import { actualScreenWidth, actualScreenHeight } from '../../../styles/generalStyle';
 import { useSelector } from 'react-redux';
-import HabitItem from '../../components/ScreensComponents/HomeComponents/habitComponents/HabitItem';
-import DaysLabel from '../../components/ScreensComponents/HomeComponents/habitComponents/DaysLabel';
+import HabitItem from '../../../components/ScreensComponents/HomeComponents/habitComponents/HabitItem';
+import DaysLabel from '../../../components/ScreensComponents/HomeComponents/habitComponents/DaysLabel';
+import LottieView from 'lottie-react-native';
+import { calculateAdjustedDimensions } from '../../../businessLogic/utilityFunctions';
+
+
+const [lottieWidth, lottieHeight] = calculateAdjustedDimensions(1804, 1787);
 
 
 const HomeScreen = () => {
     const user = useSelector((state) => state.user.currentUser);
-    const locationImage = require('../../../assets/images/locations/FevalaHome.png');
 
     return (
         <View style={styles.parentContainer}>
             <View style={styles.locationBackgroundContainer}>
-                <Image source={locationImage} style={styles.locationBackground} />
+                <LottieView 
+                    source={require('../../../../assets/lottie/properties/favelapropertyOptimisedLottie.json')}
+                    width={lottieWidth}
+                    height={lottieHeight}
+                    loop={true}
+                    autoPlay={true}
+                />
                 <LinearGradient 
                     start={{x:0, y:0.9}} 
                     end={{x:0, y:0}} 
@@ -56,6 +64,7 @@ const styles = StyleSheet.create({
     },
     locationBackgroundContainer: {
         height: '45%',
+        overflow: 'hidden'
     },
     fade: {
         bottom: 0,
