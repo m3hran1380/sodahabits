@@ -40,9 +40,18 @@ const HomeScreen = () => {
                         return ({
                             habitName: user.todayHabits.habits.primary[key].name,
                             habitStatus: user.todayHabits.habits.primary[key].status,
+                            habitNotes: user.todayHabits.habits.primary[key].notes,
+                            habitImageUrl: user.todayHabits.habits.primary[key].imageUrl,
                         })
-                    }).map(({habitName, habitStatus}, index) => {
-                        return <HabitItem key={index} habitIndex={index} habitStatus={habitStatus} habitName={habitName} primary={true} />
+                    }).map((habitData, index) => {
+                        return (
+                            <HabitItem 
+                                key={index} 
+                                habitIndex={index} 
+                                habitData={habitData}
+                                primary={true} 
+                            />
+                        )
                     })
                 }
             </View>

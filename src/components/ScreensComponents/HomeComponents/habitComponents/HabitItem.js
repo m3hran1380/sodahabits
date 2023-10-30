@@ -11,11 +11,12 @@ import { getTodayIndex, updateHabitStatus } from '../../../../businessLogic/fire
 import { setUser } from '../../../../features/userSlice';
 import { useState } from 'react';
 import CameraIcon from '../../../../../assets/svgs/Icons/habitItemIcons/camera.svg';
+import CameraCheckedIcon from '../../../../../assets/svgs/Icons/habitItemIcons/cameraChecked.svg';
 import NotesIcon from '../../../../../assets/svgs/Icons/habitItemIcons/notes.svg';
 import { useNavigation } from '@react-navigation/native';
 
 
-const HabitItem = ({ habitName, habitIndex, primary, habitStatus }) => {
+const HabitItem = ({ habitData, habitIndex, primary }) => {
     
     const dispatch = useDispatch();
     const user = useSelector((state) => state.user.currentUser);
@@ -83,8 +84,8 @@ const HabitItem = ({ habitName, habitIndex, primary, habitStatus }) => {
 
             // if habit is completed, user shouldn't be able to swipte right to complete again
             // similarly if habit is incomplete, user shouldn't be able to swipe left to undo.
-            if (habitStatus === 'complete' && (btnOffset.value + event.changeX > 0)) return;
-            else if (habitStatus !== 'complete' && (btnOffset.value + event.changeX < 0)) return;
+            if (habitData.habitStatus === 'complete' && (btnOffset.value + event.changeX > 0)) return;
+            else if (habitData.habitStatus !== 'complete' && (btnOffset.value + event.changeX < 0)) return;
 
             btnOffset.value += event.changeX;
             btnOffset.value = btnOffset.value > availableScreenWidth ? availableScreenWidth : btnOffset.value;
@@ -108,24 +109,23 @@ const HabitItem = ({ habitName, habitIndex, primary, habitStatus }) => {
 
     const handleHabitItemPressed = () => {
         // only display the additional options (to take picture + take notes) if the habit is complete
-        if (habitStatus !== 'complete') return;
+        if (habitData.habitStatus !== 'complete') return;
         setExtraOptionsEnabled(val => !val);
     }
-
 
     
     return (
         <GestureDetector gesture={panGesture}>
             <Pressable 
                 onPress={handleHabitItemPressed}
-                style={[styles.container, {backgroundColor: habitStatus === 'complete' ? colors.habitColorSuccess : colors.habitColorPrimary}]}
+                style={[styles.container, {backgroundColor: habitData.habitStatus === 'complete' ? colors.habitColorSuccess : colors.habitColorPrimary}]}
             >
                 <Animated.View style={[styles.completeBtn, completeBtnStyle]}>
                     <AntDesign name='check' size={30} style={{color: 'white'}} />
                 </Animated.View>
 
                 <View style={styles.innerContainer}>
-                    <Text style={[generalStyles.normalText, {color: 'white', textAlign: 'left'}]}>{habitName}</Text>
+                    <Text style={[generalStyles.normalText, {color: 'white', textAlign: 'left'}]}>{habitData.habitName}</Text>
                     <View style={styles.innerMostContainer}>
                     { !extraOptionsEnabled ?
                         currentHabitWeeklyStatus.map((dayStatus, index) => {
@@ -133,9 +133,16 @@ const HabitItem = ({ habitName, habitIndex, primary, habitStatus }) => {
                         })
                         :
                         <>
-                            <Pressable onPress={() => navigation.navigate('camera screen')}>
-                                <CameraIcon style={styles.svgIcons}/>
-                            </Pressable>
+                            {habitData.habitImageUrl ?
+                                <Pressable onPress={() => navigation.navigate('camera screen', { habitIndex: habitIndex })}>
+                                    <CameraCheckedIcon style={styles.svgIcons}/>
+                                </Pressable>
+                                :
+                                <Pressable onPress={() => navigation.navigate('camera screen', { habitIndex: habitIndex })}>
+                                    <CameraIcon style={styles.svgIcons}/>
+                                </Pressable>
+                            }
+
                             <Pressable>
                                 <NotesIcon style={styles.svgIcons}/>
                             </Pressable>

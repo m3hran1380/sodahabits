@@ -433,3 +433,20 @@ export const removeFriend = async (firstUserId, secondUserId) => {
     }
 }
 
+
+
+export const updateHabitImageURI = async (userId, habitIndex, imageURI) => {
+    try {
+        const todayHabitDocument = await getTodaysHabits(userId);
+        const currentHabitObject = todayHabitDocument.habits;
+        currentHabitObject.primary[habitIndex].imageUrl = imageURI; 
+        const docRef = doc(db, 'usersprivate', userId, 'dailyhabits', todayHabitDocument.id);
+        await updateDoc(docRef, {
+            habits: currentHabitObject
+        });
+        return {todayHabits: {habits: currentHabitObject, id: todayHabitDocument.id}};
+    }
+    catch (error) {
+        console.log("Error while updating the habit image URI ", error);
+    }
+}
