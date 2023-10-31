@@ -1,9 +1,19 @@
 import { StyleSheet, Text, View, Image, Pressable } from 'react-native';
-import generalStyles, { colors } from '../../../../styles/generalStyle';
-import { Ionicons, AntDesign } from '@expo/vector-icons/';
-import { removeFriend } from '../../../../businessLogic/firestoreFunctions';
+import { availableScreenWidth2 } from '../../../../styles/generalStyle';
 import { useSelector } from 'react-redux';
 import { useState } from 'react';
+import {
+    Canvas,
+    Rect,
+    Circle,
+    RadialGradient,
+    Skia,
+    Shader,
+    vec,
+    Group,
+    Shadow
+} from "@shopify/react-native-skia";
+   
 
 
 const defaultPFP = require('../../../../../assets/images/profilePictures/default-pfp.png');
@@ -11,115 +21,65 @@ const defaultPFP = require('../../../../../assets/images/profilePictures/default
 const FriendItem = ({ userData }) => {
 
     const user = useSelector(state => state.user.currentUser);
-    const [removePopup, setRemovePopup] = useState(false);
 
-    const handleFriendRemoval = async () => {
-        await removeFriend(user.uid, userData.id);
-    }
+    console.log(userData);
 
     return ( 
-        <View style={styles.container}>
-            <View style={styles.imageContainer}>
-                { userData?.pfpurl ? 
-                    <Image resizeMode='contain' source={{ uri: userData.pfpurl }} style={styles.pfpImage} />
-                    :
-                    <Image resizeMode='contain' source={defaultPFP} style={styles.pfpImage} />
+        <View>
+            <View style={styles.pfpContainer}>
+                {userData?.type && 
+                    <Canvas style={styles.glowCanvas}>
+                        <Circle cx={(availableScreenWidth2/3) * 0.5} cy={(availableScreenWidth2/3) * 0.5} r={(availableScreenWidth2/3) * 0.5}>
+                            <RadialGradient
+                                c={vec((availableScreenWidth2/3) * 0.5, (availableScreenWidth2/3) * 0.5)}
+                                r={(availableScreenWidth2/3) * 0.5}
+                                colors={['#55D5E7', '#55D5E7', '#55D5E7', 'transparent']}
+                            />
+                        </Circle>
+                    </Canvas>
                 }
-            </View>
-            <View style={styles.textContainer}>
-                <Text style={[generalStyles.normalText, styles.text]}>{userData.username}</Text>
-            </View>
-            <View style={styles.buttonContainer}>
-                <Pressable style={styles.iconContainer}>
-                    {({pressed}) => {
-                        return <AntDesign name='message1' size={20} style={[styles.icon, pressed && {color: 'green'}]} />
-                    }}
-                </Pressable>
-                <Pressable style={styles.iconContainer} onPress={() => setRemovePopup(true)}>
-                    {({pressed}) => {
-                        return <Ionicons name='person-remove' size={20} style={[styles.icon, pressed && {color: 'red'}]} />
-                    }}
-                </Pressable>
-            </View>
-            
-            {removePopup &&
-                <View style={styles.removeFriendContainer}>
-                    <Pressable onPress={handleFriendRemoval} style={({pressed}) => [styles.removeBtn, {backgroundColor: pressed ? 'white' : 'green'}]}>
-                        {({pressed}) => {
-                            return <Text style={{color: pressed ? 'black' : 'white'}}>Confirm</Text>
-                        }} 
-                    </Pressable>
-                    <Pressable onPress={() => setRemovePopup(false)} style={({pressed}) => [styles.removeBtn, {backgroundColor: pressed ? 'white' : 'red'}]}>
-                        {({pressed}) => {
-                            return <Text style={{color: pressed ? 'black' : 'white'}}>Cancel</Text>
-                        }} 
-                    </Pressable>
+                <View style={styles.imageContainer}>
+                    { userData?.pfpurl ? 
+                        <Image resizeMode='contain' source={{ uri: userData.pfpurl }} style={styles.pfpImage} />
+                        :
+                        <Image resizeMode='contain' source={defaultPFP} style={styles.pfpImage} />
+                    }
                 </View>
-            }
+            </View>
+            <Text style={styles.text}>{userData.username}</Text>
         </View>
     )
 }
 
-export default FriendItem
+export default FriendItem;
+
 
 const styles = StyleSheet.create({
-    container: {
-        backgroundColor: colors.backgroundColorPrimary,
-        height: 50,
-        marginHorizontal: 10,
-        borderRadius: 10,
-        marginVertical: 2,
+    pfpContainer: {
+        width: availableScreenWidth2/3,
+        height: availableScreenWidth2/3,
+        justifyContent: 'center',
         alignItems: 'center',
-        flexDirection: 'row',
-        paddingRight: 10,
-        overflow: 'hidden'
-    },
-    text: {
-        textAlign: 'left',
-        color: 'white',
     },
     imageContainer: {
-        height: 40,
-        width: 40,
-        borderRadius: 20,
+        height: (availableScreenWidth2/3) * 0.65,
+        width: (availableScreenWidth2/3) * 0.65,
+        borderRadius: (availableScreenWidth2/3) * 0.35,
         overflow: 'hidden',
-        marginLeft: 10,
     },
     pfpImage: {
         width: '100%',
         height: '100%',
         aspectRatio: 1,
     },
-    textContainer: {
-        flex: 1,
-        alignItems: 'flex-start',
-        justifyContent: 'center',
-        paddingHorizontal: 20,
+    glowCanvas: {
+        width: availableScreenWidth2/3, 
+        height: availableScreenWidth2/3,
+        position: 'absolute',
     },
-    iconContainer: {
-        height: 30,
-        width:30,
-        borderRadius: 10,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    icon: {
+    text: {
         color: 'white',
+        textAlign: 'center',
+        top: -(availableScreenWidth2/3) * 0.08,
     },
-    buttonContainer: {
-        flexDirection: 'row',
-    },
-    removeFriendContainer: {
-        ...StyleSheet.absoluteFillObject,
-        backgroundColor: 'rgba(0,0,0,0.9)',
-        flexDirection: 'row',
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    removeBtn: {
-        borderRadius: 10,
-        padding: 5,
-        marginHorizontal: 5,
-    }
-
 })

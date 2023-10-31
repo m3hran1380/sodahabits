@@ -9,7 +9,7 @@ const generalStyles = {
     },
     containerNoMargin: {
         flex: 1,
-        paddingHorizontal: 10,
+        paddingHorizontal: 25,
         paddingTop: 75,
         paddingBottom: 40,
     },
@@ -42,6 +42,7 @@ const generalStyles = {
 };
 
 export const availableScreenWidth = Dimensions.get('window').width - generalStyles.container.marginHorizontal * 2;
+export const availableScreenWidth2 = Dimensions.get('window').width - generalStyles.containerNoMargin.paddingHorizontal * 2;
 export const actualScreenWidth = Dimensions.get('window').width;
 export const actualScreenHeight = Dimensions.get('window').height;
 
