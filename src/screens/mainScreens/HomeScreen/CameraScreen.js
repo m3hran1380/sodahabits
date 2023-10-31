@@ -25,7 +25,7 @@ const CameraScreen = ({ route, navigation }) => {
     const [uploading, setUploading] = useState(false);
     const [progress, setProgress] = useState(0);
     const user = useSelector(state => state.user.currentUser);
-    const {habitIndex} = route.params;
+    const {habitIndex, habitType} = route.params;
 
     const dispatch = useDispatch();
     const cameraRef = useRef();
@@ -109,7 +109,8 @@ const CameraScreen = ({ route, navigation }) => {
         setUploading(true);
         const fetchImage = await fetch(image);
         const imageBlob = await fetchImage.blob();
-        const uploadTask = uploadBytesResumable(ref(storage, `images/${user.uid}/${new Date().toISOString()}`), imageBlob);
+        const imageName = new Date().toISOString();
+        const uploadTask = uploadBytesResumable(ref(storage, `images/${user.uid}/${imageName}`), imageBlob);
         uploadTask.on('state_changed', 
             (snapshot) => {
                 const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
@@ -120,7 +121,7 @@ const CameraScreen = ({ route, navigation }) => {
             }, 
             () => {
                 getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
-                    updateHabitImageURI(user.uid, habitIndex, downloadURL).then((updatedHabitObject) => {
+                    updateHabitImageURI(user.uid, habitIndex, habitType, downloadURL, imageName).then((updatedHabitObject) => {
                         dispatch(setUser(updatedHabitObject));
                         navigation.navigate('home screen');
                     });

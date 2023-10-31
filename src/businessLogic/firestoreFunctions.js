@@ -1,4 +1,6 @@
 import { getDocs, getDoc, doc, query, collection, orderBy, limit, addDoc, serverTimestamp, writeBatch, updateDoc, startAt, endAt, runTransaction, deleteDoc } from 'firebase/firestore';
+import { getStorage, ref, deleteObject } from "firebase/storage";
+import { storage } from '../firestore/firestoreConfig';
 import { db } from '../firestore/firestoreConfig';
 
 
@@ -290,6 +292,16 @@ export const updateHabitStatus = async (userId, habitIndex, habitType, newHabitS
         currentWeeklyTracker.habitStatus[todayIndex][`${habitType}Status`][habitIndex] = newHabitStatus;
         todayHabitDocument.habits[habitType][habitIndex].status = newHabitStatus;
 
+        if (newHabitStatus === 'pending') {
+            const imageName = todayHabitDocument.habits[habitType][habitIndex].imageName;
+            if (imageName) {
+                const imageRef = ref(storage, `images/${userId}/${imageName}`);
+                await (deleteObject(imageRef));
+                todayHabitDocument.habits[habitType][habitIndex].imageUrl = null;
+                todayHabitDocument.habits[habitType][habitIndex].imageName = null;
+            }
+        }
+
         const trackerDocRef = doc(db, 'usersprivate', userId, 'weeklytrackers', currentWeeklyTracker.id);
         const dailyhabitDocRef = doc(db, 'usersprivate', userId, 'dailyhabits', todayHabitDocument.id);
        
@@ -302,6 +314,24 @@ export const updateHabitStatus = async (userId, habitIndex, habitType, newHabitS
     catch (error) {
         // if we can't update habit status, the app state should be reverted back - (optimistic update)
         throw error;
+    }
+}
+
+
+// following function removes the image associated with the current habit
+export const removeHabitImage = async (userId, habitIndex, habitType) => {
+    try {
+        const todayHabitDocument = await getTodaysHabits(userId); 
+        const imageRef = ref(storage, `images/${userId}/${todayHabitDocument.habits[habitType][habitIndex].imageName}`);
+        await (deleteObject(imageRef));
+        todayHabitDocument.habits[habitType][habitIndex].imageUrl = null;
+        todayHabitDocument.habits[habitType][habitIndex].imageName = null;
+        // update the todayhabitdocument in firestore
+        const dailyhabitDocRef = doc(db, 'usersprivate', userId, 'dailyhabits', todayHabitDocument.id);
+        await updateDoc(dailyhabitDocRef, todayHabitDocument);
+    }
+    catch (error) {
+        console.log("error while removing a habit image ", error);
     }
 }
 
@@ -434,12 +464,20 @@ export const removeFriend = async (firstUserId, secondUserId) => {
 }
 
 
-
-export const updateHabitImageURI = async (userId, habitIndex, imageURI) => {
+// this function updates the imageURI of the habit passed to it
+export const updateHabitImageURI = async (userId, habitIndex, habitType, imageURI, imageName) => {
     try {
         const todayHabitDocument = await getTodaysHabits(userId);
         const currentHabitObject = todayHabitDocument.habits;
-        currentHabitObject.primary[habitIndex].imageUrl = imageURI; 
+
+        // remove the previous image from the firebase storage if one exists
+        if (currentHabitObject[habitType][habitIndex].imageName) {
+            const imageRef = ref(storage, `images/${userId}/${currentHabitObject[habitType][habitIndex].imageName}`);
+            await (deleteObject(imageRef));
+        }
+
+        currentHabitObject[habitType][habitIndex].imageUrl = imageURI; 
+        currentHabitObject[habitType][habitIndex].imageName = imageName; 
         const docRef = doc(db, 'usersprivate', userId, 'dailyhabits', todayHabitDocument.id);
         await updateDoc(docRef, {
             habits: currentHabitObject

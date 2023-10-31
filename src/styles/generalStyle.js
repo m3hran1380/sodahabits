@@ -9,7 +9,7 @@ const generalStyles = {
     },
     containerNoMargin: {
         flex: 1,
-        paddingHorizontal: 30,
+        paddingHorizontal: 10,
         paddingTop: 75,
         paddingBottom: 40,
     },

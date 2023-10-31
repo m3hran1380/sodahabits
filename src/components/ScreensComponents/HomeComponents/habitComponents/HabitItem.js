@@ -14,6 +14,7 @@ import CameraIcon from '../../../../../assets/svgs/Icons/habitItemIcons/camera.s
 import CameraCheckedIcon from '../../../../../assets/svgs/Icons/habitItemIcons/cameraChecked.svg';
 import NotesIcon from '../../../../../assets/svgs/Icons/habitItemIcons/notes.svg';
 import { useNavigation } from '@react-navigation/native';
+import CameraOptions from './CameraOptions';
 
 
 const HabitItem = ({ habitData, habitIndex, primary }) => {
@@ -22,6 +23,7 @@ const HabitItem = ({ habitData, habitIndex, primary }) => {
     const user = useSelector((state) => state.user.currentUser);
     // this state is for displaying the picture and note taking options.
     const [extraOptionsEnabled, setExtraOptionsEnabled] = useState(false); 
+    const [extraCameraOptions, setExtraCameraOptions] = useState(false);
     const navigation = useNavigation();
 
     // change this later - currently it only retrieves latest tracker - this should be based on a prop so we can retrieve previous weeks as well.
@@ -62,6 +64,8 @@ const HabitItem = ({ habitData, habitIndex, primary }) => {
         currentWeeklyTrackerList[0].habitStatus[todayIndex][`${primary ? 'primary' : 'secondary'}Status`][habitIndex] = newStatus;
         const todayHabitsCopy = JSON.parse(JSON.stringify(user.todayHabits));
         todayHabitsCopy.habits[`${primary ? 'primary' : 'secondary'}`][habitIndex].status = newStatus;
+        const currentImageUrl = todayHabitsCopy.habits[`${primary ? 'primary' : 'secondary'}`][habitIndex].imageUrl;
+        if (newStatus === 'pending') todayHabitsCopy.habits[`${primary ? 'primary' : 'secondary'}`][habitIndex].imageUrl = null;
 
         dispatch(setUser({weeklyTrackers: currentWeeklyTrackerList, todayHabits: todayHabitsCopy}));
 
@@ -74,6 +78,7 @@ const HabitItem = ({ habitData, habitIndex, primary }) => {
                 // update the todayHabits property of user state
                 const todayHabitsCopy = JSON.parse(JSON.stringify(user.todayHabits));
                 todayHabitsCopy.habits[`${primary ? 'primary' : 'secondary'}`][habitIndex].status = oldStatus;
+                if (oldStatus === 'complete') todayHabitsCopy.habits[`${primary ? 'primary' : 'secondary'}`][habitIndex].imageUrl = currentImageUrl;
                 dispatch(setUser({weeklyTrackers: currentWeeklyTrackerList, todayHabits: todayHabitsCopy}));
             })
     }
@@ -132,13 +137,21 @@ const HabitItem = ({ habitData, habitIndex, primary }) => {
                             return <HabitTrackerDot status={dayStatus} key={index} />
                         })
                         :
-                        <>
+                        <>{extraCameraOptions ? 
+                            <CameraOptions 
+                                habitIndex={habitIndex} 
+                                habitType={primary ? 'primary' : 'secondary'} 
+                                setExtraCameraOption={setExtraCameraOptions} 
+                                setExtraOptionsEnabled={setExtraOptionsEnabled}
+                            />
+                        :
+                        <>                            
                             {habitData.habitImageUrl ?
-                                <Pressable onPress={() => navigation.navigate('camera screen', { habitIndex: habitIndex })}>
+                                <Pressable onPress={() => {setExtraCameraOptions(val => !val)}}>
                                     <CameraCheckedIcon style={styles.svgIcons}/>
                                 </Pressable>
                                 :
-                                <Pressable onPress={() => navigation.navigate('camera screen', { habitIndex: habitIndex })}>
+                                <Pressable onPress={() => navigation.navigate('camera screen', { habitIndex: habitIndex, habitType: primary ? 'primary' : 'secondary' })}>
                                     <CameraIcon style={styles.svgIcons}/>
                                 </Pressable>
                             }
@@ -147,6 +160,7 @@ const HabitItem = ({ habitData, habitIndex, primary }) => {
                                 <NotesIcon style={styles.svgIcons}/>
                             </Pressable>
                         </>
+                        }</>
                     }
                     </View>
                 </View> 
@@ -179,6 +193,7 @@ const styles = StyleSheet.create({
     innerMostContainer: {
         flexDirection: 'row',
         justifyContent: 'space-between',
+        alignItems: 'center',
     },
     completeBtn: {
         backgroundColor: colors.colorComplete,
@@ -203,6 +218,6 @@ const styles = StyleSheet.create({
         pointEvents: 'none',
     },
     svgIcons: {
-        marginLeft: 10,
+        marginLeft: 5,
     } 
 })

@@ -70,7 +70,7 @@ const SocialScreen = () => {
             <SafeAreaView style={[generalStyles.containerNoMargin, styles.container]}>
                 {/* the following pressable component closes the modal when user clicks outside of it */}
                 <Pressable onPress={() => {closeAddFriendModal(); closeRequestInboxModel(); Keyboard.dismiss()}} style={styles.modalOverlay} />
-                <Text style={[generalStyles.h1, {color: 'white'}]}>Soda Community</Text>
+                <Text style={[generalStyles.h2, styles.headerText]}>Soda Community</Text>
                 
                 <FriendsMenu openAddFriendModal={openAddFriendModal} openRequestInboxModal={openRequestInboxModal}/>
                 <AddFriendsModal status={friendModalStatus} closeModal={closeAddFriendModal} style={friendModalStyle}/>
@@ -94,4 +94,9 @@ const styles = StyleSheet.create({
     modalOverlay: {
         ...StyleSheet.absoluteFillObject,
     },
+    headerText: {
+        color: 'white',
+        textAlign: 'left',
+        marginVertical: 20,
+    }
 })
