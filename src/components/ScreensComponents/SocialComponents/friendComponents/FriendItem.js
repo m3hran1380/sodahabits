@@ -1,39 +1,31 @@
 import { StyleSheet, Text, View, Image, Pressable } from 'react-native';
 import { availableScreenWidth2 } from '../../../../styles/generalStyle';
-import { useSelector } from 'react-redux';
 import { useState } from 'react';
-import {
-    Canvas,
-    Rect,
-    Circle,
-    RadialGradient,
-    Skia,
-    Shader,
-    vec,
-    Group,
-    Shadow
-} from "@shopify/react-native-skia";
-   
+import { Canvas, Circle, RadialGradient, vec } from "@shopify/react-native-skia";
+import AddUserIcon from '../../../../../assets/svgs/Icons/socialIcons/friendIcons/addUserIcon.svg'
+import DefaultPFP from '../../../../../assets/svgs/defaultPfps/default1.svg';
+import FriendRequestOverlay from '../../SocialComponents/friendComponents/FriendRequestOverlay';
 
-
-const defaultPFP = require('../../../../../assets/images/profilePictures/default-pfp.png');
 
 const FriendItem = ({ userData }) => {
+    const [friendRequestOverlay, setFriendRequestOverlay] = useState(false);
 
-    const user = useSelector(state => state.user.currentUser);
-
-    console.log(userData);
+    const handleProfilePressed = () => {
+        if (userData?.type) {
+            setFriendRequestOverlay(true);
+        }
+    }
 
     return ( 
         <View>
-            <View style={styles.pfpContainer}>
+            <Pressable onPress={handleProfilePressed} style={styles.pfpContainer}>
                 {userData?.type && 
                     <Canvas style={styles.glowCanvas}>
                         <Circle cx={(availableScreenWidth2/3) * 0.5} cy={(availableScreenWidth2/3) * 0.5} r={(availableScreenWidth2/3) * 0.5}>
                             <RadialGradient
                                 c={vec((availableScreenWidth2/3) * 0.5, (availableScreenWidth2/3) * 0.5)}
                                 r={(availableScreenWidth2/3) * 0.5}
-                                colors={['#55D5E7', '#55D5E7', '#55D5E7', 'transparent']}
+                                colors={['#55D5E7', '#55D5E7', '#55D5E7', '#55D5E7', 'transparent']}
                             />
                         </Circle>
                     </Canvas>
@@ -42,11 +34,15 @@ const FriendItem = ({ userData }) => {
                     { userData?.pfpurl ? 
                         <Image resizeMode='contain' source={{ uri: userData.pfpurl }} style={styles.pfpImage} />
                         :
-                        <Image resizeMode='contain' source={defaultPFP} style={styles.pfpImage} />
+                        <DefaultPFP style={styles.pfpImage} />
                     }
                 </View>
-            </View>
+                {userData?.type && 
+                    <AddUserIcon width={'30%'} height={'30%'} style={styles.addUserIcon} />
+                }
+            </Pressable>
             <Text style={styles.text}>{userData.username}</Text>
+            {friendRequestOverlay && <FriendRequestOverlay setFriendRequestOverlay={setFriendRequestOverlay} userData={userData} />}
         </View>
     )
 }
@@ -62,10 +58,12 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     imageContainer: {
-        height: (availableScreenWidth2/3) * 0.65,
-        width: (availableScreenWidth2/3) * 0.65,
+        height: (availableScreenWidth2/3) * 0.7,
+        width: (availableScreenWidth2/3) * 0.7,
         borderRadius: (availableScreenWidth2/3) * 0.35,
         overflow: 'hidden',
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     pfpImage: {
         width: '100%',
@@ -81,5 +79,10 @@ const styles = StyleSheet.create({
         color: 'white',
         textAlign: 'center',
         top: -(availableScreenWidth2/3) * 0.08,
+    },
+    addUserIcon: {
+        position: 'absolute',
+        top: '10%',
+        right: '10%',
     },
 })

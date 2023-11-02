@@ -1,11 +1,12 @@
 import { StyleSheet, View, TextInput } from 'react-native'
 
 
-const FormInput = ({ placeholder, handleInput, value }) => {
+const FormInput = ({ placeholder, handleInput, value, style }) => {
 
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, style]}>
             <TextInput 
+                placeholderTextColor={'#838383'}
                 value={value} 
                 onChangeText={handleInput} 
                 style={styles.textInput} 
@@ -19,16 +20,16 @@ export default FormInput
 
 const styles = StyleSheet.create({
     container: {
-        margin: 10,
         borderWidth: 1,
         borderColor: 'black',
-        borderRadius: 10,
+        borderRadius: 5,
         paddingHorizontal: 8,
         height: 40,
-        backgroundColor: 'white',
+        backgroundColor: '#383838',
         justifyContent: 'center',
     },
     textInput: {
-        backgroundColor: 'white',
+        backgroundColor: '#383838',
+        color: 'white'
     }
 })

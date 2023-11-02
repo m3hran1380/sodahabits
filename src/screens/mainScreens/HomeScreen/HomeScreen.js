@@ -1,4 +1,4 @@
-import { StyleSheet, View } from 'react-native'
+import { Pressable, StyleSheet, View } from 'react-native'
 import generalStyles, { colors } from '../../../styles/generalStyle';
 import { LinearGradient } from 'expo-linear-gradient';
 import { actualScreenWidth } from '../../../styles/generalStyle';
@@ -32,7 +32,8 @@ const HomeScreen = () => {
                     style={styles.fade} 
                 />
             </View>
-            <View style={[styles.container, {paddingTop: 0}]}>
+
+            <View style={[styles.containerNoMargin, {paddingTop: 0}]}>
                 <DaysLabel />
                 {
                     // render the primary habits

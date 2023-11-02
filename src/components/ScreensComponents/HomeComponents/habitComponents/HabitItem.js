@@ -1,5 +1,5 @@
 import { StyleSheet, Text, View, Pressable } from 'react-native';
-import generalStyles, { availableScreenWidth } from '../../../../styles/generalStyle';
+import generalStyles, { availableScreenWidth2, textStyle } from '../../../../styles/generalStyle';
 import { colors } from '../../../../styles/generalStyle';
 import HabitTrackerDot from './HabitTrackerDot';
 import { useSelector, useDispatch } from 'react-redux';
@@ -42,7 +42,7 @@ const HabitItem = ({ habitData, habitIndex, primary }) => {
     const completeBtnStyle = useAnimatedStyle(() => {
         return {
             transform: [
-                {translateX:  -availableScreenWidth + btnOffset.value}
+                {translateX: -availableScreenWidth2 + btnOffset.value}
             ]
         }
     });
@@ -50,7 +50,7 @@ const HabitItem = ({ habitData, habitIndex, primary }) => {
     const rejectBtnStyle = useAnimatedStyle(() => {
         return {
             transform: [
-                {translateX: availableScreenWidth + btnOffset.value}
+                {translateX: availableScreenWidth2 + btnOffset.value}
             ]
         }
     });
@@ -93,18 +93,18 @@ const HabitItem = ({ habitData, habitIndex, primary }) => {
             else if (habitData.habitStatus !== 'complete' && (btnOffset.value + event.changeX < 0)) return;
 
             btnOffset.value += event.changeX;
-            btnOffset.value = btnOffset.value > availableScreenWidth ? availableScreenWidth : btnOffset.value;
-            btnOffset.value = btnOffset.value < -availableScreenWidth ? -availableScreenWidth : btnOffset.value;
+            btnOffset.value = btnOffset.value > availableScreenWidth2 ? availableScreenWidth2 : btnOffset.value;
+            btnOffset.value = btnOffset.value < -availableScreenWidth2 ? -availableScreenWidth2 : btnOffset.value;
         })
         .onEnd(() => {
             if (extraOptionsEnabled) return;
 
-            if (btnOffset.value > (availableScreenWidth / 2)) {
-                btnOffset.value = withSequence(withTiming(availableScreenWidth), withDelay(100, withTiming(0, {duration: 0})));
+            if (btnOffset.value > (availableScreenWidth2 / 2)) {
+                btnOffset.value = withSequence(withTiming(availableScreenWidth2), withDelay(100, withTiming(0, {duration: 0})));
                 runOnJS(handleSwipe)('right');
             }
-            else if (btnOffset.value < -(availableScreenWidth / 2)) {
-                btnOffset.value = withSequence(withTiming(-availableScreenWidth), withDelay(100, withTiming(0, {duration: 0})));
+            else if (btnOffset.value < -(availableScreenWidth2 / 2)) {
+                btnOffset.value = withSequence(withTiming(-availableScreenWidth2), withDelay(100, withTiming(0, {duration: 0})));
                 runOnJS(handleSwipe)('left');
             }
             else {
@@ -116,6 +116,7 @@ const HabitItem = ({ habitData, habitIndex, primary }) => {
         // only display the additional options (to take picture + take notes) if the habit is complete
         if (habitData.habitStatus !== 'complete') return;
         setExtraOptionsEnabled(val => !val);
+        if (extraOptionsEnabled) setExtraCameraOptions(false);
     }
 
     
@@ -130,7 +131,7 @@ const HabitItem = ({ habitData, habitIndex, primary }) => {
                 </Animated.View>
 
                 <View style={styles.innerContainer}>
-                    <Text style={[generalStyles.normalText, {color: 'white', textAlign: 'left'}]}>{habitData.habitName}</Text>
+                    <Text style={[textStyle.normalText, {color: 'white', textAlign: 'left'}]}>{habitData.habitName}</Text>
                     <View style={styles.innerMostContainer}>
                     { !extraOptionsEnabled ?
                         currentHabitWeeklyStatus.map((dayStatus, index) => {
@@ -180,10 +181,10 @@ const styles = StyleSheet.create({
     container: {
         borderRadius: 10,
         height: 45,
-        paddingHorizontal: 15,
+        paddingHorizontal: 10,
         marginVertical: 5,
         justifyContent: 'center',
-        overflow: 'hidden'
+        overflow: 'hidden',
     },
     innerContainer: {
         flexDirection: 'row',
@@ -198,7 +199,7 @@ const styles = StyleSheet.create({
     completeBtn: {
         backgroundColor: colors.colorComplete,
         height: 45,
-        width: availableScreenWidth,
+        width: availableScreenWidth2,
         position: 'absolute',
         zIndex: 2,
         justifyContent: 'center',
@@ -209,7 +210,7 @@ const styles = StyleSheet.create({
     rejectBtn: {
         backgroundColor: colors.colorRejet,
         height: 45,
-        width: availableScreenWidth,
+        width: availableScreenWidth2,
         position: 'absolute',
         zIndex: 3,
         justifyContent: 'center',

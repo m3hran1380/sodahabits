@@ -1,11 +1,12 @@
 import Animated, { useAnimatedStyle, withTiming, interpolate, Extrapolate } from 'react-native-reanimated';
-import { StyleSheet, Pressable } from 'react-native';
+import { StyleSheet, Pressable, Keyboard } from 'react-native';
 import { useState } from 'react';
 
 const HamburgerIcon = ({ setShowOptions, setSpecificOptionSelected, specificOptionSelected }) => {
     const [collapsed, setCollapsed] = useState(false);
 
     const handlePress = () => {
+        Keyboard.dismiss();
         if (specificOptionSelected) {
             setSpecificOptionSelected(false);
         }

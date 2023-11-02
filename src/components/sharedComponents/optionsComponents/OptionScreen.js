@@ -46,11 +46,9 @@ const OptionScreen = ({ specificOptionSelected, setSpecificOptionSelected, setLo
                 style={styles.lottie}
             />
             {specificOptionSelected ?
-
                 <View style={styles.optionScreenContainer}>
                     {optionScreens[selectedScreenIndex]}
                 </View>
-                
                 :
                 <OptionScreenOptions 
                     setSpecificOptionSelected={setSpecificOptionSelected}

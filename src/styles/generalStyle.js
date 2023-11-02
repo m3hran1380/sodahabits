@@ -9,7 +9,7 @@ const generalStyles = {
     },
     containerNoMargin: {
         flex: 1,
-        paddingHorizontal: 25,
+        paddingHorizontal: 20,
         paddingTop: 75,
         paddingBottom: 40,
     },
@@ -59,6 +59,20 @@ export const colors = {
     colorNull: '#dddddd',
     colorComplete: '#30CB5C',
     colorRejet: '#FF7A00',
+}
+
+
+export const textStyle = {
+    allText: {
+        fontFamily: 'space-grotesk',
+    },
+    normalText: {
+        fontSize: actualScreenWidth > 414 ? 18 : actualScreenWidth > 321 ? 16 : 14,
+    },
+    h1: {
+        fontSize: 35, 
+        fontFamily: 'space-grotesk-bold',
+    }
 }
 
 export default generalStyles;

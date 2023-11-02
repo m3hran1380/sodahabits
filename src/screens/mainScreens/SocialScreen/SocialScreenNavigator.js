@@ -1,5 +1,6 @@
 import { createStackNavigator } from '@react-navigation/stack';
 import SocialScreen from './SocialScreen';
+import SocialSearchScreen from './SocialSearchScreen';
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { setFriends, setIncomingRequests, setOutgoingRequests } from '../../../features/friendSlice';
@@ -85,6 +86,7 @@ const SocialScreenNavigator = () => {
     return (
         <Stack.Navigator screenOptions={{headerShown: false}}>
             <Stack.Screen component={SocialScreen} name='social screen' />
+            <Stack.Screen component={SocialSearchScreen} name='social search screen' />
         </Stack.Navigator>
     )
 }

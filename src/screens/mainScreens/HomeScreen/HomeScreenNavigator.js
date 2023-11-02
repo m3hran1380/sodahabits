@@ -2,6 +2,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import HomeScreen from './HomeScreen';
 import CameraScreen from './CameraScreen';
 
+
 const Stack = createStackNavigator();
 
 const HomeScreenNavigator = () => {

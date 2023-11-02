@@ -24,7 +24,6 @@ const RootNavigation = () => {
 
     const loadingState = useSelector(state => state.app.loading);
     const userState = useSelector((state) => state.user.currentUser);
-
     // check for authentication status:
     useEffect(() => {
         let snapshotUnsub = () => {pass}
