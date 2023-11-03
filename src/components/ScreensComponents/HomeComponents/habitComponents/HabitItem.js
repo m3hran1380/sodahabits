@@ -152,7 +152,7 @@ const HabitItem = ({ habitData, habitIndex, primary }) => {
                                     <CameraCheckedIcon style={styles.svgIcons}/>
                                 </Pressable>
                                 :
-                                <Pressable onPress={() => navigation.navigate('camera screen', { habitIndex: habitIndex, habitType: primary ? 'primary' : 'secondary' })}>
+                                <Pressable style={{marginRight: 4.5}} onPress={() => navigation.navigate('camera screen', { habitIndex: habitIndex, habitType: primary ? 'primary' : 'secondary' })}>
                                     <CameraIcon style={styles.svgIcons}/>
                                 </Pressable>
                             }

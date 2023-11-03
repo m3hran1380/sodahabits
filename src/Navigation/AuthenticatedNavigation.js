@@ -16,7 +16,6 @@ import SplashScreen from '../components/loadingSpinners/SplashScreen';
 import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
 
 
-
 const barStyle = {
     justifyContent: 'center',
     alignItems: 'center',
@@ -25,6 +24,7 @@ const barStyle = {
     borderTopWidth: 0,
     position: 'absolute',
     paddingBottom: 10,
+    height: 50,
 }
 
 const Tab = createBottomTabNavigator();

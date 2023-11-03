@@ -17,7 +17,7 @@ const FriendItem = ({ userData }) => {
     }
 
     return ( 
-        <View>
+        <View style={styles.outermostContainer}>
             <Pressable onPress={handleProfilePressed} style={styles.pfpContainer}>
                 {userData?.type && 
                     <Canvas style={styles.glowCanvas}>
@@ -41,7 +41,7 @@ const FriendItem = ({ userData }) => {
                     <AddUserIcon width={'30%'} height={'30%'} style={styles.addUserIcon} />
                 }
             </Pressable>
-            <Text style={styles.text}>{userData.username}</Text>
+            <View style={styles.usernameContainer}><Text style={styles.text}>{userData.username}</Text></View>
             {friendRequestOverlay && <FriendRequestOverlay setFriendRequestOverlay={setFriendRequestOverlay} userData={userData} />}
         </View>
     )
@@ -51,6 +51,9 @@ export default FriendItem;
 
 
 const styles = StyleSheet.create({
+    outermostContainer: {
+        marginBottom: 5,
+    },
     pfpContainer: {
         width: availableScreenWidth2/3,
         height: availableScreenWidth2/3,
@@ -78,11 +81,17 @@ const styles = StyleSheet.create({
     text: {
         color: 'white',
         textAlign: 'center',
-        top: -(availableScreenWidth2/3) * 0.08,
     },
     addUserIcon: {
         position: 'absolute',
         top: '10%',
         right: '10%',
     },
+    usernameContainer: {
+        width: (availableScreenWidth2/3),
+        justifyContent: 'center',
+        alignItems: 'center',
+        position: 'absolute',
+        top: (availableScreenWidth2/3) * 0.9,
+    }
 })

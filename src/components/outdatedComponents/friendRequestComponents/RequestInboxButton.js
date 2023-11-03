@@ -1,6 +1,6 @@
 import { StyleSheet, Pressable, View, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons/';
-import { colors } from '../../../../../styles/generalStyle';
+import { colors } from '../../../styles/generalStyle';
 import { useSelector } from 'react-redux';
 
 

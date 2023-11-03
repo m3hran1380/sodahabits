@@ -1,5 +1,5 @@
-import { getDocs, getDoc, doc, query, collection, orderBy, limit, addDoc, serverTimestamp, writeBatch, updateDoc, startAt, endAt, runTransaction, deleteDoc } from 'firebase/firestore';
-import { getStorage, ref, deleteObject } from "firebase/storage";
+import { getDocs, getDoc, doc, query, collection, orderBy, limit, addDoc, serverTimestamp, writeBatch, updateDoc, startAt, endAt, runTransaction, deleteDoc, where } from 'firebase/firestore';
+import { ref, deleteObject } from "firebase/storage";
 import { storage } from '../firestore/firestoreConfig';
 import { db } from '../firestore/firestoreConfig';
 
@@ -486,5 +486,29 @@ export const updateHabitImageURI = async (userId, habitIndex, habitType, imageUR
     }
     catch (error) {
         console.log("Error while updating the habit image URI ", error);
+    }
+}
+
+
+// this function retrieves the incoming friend request
+// used at the very start in root navigation
+export const retrieveIncomingFriendRequestsData = async (userId) => {
+    try {
+        const incomingRequestQuery = query(collection(db, 'friendrequests'),
+         where('receiverId', '==', userId), where('status', '==', 'pending'), orderBy('timestamp', 'desc'));
+
+        const userIds = [];
+
+        snapshot = await getDocs(incomingRequestQuery);
+        snapshot.forEach((doc) => {
+            userIds.push(doc.data().senderId);
+        });
+        const userData = await getUsersById(userIds);
+        userData.forEach(user => user.type = 'request');
+        return userData;
+    }
+    catch (error) {
+        console.log("Error while retrieving the incoming friend requests ", error);
+        return []
     }
 }

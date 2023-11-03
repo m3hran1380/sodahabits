@@ -9,30 +9,26 @@ import { Pressable } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 
 
-const FriendsMenu = ({ }) => {
-    const {friendsList, incomingRequests} = useSelector(state => state.friends);
+const FriendsMenu = ({ style }) => {
+    const {friendsList, incomingRequestsData} = useSelector(state => state.friends);
     // the following is the data of friends + incoming requests.
     const [combinedData, setCombinedData] = useState();    
     const navigation = useNavigation();
 
 
-    // retrieve the user profile informations - INCOMING:
+    // sort the incoming request data + friend data separately and combine them together. Do this everytime either list changes.
     useEffect(() => {
         const sortedFriends = friendsList.slice().sort((a, b) => a.username.localeCompare(b.username));
-        const incomingUserIds = incomingRequests.map((request) => request.senderId);
-        (async () => {
-            const retrievedData = await getUsersById(incomingUserIds);
-            retrievedData.forEach((user) => user.type = 'request');
-            // sort and then combine the data with the users friends:
-            retrievedData.sort((a, b) => a.username.localeCompare(b.username));
-            const dataCombined = [...retrievedData, ...sortedFriends];
-            setCombinedData(dataCombined);
-        })();
-    }, [incomingRequests, friendsList, setCombinedData]);
+        const sortedIncomingRequestsData = incomingRequestsData.slice().sort((a, b) => a.username.localeCompare(b.username));
+        const dataCombined = [...sortedIncomingRequestsData, ...sortedFriends];
+        setCombinedData(dataCombined);
+        
+    }, [incomingRequestsData, friendsList, setCombinedData]);
     
 
+
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, style]}>
             <View style={styles.headerContainer}>
                 <Text style={generalStyles.h2}>Friends</Text>
                 <Pressable onPress={() => {navigation.navigate('social search screen')}} style={styles.addIconContainer}>
@@ -61,12 +57,12 @@ const styles = StyleSheet.create({
         width: '100%',
     },
     headerContainer: {
+        height: 40,
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
     },
     addIconContainer: {
         justifyContent: 'center',
-        // alignItems: 'center',
     }
 })

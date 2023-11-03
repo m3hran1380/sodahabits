@@ -1,9 +1,9 @@
 import { createStackNavigator } from '@react-navigation/stack';
 import SocialScreen from './SocialScreen';
 import SocialSearchScreen from './SocialSearchScreen';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { setFriends, setIncomingRequests, setOutgoingRequests } from '../../../features/friendSlice';
+import { setFriends, setIncomingRequests, setOutgoingRequests, setIncomingRequestsData } from '../../../features/friendSlice';
 import { onSnapshot, where, query, collection, orderBy } from 'firebase/firestore';
 import { db } from '../../../firestore/firestoreConfig';
 import { getUsersById } from '../../../businessLogic/firestoreFunctions';
@@ -12,13 +12,14 @@ import { getUsersById } from '../../../businessLogic/firestoreFunctions';
 const Stack = createStackNavigator();
 
 const SocialScreenNavigator = () => {
-
+    const isFetching = useRef(false);
     const user = useSelector(state => state.user.currentUser);
-    const currentFriends = useSelector(state => state.friends.friendsList);
+    const {friendsList, incomingRequests, incomingRequestsData} = useSelector(state => state.friends);
     const dispatch = useDispatch();
 
     // setup a live listener on the incoming/outgoing friend requests
     useEffect(() => {
+        isFetching.current = true;
         const incomingFriendRequestQuery = query(collection(db, 'friendrequests'),
          where('receiverId', '==', user.uid), where('status', '==', 'pending'), orderBy('timestamp', 'desc'));
         const unsubIncoming = onSnapshot(incomingFriendRequestQuery, (querySnapshot) => {
@@ -29,6 +30,7 @@ const SocialScreenNavigator = () => {
                 incomingRequests.push(request);
             });
             dispatch(setIncomingRequests(incomingRequests));
+            isFetching.current = false;
         }, (error) => console.log('error in incoming snapshot: ', error))
 
         const outgoingFriendRequestQuery = query(collection(db, 'friendrequests'),
@@ -50,11 +52,42 @@ const SocialScreenNavigator = () => {
     }, []);
 
 
+    // this side effect runs everytime the incoming request changes - it retrieves the new requesting user's data
+    useEffect(() => {
+        if (!isFetching.current) {
+            const incomingRequestsDataIds = new Set(incomingRequestsData.map(userData => userData.id));
+            const incomingRequestsIds = new Set(incomingRequests.map(request => request.senderId));
+            const areArraysEqual = incomingRequestsData.map(userData => userData.id).length === 
+            incomingRequests.map(request => request.senderId).length && [...incomingRequestsDataIds].every(item => incomingRequestsIds.has(item));
+
+            if (!areArraysEqual) {
+                // find out if a new request has been added or removed
+                if (incomingRequestsDataIds.size < incomingRequestsIds.size) {
+                    const difference = [...incomingRequestsIds].filter(item => !incomingRequestsDataIds.has(item));
+                    // retrieve the data for the new requesting users:
+                    (async () => {
+                        const usersData = await getUsersById(difference);
+                        usersData.forEach(user => user.type = 'request')
+                        const modifiedIncomingRequestsDataArray = [...incomingRequestsData, ...usersData];
+                        dispatch(setIncomingRequestsData(modifiedIncomingRequestsDataArray));
+                    })();
+                }
+                else {
+                    const difference = [...incomingRequestsDataIds].filter(item => !incomingRequestsIds.has(item));
+                    // dispatch new incoming requests data state:
+                    const modifiedIncomingRequestsDataArray = incomingRequestsData.filter(item => !difference.includes(item.id));
+                    dispatch(setIncomingRequestsData(modifiedIncomingRequestsDataArray));
+                }
+            }
+        }
+    }, [incomingRequests])
+
+
     // this side effect runs everytime the user state changes - it checks for changes in friends array.
     useEffect(() => {
         if (!user.friends) return;
         
-        const currentFriendIds = currentFriends.map((friend) => friend.id);
+        const currentFriendIds = friendsList.map((friend) => friend.id);
          // compare the updated user document's friends array to what we have in redux
         const currentFriendsSet = new Set(currentFriendIds);
         const retrievedFriendsSet = new Set(user.friends);
@@ -69,14 +102,14 @@ const SocialScreenNavigator = () => {
                 // retrieve the data for the new friends:
                 (async () => {
                     const usersData = await getUsersById(difference);
-                    const modifiedFriendsArray = [...currentFriends, ...usersData];
+                    const modifiedFriendsArray = [...friendsList, ...usersData];
                     dispatch(setFriends(modifiedFriendsArray));
                 })();
             }
             else {
                 const difference = [...currentFriendsSet].filter(item => !retrievedFriendsSet.has(item));
                 // dispatch new friends state:
-                const modifiedFriendsArray = currentFriends.filter(item => !difference.includes(item.id));
+                const modifiedFriendsArray = friendsList.filter(item => !difference.includes(item.id));
                 dispatch(setFriends(modifiedFriendsArray));
             }
         }

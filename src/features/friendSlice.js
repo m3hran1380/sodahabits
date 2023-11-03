@@ -7,6 +7,7 @@ const initialState = {
     incomingRequests: [],
     outgoingRequests: [],
     friendsList: [],
+    incomingRequestsData: [],
 }
 
 
@@ -23,10 +24,13 @@ const friendSlice = createSlice({
         setFriends: (state, action) => {
             state.friendsList = action.payload;
         },
+        setIncomingRequestsData: (state, action) => {
+            state.incomingRequestsData = action.payload;
+        }
     }
 });
 
 
-export const { setIncomingRequests, setOutgoingRequests, setFriends } = friendSlice.actions;
+export const { setIncomingRequests, setOutgoingRequests, setFriends, setIncomingRequestsData } = friendSlice.actions;
 
 export default friendSlice.reducer;

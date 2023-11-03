@@ -1,14 +1,14 @@
 import { StyleSheet, View, Text, FlatList } from 'react-native';
-import generalStyles, { colors } from '../../../../../styles/generalStyle';
-import FormInput from '../../../../sharedComponents/FormInput';
+import generalStyles, { colors } from '../../../styles/generalStyle';
+import FormInput from '../../sharedComponents/FormInput';
 import UserLoadingSkeleton from './UserLoadingSkeleton';
 import { useState, useEffect } from 'react';
 import { debounce } from 'lodash';
 import { useCallback } from 'react';
-import { retrieveUsers } from '../../../../../businessLogic/firestoreFunctions';
+import { retrieveUsers } from '../../../businessLogic/firestoreFunctions';
 import RetrievedUser from './RetrievedUser';
 import { useSelector } from 'react-redux';
-import CustomModal from '../../../../sharedComponents/CustomModal';
+import CustomModal from '../../sharedComponents/CustomModal';
 
 
 const AddFriendsModal = ({ closeModal, style, status }) => {

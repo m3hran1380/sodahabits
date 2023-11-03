@@ -13,8 +13,8 @@ import { setAppLoading } from "../features/appSlice";
 import { initialiseApp } from "../businessLogic/initialisationFunctions";
 import { doc, onSnapshot } from "firebase/firestore";
 import { db } from "../firestore/firestoreConfig";
-import { getUsersById } from "../businessLogic/firestoreFunctions";
-import { setFriends } from "../features/friendSlice";
+import { getUsersById, retrieveIncomingFriendRequestsData } from "../businessLogic/firestoreFunctions";
+import { setFriends, setIncomingRequestsData } from "../features/friendSlice";
 
 
 const Stack = createStackNavigator();
@@ -35,6 +35,9 @@ const RootNavigation = () => {
                     const userData = await initialiseApp(user.uid);
                     // retrieve user's friends data:
                     const friendsData = await getUsersById(userData.friends ? userData.friends : []);
+                    // retrieve incoming requests:
+                    const incomingRequestsData = await retrieveIncomingFriendRequestsData(user.uid);
+                    dispatch(setIncomingRequestsData(incomingRequestsData));
                     dispatch(setUser(userData));
                     dispatch(setFriends(friendsData));
 

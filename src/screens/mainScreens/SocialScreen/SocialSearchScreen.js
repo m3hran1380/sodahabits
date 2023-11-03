@@ -20,7 +20,6 @@ const SocialSearchScreen = () => {
     const user = useSelector(state => state.user.currentUser);
     const {friendsList, incomingRequests} = useSelector(state => state.friends);
 
-
     const navigation = useNavigation();
 
     const debouncedUserSearch = useCallback(

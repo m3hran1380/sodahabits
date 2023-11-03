@@ -1,7 +1,7 @@
 import { StyleSheet, Text, View, Image, Pressable } from 'react-native';
-import generalStyles, { colors } from '../../../../../styles/generalStyle';
+import generalStyles, { colors } from '../../../styles/generalStyle';
 import { Ionicons, Feather } from '@expo/vector-icons/';
-import { acceptFriendRequest, deleteFriendRequest } from '../../../../../businessLogic/firestoreFunctions';
+import { acceptFriendRequest, deleteFriendRequest } from '../../../businessLogic/firestoreFunctions';
 import { useSelector } from 'react-redux';
 
 
