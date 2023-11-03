@@ -64,7 +64,7 @@ const SocialSearchScreen = () => {
     return (
         <View style={styles.parentContainer}>
             <SafeAreaView style={[generalStyles.containerNoMargin, styles.container]}>
-                <Text style={[generalStyles.h2, styles.headerText]}>Soda Community</Text>
+                <Text style={[generalStyles.h2, styles.headerText]}>Connection is key!</Text>
                 
                 <View style={styles.headerTextContainer}>
                     <Text style={[generalStyles.h3, {marginBottom: 10}]}>Search for friends</Text>

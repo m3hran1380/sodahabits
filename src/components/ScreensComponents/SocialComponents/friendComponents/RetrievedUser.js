@@ -44,15 +44,15 @@ const RetrievedUser = ({ userData }) => {
     return ( 
         <View style={styles.pfpContainer}>
             <View style={styles.imageContainer}>
-                { userData?.pfpurl ? 
-                    <Image resizeMode='contain' source={{ uri: userData.pfpurl }} style={styles.pfpImage} />
+                { userData?.pfpUrl ? 
+                    <Image resizeMode='contain' source={{ uri: userData.pfpUrl }} style={styles.pfpImage} />
                     :
                     <DefaultPFP style={styles.pfpImage} />
                 }
             </View>
             <Pressable onPress={actionButtonPressed} style={[styles.actionButton, {backgroundColor: isOutgoingRequest ? '#626262' : '#59B9FF'}]}>
                 {({pressed}) => 
-                    <Text style={[textStyle.allText, {color: pressed ? 'black' : 'white'}]}>{isOutgoingRequest ? 'Cancel request' : 'Add'}</Text>
+                    <Text style={[textStyle.allText, {color: pressed ? 'black' : 'white'}]}>{isOutgoingRequest ? 'Cancel' : 'Add'}</Text>
                 }
             </Pressable>
             <Text style={styles.text}>{userData.username}</Text>

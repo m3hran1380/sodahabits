@@ -512,3 +512,29 @@ export const retrieveIncomingFriendRequestsData = async (userId) => {
         return []
     }
 }
+
+
+
+// following function uploads users profile picture url onto firebase
+export const updateUserPFPURI = async (userId, downloadURL, imageName) => {
+    // check to see if the user already has a pfp - if so, delete their previous image from storage
+    const userData = await getUserData(userId);
+
+    if (userData.pfpUrl) {
+        const imageRef = ref(storage, `images/${userId}/pfp/${userData.pfpImageName}`);
+        await (deleteObject(imageRef));
+    }
+
+    const newUpdate = {
+        pfpUrl: downloadURL,
+        pfpImageName: imageName,
+    }
+
+    const privateUserRef = doc(db, 'usersprivate', userId);
+    const publicUserRef = doc(db, 'userspublic', userId);
+
+    const batch = writeBatch(db);
+    batch.update(privateUserRef, newUpdate);
+    batch.update(publicUserRef, newUpdate);
+    await batch.commit();
+}

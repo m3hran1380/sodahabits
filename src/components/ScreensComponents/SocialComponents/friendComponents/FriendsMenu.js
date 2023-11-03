@@ -3,7 +3,6 @@ import { useEffect, useState } from 'react';
 import generalStyles from '../../../../styles/generalStyle';
 import { useSelector } from 'react-redux';
 import FriendItem from './FriendItem';
-import { getUsersById } from '../../../../businessLogic/firestoreFunctions';
 import AddFriendIcon from '../../../../../assets/svgs/Icons/socialIcons/friendIcons/addFriend.svg';
 import { Pressable } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
@@ -12,7 +11,7 @@ import { useNavigation } from '@react-navigation/native';
 const FriendsMenu = ({ style }) => {
     const {friendsList, incomingRequestsData} = useSelector(state => state.friends);
     // the following is the data of friends + incoming requests.
-    const [combinedData, setCombinedData] = useState();    
+    const [combinedData, setCombinedData] = useState([]);    
     const navigation = useNavigation();
 
 
@@ -35,14 +34,15 @@ const FriendsMenu = ({ style }) => {
                     <AddFriendIcon width={27} height={27}/>
                 </Pressable>
             </View>
-            <FlatList
-                numColumns={3}
-                data={combinedData}
-                keyExtractor={friend => friend.id}
-                renderItem={({item}) => 
-                    <FriendItem userData={item} />
-                }
-            />
+            <View style={styles.wrappableContainer}>
+            {
+                combinedData.map((item, index) => {
+                    return (
+                        <FriendItem key={index} userData={item} />
+                    )
+                })
+            }
+            </View>
         </View>
     )
 }
@@ -64,5 +64,9 @@ const styles = StyleSheet.create({
     },
     addIconContainer: {
         justifyContent: 'center',
+    },
+    wrappableContainer: {
+        flexDirection: 'row',
+        flexWrap: 'wrap'
     }
 })

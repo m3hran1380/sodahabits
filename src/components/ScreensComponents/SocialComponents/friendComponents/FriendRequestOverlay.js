@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, Modal, Pressable } from 'react-native'
+import { StyleSheet, Text, View, Modal, Pressable, Image } from 'react-native'
 import DefaultPFP from '../../../../../assets/svgs/defaultPfps/default1.svg';
 import { availableScreenWidth2 } from '../../../../styles/generalStyle';
 import { textStyle } from '../../../../styles/generalStyle';
@@ -23,8 +23,8 @@ const FriendRequestOverlay = ({ userData, setFriendRequestOverlay }) => {
                 <Pressable style={styles.innerOverlay} onPress={() => setFriendRequestOverlay(false)} />
                 <View style={styles.innerContainer}>
                     <View style={styles.imageContainer}>
-                        { userData?.pfpurl ? 
-                            <Image resizeMode='contain' source={{ uri: userData.pfpurl }} style={styles.pfpImage} />
+                        { userData?.pfpUrl ? 
+                            <Image resizeMode='contain' source={{ uri: userData.pfpUrl }} style={styles.pfpImage} />
                             :
                             <DefaultPFP width='100%' height='100%' />
                         }

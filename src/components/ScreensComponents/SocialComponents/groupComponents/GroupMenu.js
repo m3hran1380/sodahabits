@@ -11,7 +11,7 @@ const GroupsMenu = ({ style }) => {
     const navigation = useNavigation();
 
     return (
-        <View style={[styles.container, style]}>
+        <View style={style}>
             <View style={styles.headerContainer}>
                 <Text style={generalStyles.h2}>Groups</Text>
                 <View style={styles.iconsContainer}>
@@ -30,9 +30,6 @@ const GroupsMenu = ({ style }) => {
 export default GroupsMenu
 
 const styles = StyleSheet.create({
-    container: {
-        marginTop: 20,
-    },
     friendList: {
         width: '100%',
     },

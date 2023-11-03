@@ -31,8 +31,8 @@ const FriendItem = ({ userData }) => {
                     </Canvas>
                 }
                 <View style={styles.imageContainer}>
-                    { userData?.pfpurl ? 
-                        <Image resizeMode='contain' source={{ uri: userData.pfpurl }} style={styles.pfpImage} />
+                    { userData?.pfpUrl ? 
+                        <Image resizeMode='contain' source={{ uri: userData.pfpUrl }} style={styles.pfpImage} />
                         :
                         <DefaultPFP style={styles.pfpImage} />
                     }

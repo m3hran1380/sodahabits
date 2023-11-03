@@ -32,8 +32,8 @@ const RetrievedUserRequest = ({ userData, type }) => {
     return ( 
         <View style={styles.container}>
             <View style={styles.imageContainer}>
-                { userData?.pfpurl ? 
-                    <Image resizeMode='contain' source={{ uri: userData.pfpurl }} style={styles.pfpImage} />
+                { userData?.pfpUrl ? 
+                    <Image resizeMode='contain' source={{ uri: userData.pfpUrl }} style={styles.pfpImage} />
                     :
                     <Image resizeMode='contain' source={defaultPFP} style={styles.pfpImage} />
                 }
