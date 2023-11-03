@@ -1,7 +1,7 @@
 import { StyleSheet, View, TextInput } from 'react-native'
 
 
-const FormInput = ({ placeholder, handleInput, value, style }) => {
+const FormInput = ({ placeholder, handleInput, value, style, maxLength }) => {
 
     return (
         <View style={[styles.container, style]}>
@@ -11,6 +11,7 @@ const FormInput = ({ placeholder, handleInput, value, style }) => {
                 onChangeText={handleInput} 
                 style={styles.textInput} 
                 placeholder={placeholder} 
+                maxLength={maxLength ? maxLength : undefined}
             />
         </View>
     )

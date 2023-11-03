@@ -1,5 +1,5 @@
 import { StyleSheet, Text, View, Pressable } from 'react-native';
-import generalStyles, { availableScreenWidth2, textStyle } from '../../../../styles/generalStyle';
+import { availableScreenWidth2, textStyle } from '../../../../styles/generalStyle';
 import { colors } from '../../../../styles/generalStyle';
 import HabitTrackerDot from './HabitTrackerDot';
 import { useSelector, useDispatch } from 'react-redux';
@@ -15,15 +15,20 @@ import CameraCheckedIcon from '../../../../../assets/svgs/Icons/habitItemIcons/c
 import NotesIcon from '../../../../../assets/svgs/Icons/habitItemIcons/notes.svg';
 import { useNavigation } from '@react-navigation/native';
 import CameraOptions from './CameraOptions';
+import * as Haptics from 'expo-haptics';
+import EditHabitOverlay from './EditHabitOverlay';
 
 
 const HabitItem = ({ habitData, habitIndex, primary }) => {
-    
     const dispatch = useDispatch();
     const user = useSelector((state) => state.user.currentUser);
     // this state is for displaying the picture and note taking options.
     const [extraOptionsEnabled, setExtraOptionsEnabled] = useState(false); 
     const [extraCameraOptions, setExtraCameraOptions] = useState(false);
+    // following state is activated on long press - it allows the user to edit the habit name
+    const [editable, setEditable] = useState(false);
+    const [editing, setEditing] = useState(false);
+
     const navigation = useNavigation();
 
     // change this later - currently it only retrieves latest tracker - this should be based on a prop so we can retrieve previous weeks as well.
@@ -83,6 +88,10 @@ const HabitItem = ({ habitData, habitIndex, primary }) => {
             })
     }
 
+    const toggleEditState = () => {
+        setEditable(val => !val);
+    }
+
     const panGesture = Gesture.Pan()
         .onChange((event) => {
             if (extraOptionsEnabled) return;
@@ -112,20 +121,42 @@ const HabitItem = ({ habitData, habitIndex, primary }) => {
             }
         })
 
+    const longPressGesture = Gesture.LongPress()
+        .onStart(() => {
+            runOnJS(Haptics.impactAsync)(Haptics.ImpactFeedbackStyle.Heavy);
+            runOnJS(toggleEditState)();
+    })
+
+    // combine the pan and the longpress gestures into a composed gesture.
+    const composedGesture = Gesture.Race(panGesture, longPressGesture);
+
+
     const handleHabitItemPressed = () => {
-        // only display the additional options (to take picture + take notes) if the habit is complete
-        if (habitData.habitStatus !== 'complete') return;
-        setExtraOptionsEnabled(val => !val);
-        if (extraOptionsEnabled) setExtraCameraOptions(false);
+        if (editable) {
+            setEditing(true);
+        }
+        else {
+            // only display the additional options (to take picture + take notes) if the habit is complete
+            if (habitData.habitStatus !== 'complete') return;
+            setExtraOptionsEnabled(val => !val);
+            if (extraOptionsEnabled) setExtraCameraOptions(false);
+        }
     }
 
     
     return (
-        <GestureDetector gesture={panGesture}>
+        <>
+        <GestureDetector gesture={composedGesture}>
             <Pressable 
                 onPress={handleHabitItemPressed}
                 style={[styles.container, {backgroundColor: habitData.habitStatus === 'complete' ? colors.habitColorSuccess : colors.habitColorPrimary}]}
             >
+                {editable ?
+                <Text style={[textStyle.normalText, {color: 'white', textAlign: 'center'}]}>
+                    Tap to edit {primary ? 'primary' : 'secondary'} habit {habitIndex + 1}
+                </Text>
+                :
+                <>
                 <Animated.View style={[styles.completeBtn, completeBtnStyle]}>
                     <AntDesign name='check' size={30} style={{color: 'white'}} />
                 </Animated.View>
@@ -156,7 +187,6 @@ const HabitItem = ({ habitData, habitIndex, primary }) => {
                                     <CameraIcon style={styles.svgIcons}/>
                                 </Pressable>
                             }
-
                             <Pressable>
                                 <NotesIcon style={styles.svgIcons}/>
                             </Pressable>
@@ -169,9 +199,11 @@ const HabitItem = ({ habitData, habitIndex, primary }) => {
                 <Animated.View style={[styles.rejectBtn, rejectBtnStyle]}>
                     <MaterialCommunityIcons name='undo-variant' size={30} style={{color: 'white'}} />
                 </Animated.View>
+                </>}
             </Pressable>
         </GestureDetector>
-
+        {editing && <EditHabitOverlay setEditable={setEditable} setEditing={setEditing} habitIndex={habitIndex} habitType={primary ? 'primary' : 'secondary'}/>}
+        </>
     )
 }
 
