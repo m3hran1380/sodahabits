@@ -318,6 +318,21 @@ export const updateHabitStatus = async (userId, habitIndex, habitType, newHabitS
 }
 
 
+// following function is used to edit the name of a habit
+export const updateHabitName = async (userId, habitIndex, habitType, updatedName) => {
+    try {
+        const todayHabitDoc = await getTodaysHabits(userId);
+        todayHabitDoc.habits[habitType][habitIndex].name = updatedName;
+        const documentRef = doc(db, 'usersprivate', userId, 'dailyhabits', todayHabitDoc.id);
+        await updateDoc(documentRef, todayHabitDoc);
+        return todayHabitDoc;
+    }   
+    catch (error) {
+        throw Error(`Error while updating the name of a habit ${error}`)
+    }
+}
+
+
 // following function removes the image associated with the current habit
 export const removeHabitImage = async (userId, habitIndex, habitType) => {
     try {

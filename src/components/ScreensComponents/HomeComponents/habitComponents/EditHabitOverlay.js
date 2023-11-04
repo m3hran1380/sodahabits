@@ -2,13 +2,32 @@ import { StyleSheet, Text, View, Modal, Pressable } from 'react-native';
 import generalStyles, { textStyle } from '../../../../styles/generalStyle';
 import FormInput from '../../../sharedComponents/FormInput';
 import { useState } from 'react';
+import { updateHabitName } from '../../../../businessLogic/firestoreFunctions';
+import { useSelector, useDispatch } from 'react-redux';
+import { setUser } from '../../../../features/userSlice';
 
 
 const EditHabitOverlay = ({setEditable, setEditing, habitIndex, habitType}) => {
     const [newHabitName, setNewHabitName] = useState('');
+    const [emptyHabit, setEmptyHabit] = useState(false);
+    const user = useSelector(state => state.user.currentUser);
+    const dispatch = useDispatch();
 
     const handleInput = (userInput) => {
+        setEmptyHabit(false);
         setNewHabitName(userInput);
+    }
+
+    const handleConfirmAction = async () => {
+        if (!newHabitName) setEmptyHabit(true);
+        else {
+            await updateHabitName(user.uid, habitIndex, habitType, newHabitName).then((updatedTodayHabitDoc) => {
+                delete updatedTodayHabitDoc.timestamp;
+                dispatch(setUser({todayHabits: updatedTodayHabitDoc}));
+                setEditable(false);
+                setEditing(false);
+            }).catch(error => console.log(error));
+        }
     }
 
     return (
@@ -18,11 +37,12 @@ const EditHabitOverlay = ({setEditable, setEditing, habitIndex, habitType}) => {
                     Change {habitType} habit {habitIndex + 1}
                 </Text>
                 <FormInput
-                    style={{paddingHorizontal: '3%'}}
-                    placeholder='enter new habit name'
+                    style={{paddingHorizontal: '3%', borderColor: emptyHabit ? 'red' : 'black'}}
+                    placeholder='Enter new habit name'
                     handleInput={handleInput}
                     value={newHabitName}
                     maxLength={16}
+                    centered={true}
                 />
                 <Text style={[textStyle.allText, styles.paragraph]}>
                     Are you sure you want to do this, consistency in the same thing is important,
@@ -33,7 +53,7 @@ const EditHabitOverlay = ({setEditable, setEditing, habitIndex, habitType}) => {
                 </Text>
 
                 <View style={styles.buttonContainer}>
-                    <Pressable style={styles.confirmButton}>
+                    <Pressable onPress={handleConfirmAction} style={styles.confirmButton}>
                         {({pressed}) =>
                             <Text style={[textStyle.allText, styles.text, pressed && {color: 'black'}]}>Confirm change</Text>
                         }
