@@ -12,9 +12,11 @@ const FriendRequestOverlay = ({ userData, setFriendRequestOverlay }) => {
 
     const handleFriendAccept = async () => {
         await acceptFriendRequest(userData.id, user.uid);
+        setFriendRequestOverlay(false);
     }
     const handleFriendReject = async () => {
         await deleteFriendRequest(userData.id, user.uid);
+        setFriendRequestOverlay(false);
     }
 
     return (

@@ -1,12 +1,15 @@
 import { StyleSheet, View } from 'react-native'
 import { actualScreenHeight, colors } from '../../../styles/generalStyle'
-import React from 'react';
+import { useEffect } from 'react';
 import { GestureDetector, Gesture } from 'react-native-gesture-handler';
 import Animated, { Extrapolation, interpolate, runOnJS, useSharedValue, useAnimatedStyle, withTiming } from 'react-native-reanimated';
 import ArrowDownIcon from '../../../../assets/svgs/Icons/screenTransitionIcons/downArrow.svg';
+import { retrieveMorePosts } from '../../../businessLogic/firestoreFunctions';
+import { useSelector } from 'react-redux';
+
 
 const SocialFeedScreen = ({ navigation }) => {
-
+    const {friendsList} = useSelector(state => state.friends);
     const startingPosition = useSharedValue(0);
     const positionMovement = useSharedValue(0);
 
@@ -37,6 +40,13 @@ const SocialFeedScreen = ({ navigation }) => {
         }
     })
 
+
+    // retrieve the latest posts: 
+    useEffect(() => {
+        (async () => {
+            await retrieveMorePosts(friendsList.map(user => user.id));
+        })();
+    }, [])
 
     return (
         <GestureDetector gesture={swipeDownGesture}>

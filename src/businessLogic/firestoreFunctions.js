@@ -1,4 +1,4 @@
-import { getDocs, getDoc, doc, query, collection, orderBy, limit, addDoc, serverTimestamp, writeBatch, updateDoc, startAt, endAt, runTransaction, deleteDoc, where } from 'firebase/firestore';
+import { getDocs, getDoc, doc, query, collection, orderBy, limit, addDoc, serverTimestamp, writeBatch, updateDoc, startAt, endAt, runTransaction, deleteDoc, where, startAfter } from 'firebase/firestore';
 import { ref, deleteObject } from "firebase/storage";
 import { storage } from '../firestore/firestoreConfig';
 import { db } from '../firestore/firestoreConfig';
@@ -19,7 +19,7 @@ export const getUserData = async (userId) => {
 
 // this function retrieves the user's latest recorded habits from the database.
 export const getUserLatestHabitsRecord = async (userId) => {
-    const habitDocQuery = query(collection(db, 'usersprivate', userId, 'dailyhabits'), orderBy('timestamp', 'desc'), limit(1));
+    const habitDocQuery = query(collection(db, 'dailyhabits'), where("ownerId", "==", userId), orderBy('timestamp', 'desc'), limit(1));
     const habitData = await getDocs(habitDocQuery);
     let latestHabitData;
     if (!habitData.empty) {
@@ -64,7 +64,7 @@ export const getTodaysHabits = async (userId) => {
             }
         });
         // update the firestore
-        const updateDocRef = doc(db, 'usersprivate', userId, 'dailyhabits', latestHabitData.id);
+        const updateDocRef = doc(db, 'dailyhabits', latestHabitData.id);
         await updateDoc(updateDocRef, latestHabitData);
 
         // create a new habit for the user:
@@ -84,10 +84,11 @@ export const getTodaysHabits = async (userId) => {
 
 // creates a daily habit document for the provided userID
 export const createHabits = async (userId, primaryHabits=[], secondaryHabits=[]) => {
-    const dailyHabitRef = collection(db, 'usersprivate', userId, 'dailyhabits');
+    const dailyHabitRef = collection(db, 'dailyhabits');
 
     try {
         await addDoc(dailyHabitRef, {
+        ownerId: userId,
         timestamp: serverTimestamp(),
         habits: {
             primary: {
@@ -301,9 +302,13 @@ export const updateHabitStatus = async (userId, habitIndex, habitType, newHabitS
                 todayHabitDocument.habits[habitType][habitIndex].imageName = null;
             }
         }
+        else {
+            // if the habit is completed update the timestamp of the document:
+            todayHabitDocument.timestamp = serverTimestamp();
+        }
 
         const trackerDocRef = doc(db, 'usersprivate', userId, 'weeklytrackers', currentWeeklyTracker.id);
-        const dailyhabitDocRef = doc(db, 'usersprivate', userId, 'dailyhabits', todayHabitDocument.id);
+        const dailyhabitDocRef = doc(db, 'dailyhabits', todayHabitDocument.id);
        
         const batch = writeBatch(db);
         batch.update(trackerDocRef, currentWeeklyTracker);
@@ -323,7 +328,7 @@ export const updateHabitName = async (userId, habitIndex, habitType, updatedName
     try {
         const todayHabitDoc = await getTodaysHabits(userId);
         todayHabitDoc.habits[habitType][habitIndex].name = updatedName;
-        const documentRef = doc(db, 'usersprivate', userId, 'dailyhabits', todayHabitDoc.id);
+        const documentRef = doc(db, 'dailyhabits', todayHabitDoc.id);
         await updateDoc(documentRef, todayHabitDoc);
         return todayHabitDoc;
     }   
@@ -342,7 +347,7 @@ export const removeHabitImage = async (userId, habitIndex, habitType) => {
         todayHabitDocument.habits[habitType][habitIndex].imageUrl = null;
         todayHabitDocument.habits[habitType][habitIndex].imageName = null;
         // update the todayhabitdocument in firestore
-        const dailyhabitDocRef = doc(db, 'usersprivate', userId, 'dailyhabits', todayHabitDocument.id);
+        const dailyhabitDocRef = doc(db, 'dailyhabits', todayHabitDocument.id);
         await updateDoc(dailyhabitDocRef, todayHabitDocument);
     }
     catch (error) {
@@ -493,7 +498,7 @@ export const updateHabitImageURI = async (userId, habitIndex, habitType, imageUR
 
         currentHabitObject[habitType][habitIndex].imageUrl = imageURI; 
         currentHabitObject[habitType][habitIndex].imageName = imageName; 
-        const docRef = doc(db, 'usersprivate', userId, 'dailyhabits', todayHabitDocument.id);
+        const docRef = doc(db, 'dailyhabits', todayHabitDocument.id);
         await updateDoc(docRef, {
             habits: currentHabitObject
         });
@@ -552,4 +557,38 @@ export const updateUserPFPURI = async (userId, downloadURL, imageName) => {
     batch.update(privateUserRef, newUpdate);
     batch.update(publicUserRef, newUpdate);
     await batch.commit();
+}
+
+
+
+// following function retrieves the 10 most recent posts made by friends:
+export const retrieveMorePosts = async (friendIds, cursorDoc) => {
+    try {
+        if (!friendIds.length) return;
+        let retrievedPosts = [];
+        let docsQuery;
+        if (cursorDoc) {
+            // if cursorDoc is present, retrieve another 10 posts - this is for loading more posts.
+            docsQuery = query(collection(db, 'dailyhabits'), where('ownerId', 'in', friendIds), orderBy('timestamp', 'desc'), startAfter(cursorDoc), limit(10));
+        }
+        else {
+            // this is for loading the initial 10 posts or upon reload.
+            docsQuery = query(collection(db, 'dailyhabits'), where('ownerId', 'in', friendIds), orderBy('timestamp', 'desc'), limit(10));
+        }
+        const retrievedData = await getDocs(docsQuery);
+        
+        if (!retrievedData.empty) {
+            retrievedData.forEach((doc) => {
+                retrievedPosts.push({
+                    id: doc.id,
+                    ...doc.data()
+                })
+            });
+        }
+
+        console.log("Retrieved posts ", retrievedPosts);
+    }   
+    catch (error) {
+        console.log("Error while retrieving the most recent posts made by friends ", error);
+    }
 }
