@@ -29,3 +29,13 @@ export const formatDate = (dateObject) => {
     }
     return `${dayOfWeek} ${dayOfMonth}${suffix}`;
 }
+
+
+export const getTime = (dateObject) => {
+    let hours = dateObject.getHours();
+    let minutes = dateObject.getMinutes();
+    hours = hours < 10 ? '0' + hours : hours;
+    minutes = minutes < 10 ? '0' + minutes : minutes;
+    const time = hours + ':' + minutes;
+    return time;
+}

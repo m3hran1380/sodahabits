@@ -5,7 +5,7 @@ import DefaultPFP from '../../../../../assets/svgs/defaultPfps/default1.svg';
 import { formatDate } from '../../../../businessLogic/utilityFunctions';
 import SocialPostHabitItem from './SocialPostHabitItem';
 import { Canvas, Circle, RadialGradient, vec } from "@shopify/react-native-skia";
-
+import HabitCompletionStatusDot from './HabitCompletionStatusDot';
 
 
 const SocialPost = ({ userData, habitsData, style }) => {
@@ -39,6 +39,9 @@ const SocialPost = ({ userData, habitsData, style }) => {
                             <Text style={[styles.text, generalStyles.h3]}>{userData.username}</Text>
                             <Text style={styles.text}>{formatDate(habitsData.timestamp)}</Text>
                         </View>
+                    </View>
+                    <View style={styles.dotTrackerContainer}>
+                        {primaryHabitsData.map((habitData, index) => <HabitCompletionStatusDot key={index} habitData={habitData} />)}
                     </View>
                 </View>
                 <View style={styles.habitsContainer}>
@@ -82,7 +85,8 @@ const styles = StyleSheet.create({
     userInfoContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'center'
+        justifyContent: 'center',
+        
     },
     imageContainer: {
         height: (availableScreenWidth2/6),
@@ -116,6 +120,13 @@ const styles = StyleSheet.create({
         width: availableScreenWidth2/5, 
         height: availableScreenWidth2/5,
         position: 'absolute',
-        top: 7,
+        top: '10%',
     },
+    dotTrackerContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        width: availableScreenWidth2/4.5,
+        height: availableScreenWidth2/16,
+    }
 })

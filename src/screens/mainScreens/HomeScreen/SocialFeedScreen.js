@@ -68,12 +68,12 @@ const SocialFeedScreen = ({ navigation }) => {
         [
             {top: '3%', left: '15%'},
             {top: '20%', right: '10%'},
-            {bottom: '8%', left: '25%'},
+            {bottom: 0, left: '30%'},
         ],
         [
-            {top: '3%', right: '10%'},
-            {top: '20%', left: '15%'},
-            {bottom: '8%', right: '10%'},
+            {top: 0, right: '10%'},
+            {top: '16%', left: '12%'},
+            {bottom: 0, right: '30%'},
         ]
     ];
 

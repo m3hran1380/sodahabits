@@ -309,6 +309,15 @@ export const updateHabitStatus = async (userId, habitIndex, habitType, newHabitS
             if (habitType === 'primary') todayHabitDocument.habits[habitType][habitIndex].completionTime = serverTimestamp();
         }
 
+        // check to see if at least one habit is completed - this is for the social feed:
+        const atleastOnePrimaryComplete = Object.keys(todayHabitDocument.habits.primary)
+                                                .map(key => todayHabitDocument.habits.primary[key].status)
+                                                .some(status => status === 'complete');
+        
+        if (atleastOnePrimaryComplete) todayHabitDocument.atleastOnePrimaryCompleted = true;
+        else todayHabitDocument.atleastOnePrimaryCompleted = false;
+        
+
         const trackerDocRef = doc(db, 'usersprivate', userId, 'weeklytrackers', currentWeeklyTracker.id);
         const dailyhabitDocRef = doc(db, 'dailyhabits', todayHabitDocument.id);
        
@@ -332,6 +341,14 @@ export const updateHabitName = async (userId, habitIndex, habitType, updatedName
         todayHabitDoc.habits[habitType][habitIndex].name = updatedName;
         const documentRef = doc(db, 'dailyhabits', todayHabitDoc.id);
         await updateDoc(documentRef, todayHabitDoc);
+        // convert the timestamp before returning the habit object - to allow its storage in redux store:
+        for (const key in todayHabitDoc.habits.primary) {
+            const completionTime = todayHabitDoc.habits.primary[key].completionTime;
+            if (completionTime) {
+                todayHabitDoc.habits.primary[key].completionTime = convertToLocaleTime(completionTime).toISOString();
+            }
+        }
+
         return todayHabitDoc;
     }   
     catch (error) {
@@ -578,11 +595,24 @@ export const retrieveMorePosts = async (friendIds, cursorDoc) => {
         let docsQuery;
         if (cursorDoc) {
             // if cursorDoc is present, retrieve another 10 posts - this is for loading more posts.
-            docsQuery = query(collection(db, 'dailyhabits'), where('ownerId', 'in', friendIds), orderBy('timestamp', 'desc'), startAfter(cursorDoc), limit(10));
+            docsQuery = query(
+                            collection(db, 'dailyhabits'), 
+                            where('ownerId', 'in', friendIds),
+                            where('atleastOnePrimaryCompleted', '==', true), 
+                            orderBy('timestamp', 'desc'), 
+                            startAfter(cursorDoc), 
+                            limit(10)
+                        );
         }
         else {
             // this is for loading the initial 10 posts or upon reload.
-            docsQuery = query(collection(db, 'dailyhabits'), where('ownerId', 'in', friendIds), orderBy('timestamp', 'desc'), limit(10));
+            docsQuery = query(
+                            collection(db, 'dailyhabits'), 
+                            where('ownerId', 'in', friendIds), 
+                            where('atleastOnePrimaryCompleted', '==', true), 
+                            orderBy('timestamp', 'desc'), 
+                            limit(10)
+                        );
         }
         const retrievedData = await getDocs(docsQuery);
         
