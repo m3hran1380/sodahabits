@@ -16,3 +16,16 @@ export const calculateAdjustedDimensions = (width, height) => {
     }
     return [adjustedWidth, adjustedHeight];
 }
+
+
+export const formatDate = (dateObject) => {
+    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const suffixes = ["th", "st", "nd", "rd"];
+    const dayOfWeek = days[dateObject.getDay()];
+    const dayOfMonth = dateObject.getDate();
+    let suffix = suffixes[dayOfMonth % 10] || "th";
+    if (dayOfMonth >= 11 && dayOfMonth <= 13) {
+        suffix = "th";
+    }
+    return `${dayOfWeek} ${dayOfMonth}${suffix}`;
+}

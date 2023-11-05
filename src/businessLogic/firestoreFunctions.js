@@ -76,7 +76,6 @@ export const getTodaysHabits = async (userId) => {
 
         latestHabitData = await getUserLatestHabitsRecord(userId);        
     }
-
     // return todays habit data;
     return latestHabitData;
 }
@@ -300,11 +299,14 @@ export const updateHabitStatus = async (userId, habitIndex, habitType, newHabitS
                 await (deleteObject(imageRef));
                 todayHabitDocument.habits[habitType][habitIndex].imageUrl = null;
                 todayHabitDocument.habits[habitType][habitIndex].imageName = null;
-            }
+            }   
+            todayHabitDocument.habits[habitType][habitIndex].completionTime = null;
         }
         else {
             // if the habit is completed update the timestamp of the document:
             todayHabitDocument.timestamp = serverTimestamp();
+            // also add the completion timestamp to the particular habit if its a primary habit:
+            if (habitType === 'primary') todayHabitDocument.habits[habitType][habitIndex].completionTime = serverTimestamp();
         }
 
         const trackerDocRef = doc(db, 'usersprivate', userId, 'weeklytrackers', currentWeeklyTracker.id);
@@ -502,6 +504,13 @@ export const updateHabitImageURI = async (userId, habitIndex, habitType, imageUR
         await updateDoc(docRef, {
             habits: currentHabitObject
         });
+        // convert timestamps to string to allow their storage in redux store
+        for (const key in currentHabitObject.primary) {
+            const completionTime = currentHabitObject.primary[key].completionTime;
+            if (completionTime) {
+                currentHabitObject.primary[key].completionTime = convertToLocaleTime(completionTime).toISOString();
+            }
+        }
         return {todayHabits: {habits: currentHabitObject, id: todayHabitDocument.id}};
     }
     catch (error) {
@@ -564,7 +573,7 @@ export const updateUserPFPURI = async (userId, downloadURL, imageName) => {
 // following function retrieves the 10 most recent posts made by friends:
 export const retrieveMorePosts = async (friendIds, cursorDoc) => {
     try {
-        if (!friendIds.length) return;
+        if (!friendIds.length) return [];
         let retrievedPosts = [];
         let docsQuery;
         if (cursorDoc) {
@@ -581,12 +590,12 @@ export const retrieveMorePosts = async (friendIds, cursorDoc) => {
             retrievedData.forEach((doc) => {
                 retrievedPosts.push({
                     id: doc.id,
-                    ...doc.data()
+                    ...doc.data(),
+                    timestamp: convertToLocaleTime(doc.data().timestamp)
                 })
             });
         }
-
-        console.log("Retrieved posts ", retrievedPosts);
+        return retrievedPosts;
     }   
     catch (error) {
         console.log("Error while retrieving the most recent posts made by friends ", error);

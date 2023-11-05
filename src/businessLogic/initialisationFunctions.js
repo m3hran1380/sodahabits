@@ -1,4 +1,4 @@
-import { getUserData, getTodaysHabits, syncWeeklyTrackers, retrieveLatestWeeklyTrackers } from "./firestoreFunctions";
+import { getUserData, getTodaysHabits, syncWeeklyTrackers, retrieveLatestWeeklyTrackers, convertToLocaleTime } from "./firestoreFunctions";
 
 
 export const initialiseApp = async (userId) => {
@@ -20,6 +20,12 @@ export const initialiseApp = async (userId) => {
             latestWeeklyTrackers.forEach((tracker) => {
                 tracker.timestamp = tracker.timestamp.toISOString();
             })
+            for (const key in todayHabits.habits.primary) {
+                const completionTime = todayHabits.habits.primary[key].completionTime;
+                if (completionTime) {
+                    todayHabits.habits.primary[key].completionTime = convertToLocaleTime(completionTime).toISOString();
+                }
+            }
             userData = {uid: userId, ...data, todayHabits: {habits: todayHabits.habits, id: todayHabits.id}, weeklyTrackers: latestWeeklyTrackers}
         }
         else {
