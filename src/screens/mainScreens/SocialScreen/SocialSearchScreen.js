@@ -2,7 +2,7 @@ import { StyleSheet, View, Text, FlatList, Pressable } from 'react-native';
 import generalStyles, { availableScreenWidth2, colors } from '../../../styles/generalStyle';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import FormInput from '../../../components/sharedComponents/FormInput';
-import { useState, useEffect, useCallback, useMemo, React } from 'react';
+import { useState, useEffect, useCallback, React } from 'react';
 import { debounce } from 'lodash';
 import RetrievedUser from '../../../components/ScreensComponents/SocialComponents/friendComponents/RetrievedUser';
 import { retrieveUsers } from '../../../businessLogic/firestoreFunctions';
