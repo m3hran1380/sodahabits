@@ -19,11 +19,6 @@ const SocialFeedScreen = ({ navigation }) => {
     const [friendPosts, setFriendPosts] = useState([]);
 
     // ----------- following chunk of code is for the shake detection ------------------- //
-    const [data, setData] = useState({
-        x: 0,
-        y: 0,
-        z: 0,
-    });
     let lastUpdate = Date.now();
     let last_x = 0;
     let last_y = 0;
@@ -52,7 +47,6 @@ const SocialFeedScreen = ({ navigation }) => {
                 last_x = x;
                 last_y = y;
                 last_z = z;
-                setData(accelerometerData);
             }
         })
 

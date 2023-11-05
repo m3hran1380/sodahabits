@@ -1,16 +1,34 @@
 import { StyleSheet, Text, View, Image } from 'react-native';
-import React from 'react';
+import { useState } from 'react';
 import generalStyles, { availableScreenWidth2, textStyle } from '../../../../styles/generalStyle';
 import DefaultPFP from '../../../../../assets/svgs/defaultPfps/default1.svg';
 import { formatDate } from '../../../../businessLogic/utilityFunctions';
 import SocialPostHabitItem from './SocialPostHabitItem';
 import { Canvas, Circle, RadialGradient, vec } from "@shopify/react-native-skia";
 import HabitCompletionStatusDot from './HabitCompletionStatusDot';
+import { ExpandedHabitOverlay } from './ExpandedHabitOverlay';
+import { convertToLocaleTime } from '../../../../businessLogic/firestoreFunctions';
 
 
 const SocialPost = ({ userData, habitsData, style }) => {
 
+    const [expandedHabit, setExpandedHabit] = useState(null);
+
     const primaryHabitsData = Object.keys(habitsData.habits.primary).map(key => habitsData.habits.primary[key]);
+
+    primaryHabitsData.sort((a, b) => {
+        if (a.status === 'complete' && b.status !== 'complete') return -1;
+        else if (b.status === 'complete' && a.status !== 'complete') return 1;
+        else if (a.status === 'complete' && b.status === 'complete') {
+            // compare their completion times:
+            const aCompletionTime = convertToLocaleTime(a.completionTime);
+            const bCompletionTime = convertToLocaleTime(b.completionTime);
+            return aCompletionTime - bCompletionTime;
+        }
+        // if statuses are both not "complete" then maintain the order
+        else return 0;
+    })
+
 
     return (
         <View style={styles.overallContainer}>
@@ -55,6 +73,7 @@ const SocialPost = ({ userData, habitsData, style }) => {
                         )
                     }
                 </View>
+                {expandedHabit && <ExpandedHabitOverlay />}
             </View>
         </View>
     )
