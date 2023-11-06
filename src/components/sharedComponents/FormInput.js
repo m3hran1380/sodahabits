@@ -1,7 +1,7 @@
 import { StyleSheet, View, TextInput } from 'react-native'
 
 
-const FormInput = ({ placeholder, handleInput, value, style, maxLength, centered }) => {
+const FormInput = ({ placeholder, handleInput, value, style, maxLength, centered, inputStyle }) => {
 
     return (
         <View style={[styles.container, style]}>
@@ -9,9 +9,10 @@ const FormInput = ({ placeholder, handleInput, value, style, maxLength, centered
                 placeholderTextColor={'#838383'}
                 value={value} 
                 onChangeText={handleInput} 
-                style={[styles.textInput, {textAlign: centered ? 'center' : 'left'}]} 
+                style={[styles.textInput, inputStyle, {textAlign: centered ? 'center' : 'left'}]} 
                 placeholder={placeholder} 
                 maxLength={maxLength ? maxLength : undefined}
+                multiline={true}
             />
         </View>
     )

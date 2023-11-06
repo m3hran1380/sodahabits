@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, Image } from 'react-native'
+import { StyleSheet, Text, View, Image, Pressable } from 'react-native'
 import React, { useEffect } from 'react'
 import DefaultHabitPicture from '../../../../../assets/svgs/defaultHabit.svg';
 import HabitDoneCheck from '../../../../../assets/svgs/Icons/socialFeedIcons/habitDone.svg';
@@ -8,7 +8,7 @@ import { convertToLocaleTime } from '../../../../businessLogic/firestoreFunction
 import { getTime } from '../../../../businessLogic/utilityFunctions';
 
 
-const SocialPostHabitItem = ({ habitData, style }) => {
+const SocialPostHabitItem = ({ habitData, style, setExpandedHabit }) => {
 
     // following are used for the hovering effect:
     const translateX = useSharedValue(0);
@@ -48,11 +48,17 @@ const SocialPostHabitItem = ({ habitData, style }) => {
         };
     })
 
+    const handleHabitPressed = () => {
+        if (habitData?.status === 'complete') {
+            setExpandedHabit(habitData);
+        }
+    }
+
     return (
         <Animated.View style={[styles.container, style, animatedHoverStyle]}>
             {habitData?.completionTime && <Text style={styles.smallText}>{getTime(convertToLocaleTime(habitData.completionTime))}</Text>}
             
-            <View style={styles.imageContainer}>
+            <Pressable onPress={handleHabitPressed} style={styles.imageContainer}>
                 { habitData?.imageUrl ? 
                     <Image resizeMode='contain' source={{ uri: habitData.imageUrl }} style={styles.habitImage} />
                     :
@@ -63,7 +69,7 @@ const SocialPostHabitItem = ({ habitData, style }) => {
                         <HabitDoneCheck width='100%' height='100%' />
                     </View>
                 }
-            </View>
+            </Pressable>
 
             <Text style={styles.text}>
                 {habitData.name}

@@ -114,8 +114,8 @@ const SocialFeedScreen = ({ navigation }) => {
 
     const style = [
         [
-            {top: '3%', left: '15%'},
-            {top: '20%', right: '10%'},
+            {top: '3%', left: '4%'},
+            {top: '10%', right: '10%'},
             {bottom: 0, left: '30%'},
         ],
         [

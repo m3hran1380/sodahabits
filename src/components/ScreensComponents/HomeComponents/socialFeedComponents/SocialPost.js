@@ -6,7 +6,7 @@ import { formatDate } from '../../../../businessLogic/utilityFunctions';
 import SocialPostHabitItem from './SocialPostHabitItem';
 import { Canvas, Circle, RadialGradient, vec } from "@shopify/react-native-skia";
 import HabitCompletionStatusDot from './HabitCompletionStatusDot';
-import { ExpandedHabitOverlay } from './ExpandedHabitOverlay';
+import ExpandedHabitOverlay from './ExpandedHabitOverlay';
 import { convertToLocaleTime } from '../../../../businessLogic/firestoreFunctions';
 
 
@@ -16,6 +16,7 @@ const SocialPost = ({ userData, habitsData, style }) => {
 
     const primaryHabitsData = Object.keys(habitsData.habits.primary).map(key => habitsData.habits.primary[key]);
 
+    // sort the habits first according to status and then according to completionTime.
     primaryHabitsData.sort((a, b) => {
         if (a.status === 'complete' && b.status !== 'complete') return -1;
         else if (b.status === 'complete' && a.status !== 'complete') return 1;
@@ -69,11 +70,12 @@ const SocialPost = ({ userData, habitsData, style }) => {
                                 key={index} 
                                 style={style[index]} 
                                 habitData={habitData} 
+                                setExpandedHabit={setExpandedHabit}
                             />
                         )
                     }
                 </View>
-                {expandedHabit && <ExpandedHabitOverlay />}
+                {expandedHabit && <ExpandedHabitOverlay setExpandedHabit={setExpandedHabit} habitData={expandedHabit} />}
             </View>
         </View>
     )
@@ -94,7 +96,8 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: 'black',
         padding: 10,
-        backgroundColor: '#354A63'
+        backgroundColor: '#354A63',
+        overflow: 'hidden'
     },
     postHeaderContainer: {
         flexDirection: 'row',

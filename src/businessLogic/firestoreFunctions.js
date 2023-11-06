@@ -357,6 +357,20 @@ export const updateHabitName = async (userId, habitIndex, habitType, updatedName
 }
 
 
+// following function adds/updates note of a habit
+export const addNotesToHabit = async (userId, habitIndex, habitType, note) => {
+    try {
+        const todayHabitDoc = await getTodaysHabits(userId);
+        todayHabitDoc.habits[habitType][habitIndex].notes = note;
+        const docRef = doc(db, 'dailyhabits', todayHabitDoc.id);
+        await updateDoc(docRef, todayHabitDoc);
+    }
+    catch (error) {
+        console.log("Error while adding notes to a habit document ", error);
+    }
+}
+
+
 // following function removes the image associated with the current habit
 export const removeHabitImage = async (userId, habitIndex, habitType) => {
     try {

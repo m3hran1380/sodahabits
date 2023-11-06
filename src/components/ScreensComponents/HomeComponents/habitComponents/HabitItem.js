@@ -13,10 +13,12 @@ import { useState } from 'react';
 import CameraIcon from '../../../../../assets/svgs/Icons/habitItemIcons/camera.svg';
 import CameraCheckedIcon from '../../../../../assets/svgs/Icons/habitItemIcons/cameraChecked.svg';
 import NotesIcon from '../../../../../assets/svgs/Icons/habitItemIcons/notes.svg';
+import NotesCheckedIcon from '../../../../../assets/svgs/Icons/habitItemIcons/notesAdded.svg';
 import { useNavigation } from '@react-navigation/native';
 import CameraOptions from './CameraOptions';
 import * as Haptics from 'expo-haptics';
 import EditHabitOverlay from './EditHabitOverlay';
+import HabitNotesOveraly from './HabitNotesOverlay';
 
 
 const HabitItem = ({ habitData, habitIndex, primary }) => {
@@ -28,6 +30,9 @@ const HabitItem = ({ habitData, habitIndex, primary }) => {
     // following state is activated on long press - it allows the user to edit the habit name
     const [editable, setEditable] = useState(false);
     const [editing, setEditing] = useState(false);
+    // following states are for the habit notes
+    const [showHabitNotesOverlay, setShowHabitNotesOverlay] = useState(false);
+
 
     const navigation = useNavigation();
 
@@ -179,16 +184,16 @@ const HabitItem = ({ habitData, habitIndex, primary }) => {
                         :
                         <>                            
                             {habitData.habitImageUrl ?
-                                <Pressable onPress={() => {setExtraCameraOptions(val => !val)}}>
-                                    <CameraCheckedIcon style={styles.svgIcons}/>
+                                <Pressable style={styles.largeIconContainer} onPress={() => {setExtraCameraOptions(val => !val)}}>
+                                    <CameraCheckedIcon width='100%' height='100%' />
                                 </Pressable>
                                 :
-                                <Pressable style={{marginRight: 4.5}} onPress={() => navigation.navigate('camera screen', { habitIndex: habitIndex, habitType: primary ? 'primary' : 'secondary' })}>
-                                    <CameraIcon style={styles.svgIcons}/>
+                                <Pressable style={styles.largeIconContainer} onPress={() => navigation.navigate('camera screen', { habitIndex: habitIndex, habitType: primary ? 'primary' : 'secondary' })}>
+                                    <CameraIcon width='85%' height='85%' />
                                 </Pressable>
                             }
-                            <Pressable>
-                                <NotesIcon style={styles.svgIcons}/>
+                            <Pressable style={styles.smallIconContainer} onPress={() => setShowHabitNotesOverlay(true)}>
+                                {habitData.habitNotes ? <NotesCheckedIcon width='100%' height='100%' /> : <NotesIcon width='92%' height='92%' />}
                             </Pressable>
                         </>
                         }</>
@@ -203,6 +208,7 @@ const HabitItem = ({ habitData, habitIndex, primary }) => {
             </Pressable>
         </GestureDetector>
         {editing && <EditHabitOverlay setEditable={setEditable} setEditing={setEditing} habitIndex={habitIndex} habitType={primary ? 'primary' : 'secondary'}/>}
+        {showHabitNotesOverlay && <HabitNotesOveraly setShowHabitNotesOverlay={setShowHabitNotesOverlay} habitIndex={habitIndex} habitType={primary ? 'primary' : 'secondary'}/>}
         </>
     )
 }
@@ -250,7 +256,16 @@ const styles = StyleSheet.create({
         paddingLeft: 10,
         pointEvents: 'none',
     },
-    svgIcons: {
-        marginLeft: 5,
+    smallIconContainer: {
+        width: availableScreenWidth2/10,
+        paddingHorizontal: 2,
+        alignItems: 'center',
+        justifyContent: 'center'
+    }, 
+    largeIconContainer: {
+        width: availableScreenWidth2/9,
+        paddingHorizontal: 2,
+        alignItems: 'flex-start',
+        justifyContent: 'center'
     } 
 })

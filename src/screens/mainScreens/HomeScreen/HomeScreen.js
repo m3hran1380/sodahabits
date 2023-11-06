@@ -78,6 +78,7 @@ const HomeScreen = ({ navigation }) => {
                                 habitStatus: user.todayHabits.habits.primary[key].status,
                                 habitNotes: user.todayHabits.habits.primary[key].notes,
                                 habitImageUrl: user.todayHabits.habits.primary[key].imageUrl,
+                                habitNotes: user.todayHabits.habits.primary[key].notes,
                             })
                         }).map((habitData, index) => {
                             return (

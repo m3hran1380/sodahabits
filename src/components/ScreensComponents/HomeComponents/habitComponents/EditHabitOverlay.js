@@ -33,7 +33,7 @@ const EditHabitOverlay = ({setEditable, setEditing, habitIndex, habitType}) => {
     return (
         <Modal transparent={true}>
             <View style={styles.container}>
-                <Text style={[generalStyles.h2, styles.text, {marginBottom: '10%'}]}>
+                <Text style={[styles.text, generalStyles.h2, {marginBottom: '10%', textAlign: 'center'}]}>
                     Change {habitType} habit {habitIndex + 1}
                 </Text>
                 <FormInput
@@ -43,6 +43,7 @@ const EditHabitOverlay = ({setEditable, setEditing, habitIndex, habitType}) => {
                     value={newHabitName}
                     maxLength={16}
                     centered={true}
+                    inputStyle={{fontSize: 20}}
                 />
                 <Text style={[textStyle.allText, styles.paragraph]}>
                     Are you sure you want to do this, consistency in the same thing is important,
@@ -58,7 +59,7 @@ const EditHabitOverlay = ({setEditable, setEditing, habitIndex, habitType}) => {
                             <Text style={[textStyle.allText, styles.text, pressed && {color: 'black'}]}>Confirm change</Text>
                         }
                     </Pressable>   
-                    <Pressable onPress={() => {setEditing(false); setEditable(false)}} style={styles.cancelButton}>
+                    <Pressable onPress={() => {setEditing(false); setEditable(false)}} style={({pressed}) => [styles.cancelButton, pressed && {backgroundColor: 'white'}]} >
                         {({pressed}) =>
                             <Text style={[textStyle.allText, styles.text, pressed && {color: 'black'}]}>Cancel</Text>
                         }
@@ -79,6 +80,7 @@ const styles = StyleSheet.create({
         padding: '10%'
     },
     text: {
+        fontSize: 17,
         color: 'white', 
         textAlign: 'center',
     },

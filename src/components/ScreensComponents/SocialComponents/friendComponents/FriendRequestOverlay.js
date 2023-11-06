@@ -9,14 +9,14 @@ import { useSelector } from 'react-redux';
 const FriendRequestOverlay = ({ userData, setFriendRequestOverlay }) => {
 
     const user = useSelector(state => state.user.currentUser);
-
+    
     const handleFriendAccept = async () => {
-        await acceptFriendRequest(userData.id, user.uid);
         setFriendRequestOverlay(false);
+        await acceptFriendRequest(userData.id, user.uid);
     }
     const handleFriendReject = async () => {
-        await deleteFriendRequest(userData.id, user.uid);
         setFriendRequestOverlay(false);
+        await deleteFriendRequest(userData.id, user.uid);
     }
 
     return (

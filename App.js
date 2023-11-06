@@ -2,11 +2,12 @@ import { useCallback } from 'react';
 import { View, StyleSheet, StatusBar } from 'react-native';
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, DarkTheme } from '@react-navigation/native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { store } from './src/ReduxStore';
 import { Provider } from 'react-redux';
 import RootNavigation from './src/Navigation/RootNavigation';
+
 
 SplashScreen.preventAutoHideAsync();
 
@@ -30,7 +31,7 @@ export default function App() {
 
   return (
     <SafeAreaProvider>
-      <NavigationContainer>
+      <NavigationContainer theme={DarkTheme}>
         <Provider store={store}>
           <View style={styles.container} onLayout={onLayoutRootView}>
             <StatusBar style="auto" />
