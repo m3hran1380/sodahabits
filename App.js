@@ -1,5 +1,6 @@
 import { useCallback } from 'react';
-import { View, StyleSheet, StatusBar } from 'react-native';
+import { View, StyleSheet } from 'react-native';
+import { StatusBar } from 'expo-status-bar';
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
 import { NavigationContainer, DarkTheme } from '@react-navigation/native';
@@ -34,7 +35,7 @@ export default function App() {
       <NavigationContainer theme={DarkTheme}>
         <Provider store={store}>
           <View style={styles.container} onLayout={onLayoutRootView}>
-            <StatusBar style="auto" />
+            <StatusBar translucent={false} style="light" />
             <RootNavigation />
           </View>
         </Provider>
