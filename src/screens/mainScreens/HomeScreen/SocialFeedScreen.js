@@ -7,9 +7,9 @@ import ArrowDownIcon from '../../../../assets/svgs/Icons/screenTransitionIcons/d
 import { retrieveMorePosts } from '../../../businessLogic/firestoreFunctions';
 import { useSelector } from 'react-redux';
 import SocialPost from '../../../components/ScreensComponents/HomeComponents/socialFeedComponents/SocialPost';
+import LoadingSpinner from '../../../components/ScreensComponents/HomeComponents/socialFeedComponents/LoadingSpinner';
 import { Accelerometer } from 'expo-sensors';
 import { debounce } from 'lodash';
-
 
 
 const SocialFeedScreen = ({ navigation }) => {
@@ -17,6 +17,7 @@ const SocialFeedScreen = ({ navigation }) => {
     const startingPosition = useSharedValue(0);
     const positionMovement = useSharedValue(0);
     const [friendPosts, setFriendPosts] = useState([]);
+    const [allRetrieved, setAllRetrieved] = useState(false);
 
     // ----------- following chunk of code is for the shake detection ------------------- //
     let lastUpdate = Date.now();
@@ -42,7 +43,7 @@ const SocialFeedScreen = ({ navigation }) => {
                 let speed = (deltaX + deltaY + deltaZ) / timeDifference * 10000;
         
                 if (speed > ShakeThreshold) {
-                    debouncedPostRetrieval();
+                    debouncedPostRetrieval(undefined, true);
                 }
                 last_x = x;
                 last_y = y;
@@ -86,22 +87,25 @@ const SocialFeedScreen = ({ navigation }) => {
 
 
     // retrieve the latest posts - run only on start
-    const retrievePosts = async (cursorDoc) => {
+    const retrievePosts = async (cursorDoc, reset) => {
         const retrievedPosts = await retrieveMorePosts(friendsList.map(user => user.id), cursorDoc);
+
         // add the user data to its retrieved post data:
         const combinedData = retrievedPosts.map((post) => {
             return {
                 habitsData: post,
-                userData: friendsList.filter((friend) => friend.id === post.ownerId)[0]
+                userData: friendsList.find((friend) => friend.id === post.ownerId)
             }
         })
-        setFriendPosts([...friendPosts, ...combinedData]);
+        if (!retrievedPosts.length) setAllRetrieved(true);
+        if (reset) { setFriendPosts(combinedData); setAllRetrieved(false) }
+        else setFriendPosts((prevFriendPosts => [...prevFriendPosts, ...combinedData]));
     }
 
     // debounced version of the retrivePosts function
     const debouncedPostRetrieval = useCallback(
-        debounce((cursorDoc) => {
-            retrievePosts(cursorDoc);
+        debounce((cursorDoc, reset) => {
+            retrievePosts(cursorDoc, reset);
         }, 500),
     [])
 
@@ -125,6 +129,15 @@ const SocialFeedScreen = ({ navigation }) => {
         ]
     ];
 
+    const retrieveMore = () => {
+        if (friendPosts.length && !allRetrieved) {
+            debouncedPostRetrieval(friendPosts[friendPosts.length - 1]['habitsData']);
+        }
+    }
+
+    const renderPost = useCallback(({item, index}) => <SocialPost style={style[[index % 2 === 0 ? 0 : 1]]} test={23} userData={item.userData} habitsData={item.habitsData} />, [])
+    const keyExtractor = useCallback((item) => item.habitsData.id, [])
+
     return (
         <GestureDetector gesture={swipeDownGesture}>
             <View style={styles.container}>
@@ -133,9 +146,13 @@ const SocialFeedScreen = ({ navigation }) => {
                 </Animated.View>    
                 <FlatList 
                     data={friendPosts}
-                    renderItem={({item, index}) => <SocialPost style={style[[index % 2 === 0 ? 0 : 1]]} userData={item.userData} habitsData={item.habitsData} />}
-                    keyExtractor={(item) => item.habitsData.id}
+                    renderItem={renderPost}
+                    keyExtractor={keyExtractor}
                     style={styles.postList}
+                    ListFooterComponent={allRetrieved ? <></> : <LoadingSpinner />}
+                    onEndReached={retrieveMore}
+                    onEndReachedThreshold={0}
+                    estimatedItemSize={322}
                 />
             </View>
         </GestureDetector>

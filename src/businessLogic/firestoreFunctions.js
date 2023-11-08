@@ -609,12 +609,13 @@ export const retrieveMorePosts = async (friendIds, cursorDoc) => {
         let docsQuery;
         if (cursorDoc) {
             // if cursorDoc is present, retrieve another 10 posts - this is for loading more posts.
+            const lastRetrievedHabit = await getDoc(doc(db, 'dailyhabits', cursorDoc.id));
             docsQuery = query(
                             collection(db, 'dailyhabits'), 
                             where('ownerId', 'in', friendIds),
                             where('atleastOnePrimaryCompleted', '==', true), 
                             orderBy('timestamp', 'desc'), 
-                            startAfter(cursorDoc), 
+                            startAfter(lastRetrievedHabit), 
                             limit(10)
                         );
         }

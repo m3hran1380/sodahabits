@@ -1,5 +1,5 @@
 import { StyleSheet, Text, View, Image } from 'react-native';
-import { useState } from 'react';
+import { useState, memo } from 'react';
 import generalStyles, { availableScreenWidth2, textStyle } from '../../../../styles/generalStyle';
 import DefaultPFP from '../../../../../assets/svgs/defaultPfps/default1.svg';
 import { formatDate } from '../../../../businessLogic/utilityFunctions';
@@ -10,10 +10,8 @@ import ExpandedHabitOverlay from './ExpandedHabitOverlay';
 import { convertToLocaleTime } from '../../../../businessLogic/firestoreFunctions';
 
 
-const SocialPost = ({ userData, habitsData, style }) => {
-
+const SocialPost = memo(({ userData, habitsData, style }) => {
     const [expandedHabit, setExpandedHabit] = useState(null);
-
     const primaryHabitsData = Object.keys(habitsData.habits.primary).map(key => habitsData.habits.primary[key]);
 
     // sort the habits first according to status and then according to completionTime.
@@ -22,9 +20,11 @@ const SocialPost = ({ userData, habitsData, style }) => {
         else if (b.status === 'complete' && a.status !== 'complete') return 1;
         else if (a.status === 'complete' && b.status === 'complete') {
             // compare their completion times:
-            const aCompletionTime = convertToLocaleTime(a.completionTime);
-            const bCompletionTime = convertToLocaleTime(b.completionTime);
-            return aCompletionTime - bCompletionTime;
+            if (a.completionTime && b.completionTime) {
+                const aCompletionTime = convertToLocaleTime(a.completionTime);
+                const bCompletionTime = convertToLocaleTime(b.completionTime);
+                return aCompletionTime - bCompletionTime;
+            }
         }
         // if statuses are both not "complete" then maintain the order
         else return 0;
@@ -79,7 +79,15 @@ const SocialPost = ({ userData, habitsData, style }) => {
             </View>
         </View>
     )
+},
+(r1, r2) => {
+    // prevent unnecessary re-render when flatlist data changes.
+    const r1Data = JSON.stringify(r1);
+    const r2Data = JSON.stringify(r2);
+    if (r1Data.localeCompare(r2Data) === 0) return true;
+    else return false;
 }
+)
 
 export default SocialPost
 
