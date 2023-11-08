@@ -2,6 +2,7 @@ import { StyleSheet, View } from 'react-native'
 import { actualScreenHeight, colors } from '../../../styles/generalStyle'
 import { useCallback, useEffect, useState } from 'react';
 import { GestureDetector, Gesture, FlatList } from 'react-native-gesture-handler';
+import { FlashList } from '@shopify/flash-list';
 import Animated, { Extrapolation, interpolate, runOnJS, useSharedValue, useAnimatedStyle, withTiming } from 'react-native-reanimated';
 import ArrowDownIcon from '../../../../assets/svgs/Icons/screenTransitionIcons/downArrow.svg';
 import { retrieveMorePosts } from '../../../businessLogic/firestoreFunctions';
@@ -139,23 +140,24 @@ const SocialFeedScreen = ({ navigation }) => {
     const keyExtractor = useCallback((item) => item.habitsData.id, [])
 
     return (
-        <GestureDetector gesture={swipeDownGesture}>
-            <View style={styles.container}>
+        <View style={styles.container}>
+            <GestureDetector gesture={swipeDownGesture}>
                 <Animated.View style={[styles.arrowContainer, animatedArrowStyle]}>
                     <ArrowDownIcon />
-                </Animated.View>    
-                <FlatList 
-                    data={friendPosts}
-                    renderItem={renderPost}
-                    keyExtractor={keyExtractor}
-                    style={styles.postList}
-                    ListFooterComponent={allRetrieved ? <></> : <LoadingSpinner />}
-                    onEndReached={retrieveMore}
-                    onEndReachedThreshold={0}
-                    estimatedItemSize={322}
-                />
+                </Animated.View>  
+            </GestureDetector>
+            <View style={styles.postList}>  
+            <FlashList 
+                data={friendPosts}
+                renderItem={renderPost}
+                keyExtractor={keyExtractor}
+                ListFooterComponent={allRetrieved ? <></> : <LoadingSpinner />}
+                onEndReached={retrieveMore}
+                onEndReachedThreshold={0}
+                estimatedItemSize={322}
+            />
             </View>
-        </GestureDetector>
+        </View>
     )
 }
 
@@ -167,12 +169,13 @@ const styles = StyleSheet.create({
         backgroundColor: colors.backgroundColorPrimary,
     },
     arrowContainer: {
-        justifyContent: 'center',
+        justifyContent: 'flex-start',
         alignItems: 'center',
-        height: 50,
+        height: 90,
+        paddingTop: 15,
     },
     postList: {
-        marginTop: 40,
+        flex: 1, 
         marginBottom: 50,
     }
 })
