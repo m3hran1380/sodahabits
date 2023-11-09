@@ -9,9 +9,10 @@ import NotesIcon from '../../../../../assets/svgs/Icons/habitItemIcons/notes.svg
 const ExpandedHabitOverlay = ({ habitData, setExpandedHabit }) => {
 
     const [showNotes, setShowNotes] = useState(false);
+    const zIndexValue = Math.floor(Math.random() * (3000 - 2000 + 1)) + 2000;
 
     return (
-        <Pressable onPress={() => setShowNotes(false)} style={styles.container}>
+        <Pressable onPress={() => setShowNotes(false)} style={[styles.container, {zIndex: zIndexValue}]}>
             <View style={styles.habitImageContainer}>
                 { habitData.imageUrl ? 
                     <Image style={styles.habitImage} source={{uri: habitData.imageUrl}} />
@@ -36,10 +37,10 @@ export default ExpandedHabitOverlay
 const styles = StyleSheet.create({
     container: {
         ...StyleSheet.absoluteFillObject,
-        zIndex: 100,
         backgroundColor: 'rgba(0,0,0,0.9)',
         justifyContent: 'center',
-        alignItems: 'center'
+        alignItems: 'center',
+        zIndex: 1000,
     },
     closeBtnContainer: {
         position: 'absolute',

@@ -17,6 +17,7 @@ import { toggleLikeStatus } from '../../../../businessLogic/firestoreFunctions';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { runOnJS } from 'react-native-reanimated';
 import PostLikesOverlay from './PostLikesOverlay';
+import { useLayoutEffect } from 'react';
 
 
 const SocialPost = memo(({ userData, habitsData, isPostOwner, style }) => {
@@ -27,7 +28,7 @@ const SocialPost = memo(({ userData, habitsData, isPostOwner, style }) => {
 
     const primaryHabitsData = Object.keys(habitsData.habits.primary).map(key => habitsData.habits.primary[key]);
 
-    useEffect(() => {
+    useLayoutEffect(() => {
         if (habitsData?.likes?.includes(user.uid)) {
             setLiked(true);
         }
@@ -121,7 +122,6 @@ const SocialPost = memo(({ userData, habitsData, isPostOwner, style }) => {
                             )
                         }
                     </View>
-                    {expandedHabit && <ExpandedHabitOverlay setExpandedHabit={setExpandedHabit} habitData={expandedHabit} />}
                     <View style={styles.heartIconContainer}>
                     {
                         isPostOwner ?
@@ -140,6 +140,7 @@ const SocialPost = memo(({ userData, habitsData, isPostOwner, style }) => {
                         <Pressable onPress={toggleHeartStatus} style={styles.heartIcon}><UnheartedIcon width='100%' height='100%' /></Pressable>}</>
                     }
                     </View>
+                    {expandedHabit && <ExpandedHabitOverlay setExpandedHabit={setExpandedHabit} habitData={expandedHabit} />}
                 </View> 
             </GestureDetector>
 
@@ -232,6 +233,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'flex-end',
         height: availableScreenWidth2/16,
+        zIndex: 1,
 
     },
     heartIcon: {

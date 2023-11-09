@@ -1,4 +1,4 @@
-import { StyleSheet, Pressable, View } from 'react-native';
+import { StyleSheet, Pressable } from 'react-native';
 import { FontAwesome, MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons/';
 
 
