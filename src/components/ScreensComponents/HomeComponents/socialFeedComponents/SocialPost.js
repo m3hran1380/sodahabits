@@ -11,17 +11,21 @@ import { convertToLocaleTime } from '../../../../businessLogic/firestoreFunction
 import { useSelector } from 'react-redux';
 import UnheartedIcon from '../../../../../assets/svgs/Icons/socialFeedIcons/unhearted.svg';
 import HeartedIcon from '../../../../../assets/svgs/Icons/socialFeedIcons/hearted.svg';
+import UserHeartIcon from '../../../../../assets/svgs/Icons/socialFeedIcons/blueHeart.svg';
+import EmptyUserHeartIcon from '../../../../../assets/svgs/Icons/socialFeedIcons/blueHeartEmpty.svg';
 import { toggleLikeStatus } from '../../../../businessLogic/firestoreFunctions';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { runOnJS } from 'react-native-reanimated';
+import PostLikesOverlay from './PostLikesOverlay';
 
 
-const SocialPost = memo(({ userData, habitsData, style }) => {
+const SocialPost = memo(({ userData, habitsData, isPostOwner, style }) => {
     const user = useSelector(state => state.user.currentUser);
     const [expandedHabit, setExpandedHabit] = useState(null);
-    const primaryHabitsData = Object.keys(habitsData.habits.primary).map(key => habitsData.habits.primary[key]);
-    
     const [liked, setLiked] = useState(null);
+    const [showLikesOverlay, setShowLikesOverlay] = useState(false);
+
+    const primaryHabitsData = Object.keys(habitsData.habits.primary).map(key => habitsData.habits.primary[key]);
 
     useEffect(() => {
         if (habitsData?.likes?.includes(user.uid)) {
@@ -61,13 +65,16 @@ const SocialPost = memo(({ userData, habitsData, style }) => {
         }
     }
 
+    const userHeartPressed = () => {
+        // this function handles the situation where the heart on the user's own posts is pressed
+        setShowLikesOverlay(true);
+    }
 
     const doubleTapGesture = Gesture.Tap().numberOfTaps(2).onEnd((_, success) => {
-        if (success) {
+        if (success && !isPostOwner) {
             runOnJS(toggleHeartStatus)();
         }
     })
-
 
     return (
         <View style={styles.overallContainer}>
@@ -94,7 +101,7 @@ const SocialPost = memo(({ userData, habitsData, style }) => {
                                 </View>
                             </View>
                             <View style={styles.userTextInfoContainer}>
-                                <Text style={[styles.text, generalStyles.h3]}>{userData.username}</Text>
+                                <Text style={[styles.text, generalStyles.h3]}>{userData.username}{isPostOwner && ' (You)'}</Text>
                                 <Text style={styles.text}>{formatDate(habitsData.timestamp)}</Text>
                             </View>
                         </View>
@@ -117,14 +124,26 @@ const SocialPost = memo(({ userData, habitsData, style }) => {
                     {expandedHabit && <ExpandedHabitOverlay setExpandedHabit={setExpandedHabit} habitData={expandedHabit} />}
                     <View style={styles.heartIconContainer}>
                     {
-                        liked ? 
+                        isPostOwner ?
+                        // this is shown when the post is the user's post themselves and not their friends.
+                        <>
+                        {habitsData?.likes?.length ? 
+                        <Pressable onPress={userHeartPressed} style={styles.heartIcon}><UserHeartIcon width='100%' height='100%' /></Pressable>
+                        :
+                        <Pressable onPress={userHeartPressed} style={styles.heartIcon}><EmptyUserHeartIcon width='100%' height='100%' /></Pressable>
+                        }</>
+                        :
+                        <>
+                        {liked ? 
                         <Pressable onPress={toggleHeartStatus} style={styles.heartIcon}><HeartedIcon width='100%' height='100%' /></Pressable>
                         :
-                        <Pressable onPress={toggleHeartStatus} style={styles.heartIcon}><UnheartedIcon width='100%' height='100%' /></Pressable>
+                        <Pressable onPress={toggleHeartStatus} style={styles.heartIcon}><UnheartedIcon width='100%' height='100%' /></Pressable>}</>
                     }
                     </View>
                 </View> 
             </GestureDetector>
+
+            {showLikesOverlay && <PostLikesOverlay likesUserIds={habitsData?.likes ? habitsData?.likes : []} setShowLikesOverlay={setShowLikesOverlay} />}
         </View>
     )
 },
@@ -207,6 +226,9 @@ const styles = StyleSheet.create({
         height: availableScreenWidth2/16,
     },
     heartIconContainer: {
+        position: 'absolute',
+        bottom: '2%',
+        right: '3%',
         justifyContent: 'center',
         alignItems: 'flex-end',
         height: availableScreenWidth2/16,

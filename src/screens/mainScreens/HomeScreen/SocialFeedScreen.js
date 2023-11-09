@@ -15,6 +15,7 @@ import { debounce } from 'lodash';
 
 const SocialFeedScreen = ({ navigation }) => {
     const {friendsList} = useSelector(state => state.friends);
+    const user = useSelector(state => state.user.currentUser);
     const startingPosition = useSharedValue(0);
     const positionMovement = useSharedValue(0);
     const [friendPosts, setFriendPosts] = useState([]);
@@ -57,8 +58,6 @@ const SocialFeedScreen = ({ navigation }) => {
     // ----------------------------------- END ---------------------------------------- //
 
 
-
-
     const swipeDownGesture = Gesture.Pan()
         .onStart((event) => {
             if (event.absoluteY > actualScreenHeight * 0.2) startingPosition.value = actualScreenHeight;
@@ -89,13 +88,15 @@ const SocialFeedScreen = ({ navigation }) => {
 
     // retrieve the latest posts - run only on start
     const retrievePosts = async (cursorDoc, reset) => {
-        const retrievedPosts = await retrieveMorePosts(friendsList.map(user => user.id), cursorDoc);
+        const retrievedPosts = await retrieveMorePosts(user.uid, friendsList.map(user => user.id), cursorDoc);
 
         // add the user data to its retrieved post data:
         const combinedData = retrievedPosts.map((post) => {
             return {
                 habitsData: post,
-                userData: friendsList.find((friend) => friend.id === post.ownerId)
+                userData: post.ownerId === user.uid ? user : friendsList.find((friend) => friend.id === post.ownerId),
+                // following property indicates whether this post is user's post or his/her friends post:
+                isPostOwner: post.ownerId === user.uid ? true : false,
             }
         })
         if (!retrievedPosts.length) setAllRetrieved(true);
@@ -140,7 +141,9 @@ const SocialFeedScreen = ({ navigation }) => {
         <SocialPost 
             style={style[[index % 2 === 0 ? 0 : 1]]} 
             userData={item.userData} 
-            habitsData={item.habitsData} />, 
+            habitsData={item.habitsData}
+            isPostOwner={item.isPostOwner}
+        />, 
         [])
 
     const keyExtractor = useCallback((item) => item.habitsData.id, [])

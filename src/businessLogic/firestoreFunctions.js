@@ -602,9 +602,9 @@ export const updateUserPFPURI = async (userId, downloadURL, imageName) => {
 
 
 // following function retrieves the 10 most recent posts made by friends:
-export const retrieveMorePosts = async (friendIds, cursorDoc) => {
+export const retrieveMorePosts = async (userId, friendIds, cursorDoc) => {
+    const allIds = [userId, ...friendIds];
     try {
-        if (!friendIds.length) return [];
         let retrievedPosts = [];
         let docsQuery;
         if (cursorDoc) {
@@ -612,7 +612,7 @@ export const retrieveMorePosts = async (friendIds, cursorDoc) => {
             const lastRetrievedHabit = await getDoc(doc(db, 'dailyhabits', cursorDoc.id));
             docsQuery = query(
                             collection(db, 'dailyhabits'), 
-                            where('ownerId', 'in', friendIds),
+                            where('ownerId', 'in', allIds),
                             where('atleastOnePrimaryCompleted', '==', true), 
                             orderBy('timestamp', 'desc'), 
                             startAfter(lastRetrievedHabit), 
@@ -623,7 +623,7 @@ export const retrieveMorePosts = async (friendIds, cursorDoc) => {
             // this is for loading the initial 10 posts or upon reload.
             docsQuery = query(
                             collection(db, 'dailyhabits'), 
-                            where('ownerId', 'in', friendIds), 
+                            where('ownerId', 'in', allIds), 
                             where('atleastOnePrimaryCompleted', '==', true), 
                             orderBy('timestamp', 'desc'), 
                             limit(10)
