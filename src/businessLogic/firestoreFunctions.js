@@ -1,4 +1,4 @@
-import { getDocs, getDoc, doc, query, collection, orderBy, limit, addDoc, serverTimestamp, writeBatch, updateDoc, startAt, endAt, runTransaction, deleteDoc, where, startAfter } from 'firebase/firestore';
+import { getDocs, getDoc, doc, query, collection, orderBy, limit, addDoc, serverTimestamp, writeBatch, updateDoc, startAt, endAt, runTransaction, deleteDoc, where, startAfter, setDoc } from 'firebase/firestore';
 import { ref, deleteObject } from "firebase/storage";
 import { storage } from '../firestore/firestoreConfig';
 import { db } from '../firestore/firestoreConfig';
@@ -644,5 +644,35 @@ export const retrieveMorePosts = async (friendIds, cursorDoc) => {
     }   
     catch (error) {
         console.log("Error while retrieving the most recent posts made by friends ", error);
+    }
+}
+
+
+
+// following function toggles the like/unlike status of a post for a user
+export const toggleLikeStatus = async (habitId, userId) => {
+    try {   
+        // check see if a document already exists - if not create it:
+        const docRef = doc(db, 'postlikes', `${habitId}${userId}`);
+        const retrievedDoc = await getDoc(docRef);
+
+        if (!retrievedDoc.exists()) {
+            await setDoc(docRef, {
+                liked: true,
+                habitId: habitId,
+                userId: userId,
+            })
+        }
+        else {
+            await runTransaction(db, async (transaction) => {
+                const currentDoc = await transaction.get(docRef);
+                transaction.update(docRef, {
+                    liked: !currentDoc.data().liked,
+                });
+            })
+        }
+    }
+    catch (error) {
+        throw error; 
     }
 }

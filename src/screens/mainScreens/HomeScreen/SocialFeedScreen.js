@@ -1,7 +1,7 @@
 import { StyleSheet, View } from 'react-native'
-import { actualScreenHeight, colors } from '../../../styles/generalStyle'
+import { actualScreenHeight, availableScreenWidth2, colors } from '../../../styles/generalStyle'
 import { useCallback, useEffect, useState } from 'react';
-import { GestureDetector, Gesture, FlatList } from 'react-native-gesture-handler';
+import { GestureDetector, Gesture } from 'react-native-gesture-handler';
 import { FlashList } from '@shopify/flash-list';
 import Animated, { Extrapolation, interpolate, runOnJS, useSharedValue, useAnimatedStyle, withTiming } from 'react-native-reanimated';
 import ArrowDownIcon from '../../../../assets/svgs/Icons/screenTransitionIcons/downArrow.svg';
@@ -136,7 +136,13 @@ const SocialFeedScreen = ({ navigation }) => {
         }
     }
 
-    const renderPost = useCallback(({item, index}) => <SocialPost style={style[[index % 2 === 0 ? 0 : 1]]} test={23} userData={item.userData} habitsData={item.habitsData} />, [])
+    const renderPost = useCallback(({item, index}) => 
+        <SocialPost 
+            style={style[[index % 2 === 0 ? 0 : 1]]} 
+            userData={item.userData} 
+            habitsData={item.habitsData} />, 
+        [])
+
     const keyExtractor = useCallback((item) => item.habitsData.id, [])
 
     return (
@@ -154,7 +160,7 @@ const SocialFeedScreen = ({ navigation }) => {
                 ListFooterComponent={allRetrieved ? <></> : <LoadingSpinner />}
                 onEndReached={retrieveMore}
                 onEndReachedThreshold={0}
-                estimatedItemSize={322}
+                estimatedItemSize={availableScreenWidth2}
             />
             </View>
         </View>

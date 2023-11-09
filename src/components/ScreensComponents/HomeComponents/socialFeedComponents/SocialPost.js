@@ -1,5 +1,5 @@
-import { StyleSheet, Text, View, Image } from 'react-native';
-import { useState, memo } from 'react';
+import { StyleSheet, Text, View, Image, Pressable } from 'react-native';
+import { useState, memo, useEffect } from 'react';
 import generalStyles, { availableScreenWidth2, textStyle } from '../../../../styles/generalStyle';
 import DefaultPFP from '../../../../../assets/svgs/defaultPfps/default1.svg';
 import { formatDate } from '../../../../businessLogic/utilityFunctions';
@@ -8,11 +8,30 @@ import { Canvas, Circle, RadialGradient, vec } from "@shopify/react-native-skia"
 import HabitCompletionStatusDot from './HabitCompletionStatusDot';
 import ExpandedHabitOverlay from './ExpandedHabitOverlay';
 import { convertToLocaleTime } from '../../../../businessLogic/firestoreFunctions';
+import { useSelector } from 'react-redux';
+import UnheartedIcon from '../../../../../assets/svgs/Icons/socialFeedIcons/unhearted.svg';
+import HeartedIcon from '../../../../../assets/svgs/Icons/socialFeedIcons/hearted.svg';
+import { toggleLikeStatus } from '../../../../businessLogic/firestoreFunctions';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import { runOnJS } from 'react-native-reanimated';
 
 
 const SocialPost = memo(({ userData, habitsData, style }) => {
+    const user = useSelector(state => state.user.currentUser);
     const [expandedHabit, setExpandedHabit] = useState(null);
     const primaryHabitsData = Object.keys(habitsData.habits.primary).map(key => habitsData.habits.primary[key]);
+    
+    const [liked, setLiked] = useState(null);
+
+    useEffect(() => {
+        if (habitsData?.likes?.includes(user.uid)) {
+            setLiked(true);
+        }
+        else {
+            setLiked(false);
+        }
+    }, [habitsData]);
+
 
     // sort the habits first according to status and then according to completionTime.
     primaryHabitsData.sort((a, b) => {
@@ -31,52 +50,81 @@ const SocialPost = memo(({ userData, habitsData, style }) => {
     })
 
 
+    const toggleHeartStatus = async () => {
+        try {
+            setLiked(val => !val);
+            await toggleLikeStatus(habitsData.id, user.uid);
+        }
+        catch (error) {
+            console.log("error while updating the like status of a post ", error);
+            setLiked(val => !val);
+        }
+    }
+
+
+    const doubleTapGesture = Gesture.Tap().numberOfTaps(2).onEnd((_, success) => {
+        if (success) {
+            runOnJS(toggleHeartStatus)();
+        }
+    })
+
+
     return (
         <View style={styles.overallContainer}>
-            <View style={styles.postContainer}>
-                <View style={styles.postHeaderContainer}>
-                    <View style={styles.userInfoContainer}>
-                        <View>
-                            <Canvas style={styles.glowCanvas}>
-                                <Circle cx={(availableScreenWidth2/12)} cy={(availableScreenWidth2/12)} r={(availableScreenWidth2/12)}>
-                                    <RadialGradient
-                                        c={vec((availableScreenWidth2/12), (availableScreenWidth2/12))}
-                                        r={(availableScreenWidth2/12)}
-                                        colors={['black', 'black', 'black', 'black', 'transparent']}
-                                    />
-                                </Circle>
-                            </Canvas>
-                            <View style={styles.imageContainer}>
-                                { userData?.pfpUrl ? 
-                                    <Image resizeMode='contain' source={{ uri: userData.pfpUrl }} style={styles.pfpImage} />
-                                    :
-                                    <DefaultPFP width='100%' height='100%' style={styles.pfpImage} />
-                                }
+            <GestureDetector gesture={doubleTapGesture}>
+                <View style={styles.postContainer}>
+                    <View style={styles.postHeaderContainer}>
+                        <View style={styles.userInfoContainer}>
+                            <View>
+                                <Canvas style={styles.glowCanvas}>
+                                    <Circle cx={(availableScreenWidth2/12)} cy={(availableScreenWidth2/12)} r={(availableScreenWidth2/12)}>
+                                        <RadialGradient
+                                            c={vec((availableScreenWidth2/12), (availableScreenWidth2/12))}
+                                            r={(availableScreenWidth2/12)}
+                                            colors={['black', 'black', 'black', 'black', 'transparent']}
+                                        />
+                                    </Circle>
+                                </Canvas>
+                                <View style={styles.imageContainer}>
+                                    { userData?.pfpUrl ? 
+                                        <Image resizeMode='contain' source={{ uri: userData.pfpUrl }} style={styles.pfpImage} />
+                                        :
+                                        <DefaultPFP width='100%' height='100%' style={styles.pfpImage} />
+                                    }
+                                </View>
+                            </View>
+                            <View style={styles.userTextInfoContainer}>
+                                <Text style={[styles.text, generalStyles.h3]}>{userData.username}</Text>
+                                <Text style={styles.text}>{formatDate(habitsData.timestamp)}</Text>
                             </View>
                         </View>
-                        <View style={styles.userTextInfoContainer}>
-                            <Text style={[styles.text, generalStyles.h3]}>{userData.username}</Text>
-                            <Text style={styles.text}>{formatDate(habitsData.timestamp)}</Text>
+                        <View style={styles.dotTrackerContainer}>
+                            {primaryHabitsData.map((habitData, index) => <HabitCompletionStatusDot key={index} habitData={habitData} />)}
                         </View>
                     </View>
-                    <View style={styles.dotTrackerContainer}>
-                        {primaryHabitsData.map((habitData, index) => <HabitCompletionStatusDot key={index} habitData={habitData} />)}
+                    <View style={styles.habitsContainer}>
+                        {
+                            primaryHabitsData.map((habitData, index) => 
+                                <SocialPostHabitItem 
+                                    key={index} 
+                                    style={style[index]} 
+                                    habitData={habitData} 
+                                    setExpandedHabit={setExpandedHabit}
+                                />
+                            )
+                        }
                     </View>
-                </View>
-                <View style={styles.habitsContainer}>
+                    {expandedHabit && <ExpandedHabitOverlay setExpandedHabit={setExpandedHabit} habitData={expandedHabit} />}
+                    <View style={styles.heartIconContainer}>
                     {
-                        primaryHabitsData.map((habitData, index) => 
-                            <SocialPostHabitItem 
-                                key={index} 
-                                style={style[index]} 
-                                habitData={habitData} 
-                                setExpandedHabit={setExpandedHabit}
-                            />
-                        )
+                        liked ? 
+                        <Pressable onPress={toggleHeartStatus} style={styles.heartIcon}><HeartedIcon width='100%' height='100%' /></Pressable>
+                        :
+                        <Pressable onPress={toggleHeartStatus} style={styles.heartIcon}><UnheartedIcon width='100%' height='100%' /></Pressable>
                     }
-                </View>
-                {expandedHabit && <ExpandedHabitOverlay setExpandedHabit={setExpandedHabit} habitData={expandedHabit} />}
-            </View>
+                    </View>
+                </View> 
+            </GestureDetector>
         </View>
     )
 },
@@ -116,7 +164,6 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        
     },
     imageContainer: {
         height: (availableScreenWidth2/6),
@@ -158,5 +205,17 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         width: availableScreenWidth2/4.5,
         height: availableScreenWidth2/16,
+    },
+    heartIconContainer: {
+        justifyContent: 'center',
+        alignItems: 'flex-end',
+        height: availableScreenWidth2/16,
+
+    },
+    heartIcon: {
+        justifyContent: 'center',
+        alignItems: 'center',
+        width: availableScreenWidth2/14,
+        height: availableScreenWidth2/14,
     }
 })
