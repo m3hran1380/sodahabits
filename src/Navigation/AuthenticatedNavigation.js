@@ -5,7 +5,7 @@ import VendingMachineScreen from '../screens/mainScreens/VendingMachineScreen';
 import LocationScreen from '../screens/mainScreens/LocationScreen';
 import TabBarButton from '../components/navigationComponents/TabBarButton';
 import React, { useEffect, useState, useCallback } from 'react';
-import { AppState, View } from 'react-native';
+import { AppState, View, Platform, PermissionsAndroid } from 'react-native';
 import { initialiseApp } from '../businessLogic/initialisationFunctions';
 import { useSelector, useDispatch } from 'react-redux';
 import { setUser } from '../features/userSlice';
@@ -14,6 +14,9 @@ import AppNavbar from '../components/sharedComponents/navbarComponents/AppNavbar
 import HamburgerIcon from '../components/sharedComponents/navbarComponents/HamburgerIcon';
 import SplashScreen from '../components/loadingSpinners/SplashScreen';
 import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
+import messaging from '@react-native-firebase/messaging';
+import { updateDeviceToken } from '../businessLogic/firestoreFunctions';
+
 
 
 const barStyle = {
@@ -39,7 +42,6 @@ const AuthenticatedNavigation = () => {
     // as it doesn't work nicely with the fadeout animation of the options component.
     const [loggingOut, setLoggingOut] = useState(false);
     const camera = useSelector(state => state.app.camera);
-
 
     const user = useSelector((state) => state.user.currentUser);
 
@@ -92,6 +94,24 @@ const AuthenticatedNavigation = () => {
             clearTimeout(timerId); // make sure to clear the timer when the component unmounts
         };
     }, [appState, setMidnightTimer]);
+
+
+    const foregroundNotificationHandler = async (message) => {
+        console.log("handling the notification on foreground. ", message)
+    }
+
+    const backgroundNotificationHandler = async (message) => {
+        console.log("handling the notification on background. ", message)
+    }
+
+
+    useEffect(() => {
+        (async () => {
+            await messaging().registerDeviceForRemoteMessages();
+            const token = await messaging().getToken();
+            await updateDeviceToken(token, user.uid);
+        })();
+    }, []);
 
 
     return (

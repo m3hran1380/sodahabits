@@ -676,3 +676,34 @@ export const toggleLikeStatus = async (habitId, userId) => {
         throw error; 
     }
 }
+
+
+// update the device token
+export const updateDeviceToken = async (deviceToken, userId) => {
+    // update user doc
+    const docRef = doc(db, 'usersprivate', userId);
+
+    try {
+        await updateDoc(docRef, {
+            deviceToken: deviceToken
+        })
+    }
+    catch (error) {
+        console.log(error);
+    }
+}
+
+
+
+// reply to a notification object - only allow edit if the users device token matches the receiver token of the notification documetn.
+export const replyToNudge = async (notificationId, reply) => {
+    try {
+        console.log(notificationId);
+        await updateDoc(doc(db, 'notifications', notificationId), {
+            reply: reply
+        })
+    }   
+    catch (error) {
+        console.log("error while trying to reply to a nudge ", error);
+    }
+}
