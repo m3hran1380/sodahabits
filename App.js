@@ -32,12 +32,17 @@ const handleNotification = async (notification) => {
         lightColor: AndroidColor.RED,
     })
 
+    const notificationSenderData = JSON.parse(notification.data.senderData);
+
+    console.log("hi ", notification.data.message);
+
     await notifee.displayNotification({
-        title: 'New interaction',
+        title: `${notificationSenderData.username} nudged you!`,
         body: `${notification.data.message}!`,
         data: {notificationId: notification.data.id},
         android: {
             channelId,
+            largeIcon: notificationSenderData.pfpUrl,
             actions: [
                 {
                     title: 'Reply',
@@ -51,7 +56,6 @@ const handleNotification = async (notification) => {
 
 // register notification handlers
 messaging().setBackgroundMessageHandler(handleNotification);
-
 
 
 SplashScreen.preventAutoHideAsync();

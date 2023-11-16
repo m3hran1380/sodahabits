@@ -1,6 +1,6 @@
 import { StyleSheet, View } from 'react-native'
 import { actualScreenHeight, availableScreenWidth2, colors } from '../../../styles/generalStyle'
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, useRef } from 'react';
 import { GestureDetector, Gesture } from 'react-native-gesture-handler';
 import { FlashList } from '@shopify/flash-list';
 import Animated, { Extrapolation, interpolate, runOnJS, useSharedValue, useAnimatedStyle, withTiming } from 'react-native-reanimated';
@@ -20,6 +20,8 @@ const SocialFeedScreen = ({ navigation }) => {
     const positionMovement = useSharedValue(0);
     const [friendPosts, setFriendPosts] = useState([]);
     const [allRetrieved, setAllRetrieved] = useState(false);
+
+    const flashListRef = useRef(null);
 
     // ----------- following chunk of code is for the shake detection ------------------- //
     let lastUpdate = Date.now();
@@ -143,6 +145,8 @@ const SocialFeedScreen = ({ navigation }) => {
             userData={item.userData} 
             habitsData={item.habitsData}
             isPostOwner={item.isPostOwner}
+            postIndex={index}
+            flashListRef={flashListRef}
         />, 
         [])
 
@@ -164,6 +168,7 @@ const SocialFeedScreen = ({ navigation }) => {
                 onEndReached={retrieveMore}
                 onEndReachedThreshold={0}
                 estimatedItemSize={availableScreenWidth2}
+                ref={flashListRef}
             />
             </View>
         </View>

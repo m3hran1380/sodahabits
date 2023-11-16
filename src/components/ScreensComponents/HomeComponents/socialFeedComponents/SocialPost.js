@@ -1,5 +1,5 @@
 import { StyleSheet, Text, View, Image, Pressable } from 'react-native';
-import { useState, memo, useEffect } from 'react';
+import { useState, memo, useLayoutEffect } from 'react';
 import generalStyles, { availableScreenWidth2, textStyle } from '../../../../styles/generalStyle';
 import DefaultPFP from '../../../../../assets/svgs/defaultPfps/default1.svg';
 import { formatDate } from '../../../../businessLogic/utilityFunctions';
@@ -17,14 +17,15 @@ import { toggleLikeStatus } from '../../../../businessLogic/firestoreFunctions';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { runOnJS } from 'react-native-reanimated';
 import PostLikesOverlay from './PostLikesOverlay';
-import { useLayoutEffect } from 'react';
+import NudgeOverlay from './NudgeOverlay';
 
 
-const SocialPost = memo(({ userData, habitsData, isPostOwner, style }) => {
+const SocialPost = memo(({ userData, habitsData, isPostOwner, style, postIndex, flashListRef }) => {
     const user = useSelector(state => state.user.currentUser);
     const [expandedHabit, setExpandedHabit] = useState(null);
     const [liked, setLiked] = useState(null);
     const [showLikesOverlay, setShowLikesOverlay] = useState(false);
+    const [showNudgeOverlay, setShowNudgeOverlay] = useState(false);
 
     const primaryHabitsData = Object.keys(habitsData.habits.primary).map(key => habitsData.habits.primary[key]);
 
@@ -118,6 +119,11 @@ const SocialPost = memo(({ userData, habitsData, isPostOwner, style }) => {
                                     style={style[index]} 
                                     habitData={habitData} 
                                     setExpandedHabit={setExpandedHabit}
+                                    isPostOwner={isPostOwner}
+                                    userData={userData}
+                                    postIndex={postIndex}
+                                    setShowNudgeOverlay={setShowNudgeOverlay}
+                                    flashListRef={flashListRef}
                                 />
                             )
                         }
@@ -145,14 +151,17 @@ const SocialPost = memo(({ userData, habitsData, isPostOwner, style }) => {
             </GestureDetector>
 
             {showLikesOverlay && <PostLikesOverlay likesUserIds={habitsData?.likes ? habitsData?.likes : []} setShowLikesOverlay={setShowLikesOverlay} />}
+            {showNudgeOverlay && <NudgeOverlay userData={userData} setShowNudgeOverlay={setShowNudgeOverlay} />}
         </View>
     )
 },
 (r1, r2) => {
     // prevent unnecessary re-render when flatlist data changes.
-    const r1Data = JSON.stringify(r1);
-    const r2Data = JSON.stringify(r2);
-    if (r1Data.localeCompare(r2Data) === 0) return true;
+    const { flashListRef: ref1, ...r1Data } = r1;
+    const { flashListRef: ref2, ...r2Data } = r2;
+    const r1DataString = JSON.stringify(r1Data);
+    const r2DataString = JSON.stringify(r2Data);
+    if (r1DataString.localeCompare(r2DataString) === 0) return true;
     else return false;
 }
 )

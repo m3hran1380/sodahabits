@@ -2,13 +2,14 @@ import { StyleSheet, Text, View, Image, Pressable } from 'react-native'
 import React, { useEffect } from 'react'
 import DefaultHabitPicture from '../../../../../assets/svgs/defaultHabit.svg';
 import HabitDoneCheck from '../../../../../assets/svgs/Icons/socialFeedIcons/habitDone.svg';
+import Nudge from '../../../../../assets/svgs/Icons/socialFeedIcons/nudge.svg';
 import { availableScreenWidth2, textStyle } from '../../../../styles/generalStyle';
 import Animated, { useSharedValue, useAnimatedStyle, withTiming } from 'react-native-reanimated';
 import { convertToLocaleTime } from '../../../../businessLogic/firestoreFunctions';
 import { getTime } from '../../../../businessLogic/utilityFunctions';
 
 
-const SocialPostHabitItem = ({ habitData, style, setExpandedHabit }) => {
+const SocialPostHabitItem = ({ habitData, style, setExpandedHabit, isPostOwner, postIndex, flashListRef, setShowNudgeOverlay }) => {
 
     // following are used for the hovering effect:
     const translateX = useSharedValue(0);
@@ -54,6 +55,13 @@ const SocialPostHabitItem = ({ habitData, style, setExpandedHabit }) => {
         }
     }
 
+
+    const handleNudge = async () => {
+        setShowNudgeOverlay(val => !val);
+        flashListRef.current.scrollToIndex({ animated: true, index: postIndex })
+    }
+
+
     return (
         <Animated.View style={[styles.container, style, animatedHoverStyle]}>
             {habitData?.completionTime && <Text style={styles.smallText}>{getTime(convertToLocaleTime(habitData.completionTime))}</Text>}
@@ -68,6 +76,11 @@ const SocialPostHabitItem = ({ habitData, style, setExpandedHabit }) => {
                     <View style={styles.habitDoneCheckmark}>
                         <HabitDoneCheck width='100%' height='100%' />
                     </View>
+                }
+                {(habitData.status === 'pending' && !isPostOwner) && 
+                    <Pressable onPress={handleNudge} style={styles.nudge}>
+                        <Nudge width='100%' height='100%' />
+                    </Pressable>
                 }
             </Pressable>
 
@@ -117,5 +130,11 @@ const styles = StyleSheet.create({
         height: '20%',
         position: 'absolute',
         bottom: '5%',
-    }
+    },
+    nudge: {
+        width: '30%',
+        height: '13%',
+        position: 'absolute',
+        bottom: '7%',
+    },
 })

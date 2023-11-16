@@ -694,6 +694,22 @@ export const updateDeviceToken = async (deviceToken, userId) => {
 }
 
 
+// following function is used to nudge a user (this happens as a by product via a cloud function)
+// users can only create notification documents if the targetId is in the friends list. (via security rules)
+export const nudgeUser = async (senderId, receiverId, message) => {
+    try {
+        await addDoc(collection(db, 'notifications'), {
+            senderId: senderId,
+            receiverId: receiverId, 
+            message: message,
+            timestamp: serverTimestamp(),
+        });
+    }
+    catch (error) {
+        console.log("error while nudging a user ", error);
+    }
+}
+
 
 // reply to a notification object - only allow edit if the users device token matches the receiver token of the notification documetn.
 export const replyToNudge = async (notificationId, reply) => {
