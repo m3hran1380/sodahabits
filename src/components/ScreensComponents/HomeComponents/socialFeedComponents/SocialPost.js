@@ -8,7 +8,7 @@ import { Canvas, Circle, RadialGradient, vec } from "@shopify/react-native-skia"
 import HabitCompletionStatusDot from './HabitCompletionStatusDot';
 import ExpandedHabitOverlay from './ExpandedHabitOverlay';
 import { convertToLocaleTime } from '../../../../businessLogic/firestoreFunctions';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import UnheartedIcon from '../../../../../assets/svgs/Icons/socialFeedIcons/unhearted.svg';
 import HeartedIcon from '../../../../../assets/svgs/Icons/socialFeedIcons/hearted.svg';
 import UserHeartIcon from '../../../../../assets/svgs/Icons/socialFeedIcons/blueHeart.svg';
@@ -18,14 +18,17 @@ import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { runOnJS } from 'react-native-reanimated';
 import PostLikesOverlay from './PostLikesOverlay';
 import NudgeOverlay from './NudgeOverlay';
+import { setNudgeOpen } from '../../../../features/appSlice';
 
 
 const SocialPost = memo(({ userData, habitsData, isPostOwner, style, postIndex, flashListRef }) => {
     const user = useSelector(state => state.user.currentUser);
+    const { nudgeOpen } = useSelector(state => state.app);
+    const dispatch = useDispatch();
+
     const [expandedHabit, setExpandedHabit] = useState(null);
     const [liked, setLiked] = useState(null);
     const [showLikesOverlay, setShowLikesOverlay] = useState(false);
-    const [showNudgeOverlay, setShowNudgeOverlay] = useState(false);
 
     const primaryHabitsData = Object.keys(habitsData.habits.primary).map(key => habitsData.habits.primary[key]);
 
@@ -37,7 +40,6 @@ const SocialPost = memo(({ userData, habitsData, isPostOwner, style, postIndex, 
             setLiked(false);
         }
     }, [habitsData]);
-
 
     // sort the habits first according to status and then according to completionTime.
     primaryHabitsData.sort((a, b) => {
@@ -78,8 +80,12 @@ const SocialPost = memo(({ userData, habitsData, isPostOwner, style, postIndex, 
         }
     })
 
+    const closeNudgeMenu = () => {
+        dispatch(setNudgeOpen(null));
+    }
+
     return (
-        <View style={styles.overallContainer}>
+        <Pressable onPress={closeNudgeMenu} style={styles.overallContainer}>
             <GestureDetector gesture={doubleTapGesture}>
                 <View style={styles.postContainer}>
                     <View style={styles.postHeaderContainer}>
@@ -122,7 +128,6 @@ const SocialPost = memo(({ userData, habitsData, isPostOwner, style, postIndex, 
                                     isPostOwner={isPostOwner}
                                     userData={userData}
                                     postIndex={postIndex}
-                                    setShowNudgeOverlay={setShowNudgeOverlay}
                                     flashListRef={flashListRef}
                                 />
                             )
@@ -151,14 +156,14 @@ const SocialPost = memo(({ userData, habitsData, isPostOwner, style, postIndex, 
             </GestureDetector>
 
             {showLikesOverlay && <PostLikesOverlay likesUserIds={habitsData?.likes ? habitsData?.likes : []} setShowLikesOverlay={setShowLikesOverlay} />}
-            {showNudgeOverlay && <NudgeOverlay userData={userData} setShowNudgeOverlay={setShowNudgeOverlay} />}
-        </View>
+            {(nudgeOpen?.index == postIndex) && <NudgeOverlay userData={userData} />}
+        </Pressable>
     )
 },
 (r1, r2) => {
     // prevent unnecessary re-render when flatlist data changes.
-    const { flashListRef: ref1, ...r1Data } = r1;
-    const { flashListRef: ref2, ...r2Data } = r2;
+    const { flashListRef: ref1, nudgeOpen: nudgeOpen1, setNudgeOpen: setNudgeOpen1, ...r1Data } = r1;
+    const { flashListRef: ref2, nudgeOpen: nudgeOpen2, setNudgeOpen: setNudgeOpen2, ...r2Data } = r2;
     const r1DataString = JSON.stringify(r1Data);
     const r2DataString = JSON.stringify(r2Data);
     if (r1DataString.localeCompare(r2DataString) === 0) return true;
@@ -172,7 +177,7 @@ const styles = StyleSheet.create({
     overallContainer: {
         justifyContent: 'center',
         alignItems: 'center',
-        marginBottom: 20,
+        paddingBottom: 20,
     },
     postContainer: {
         width: availableScreenWidth2,

@@ -6,7 +6,7 @@ import { FlashList } from '@shopify/flash-list';
 import Animated, { Extrapolation, interpolate, runOnJS, useSharedValue, useAnimatedStyle, withTiming } from 'react-native-reanimated';
 import ArrowDownIcon from '../../../../assets/svgs/Icons/screenTransitionIcons/downArrow.svg';
 import { retrieveMorePosts } from '../../../businessLogic/firestoreFunctions';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import SocialPost from '../../../components/ScreensComponents/HomeComponents/socialFeedComponents/SocialPost';
 import LoadingSpinner from '../../../components/ScreensComponents/HomeComponents/socialFeedComponents/LoadingSpinner';
 import { Accelerometer } from 'expo-sensors';
@@ -169,6 +169,7 @@ const SocialFeedScreen = ({ navigation }) => {
                 onEndReachedThreshold={0}
                 estimatedItemSize={availableScreenWidth2}
                 ref={flashListRef}
+                keyboardShouldPersistTaps='always'
             />
             </View>
         </View>
@@ -191,5 +192,8 @@ const styles = StyleSheet.create({
     postList: {
         flex: 1, 
         marginBottom: 50,
+    },
+    backgroundTouchDetector: {
+        ...StyleSheet.absoluteFillObject,
     }
 })

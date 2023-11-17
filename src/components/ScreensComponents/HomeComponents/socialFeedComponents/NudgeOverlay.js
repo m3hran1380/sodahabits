@@ -2,13 +2,17 @@ import { StyleSheet, Text, View, Pressable, TextInput } from 'react-native'
 import { availableScreenWidth2, textStyle } from '../../../../styles/generalStyle'
 import Nudge from '../../../../../assets/svgs/Icons/socialFeedIcons/nudge.svg';
 import { nudgeUser } from '../../../../businessLogic/firestoreFunctions';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { useState } from 'react';
+import { setNudgeOpen } from '../../../../features/appSlice';
 
 
-const NudgeOverlay = ({ userData, setShowNudgeOverlay }) => {
+const NudgeOverlay = ({ userData }) => {
     
     const user = useSelector(state => state.user.currentUser);
+    const {nudgeOpen} = useSelector(state => state.app);
+
+    const dispatch = useDispatch();
     const [nudgeMessage, setNudgeMessage] = useState(null);
 
     const handleInput = (userInput) => {
@@ -16,13 +20,13 @@ const NudgeOverlay = ({ userData, setShowNudgeOverlay }) => {
     }
 
     const handleNudge = async () => {
-        await nudgeUser(user.uid, userData.id, nudgeMessage ? nudgeMessage : 'Complete your habit');
+        await nudgeUser(user.uid, userData.id, nudgeMessage ? nudgeMessage : 'Complete your habit', nudgeOpen.habitData.name);
         setNudgeMessage(null);
-        setShowNudgeOverlay(false);
+        dispatch(setNudgeOpen(null));
     }
 
     return (
-        <View style={styles.container}>
+        <Pressable style={styles.container}>
             <Text style={styles.text}>send a nudge message</Text>
             <TextInput 
                 multiline={true}
@@ -37,7 +41,7 @@ const NudgeOverlay = ({ userData, setShowNudgeOverlay }) => {
                     <Nudge width='100%' height='100%' />
                 </Pressable>
             </View>
-        </View>
+        </Pressable>
     )
 }
 

@@ -96,15 +96,6 @@ const AuthenticatedNavigation = () => {
     }, [appState, setMidnightTimer]);
 
 
-    const foregroundNotificationHandler = async (message) => {
-        console.log("handling the notification on foreground. ", message)
-    }
-
-    const backgroundNotificationHandler = async (message) => {
-        console.log("handling the notification on background. ", message)
-    }
-
-
     useEffect(() => {
         (async () => {
             await messaging().registerDeviceForRemoteMessages();

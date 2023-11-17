@@ -3,16 +3,15 @@ import { useSelector, useDispatch } from "react-redux";
 import RegistrationScreen from "../screens/authScreens/RegistrationScreen";
 import LoginScreen from "../screens/authScreens/LoginScreen";
 import { clearUser, setUser } from "../features/userSlice";
-import { auth } from "../firestore/firestoreConfig";
 import { onAuthStateChanged } from 'firebase/auth';
 import { useEffect } from 'react';
 import OnboardingScreen from "../screens/onboardingScreens/OnboardingScreen";
 import AuthenticatedNavigation from "./AuthenticatedNavigation";
 import SplashScreen from "../components/loadingSpinners/SplashScreen";
-import { setAppLoading } from "../features/appSlice";
+import { setAppLoading, setUnreadNotifications } from "../features/appSlice";
 import { initialiseApp } from "../businessLogic/initialisationFunctions";
-import { doc, onSnapshot } from "firebase/firestore";
-import { db } from "../firestore/firestoreConfig";
+import { collection, doc, onSnapshot, query, where, orderBy } from "firebase/firestore";
+import { db, auth } from "../firestore/firestoreConfig";
 import { getUsersById, retrieveIncomingFriendRequestsData } from "../businessLogic/firestoreFunctions";
 import { setFriends, setIncomingRequestsData } from "../features/friendSlice";
 
@@ -26,7 +25,8 @@ const RootNavigation = () => {
     const userState = useSelector((state) => state.user.currentUser);
     // check for authentication status:
     useEffect(() => {
-        let snapshotUnsub = () => {pass}
+        let userSnapshotUnsub = () => {pass}
+        let notificationsSnapshotUnsub = () => {pass}
         const unsub = onAuthStateChanged(auth, async (user) => {
             try {
                 // don't go to home page till we have retrieved the necessary data.
@@ -42,9 +42,23 @@ const RootNavigation = () => {
                     dispatch(setFriends(friendsData));
 
                     // set up a live listener on the userprivate document:
-                    snapshotUnsub = onSnapshot(doc(db, 'usersprivate', user.uid), (snapshot) => {
+                    userSnapshotUnsub = onSnapshot(doc(db, 'usersprivate', user.uid), (snapshot) => {
                         dispatch(setUser(snapshot.data()));
                     }, (error) => console.log('error in user snapshot: ', error))
+                    // ---------------- end ------------------------- //
+
+                    // set up a live listener on the unread notifications documents:
+                    const notificationsQuery = query(collection(db, 'notifications'), 
+                        where('receiverId', '==', user.uid), where('read', '==', false), orderBy('timestamp', 'desc'));
+                    notificationsSnapshotUnsub = onSnapshot(notificationsQuery, (snapshot) => {
+                        const notifications = [];
+                        snapshot.forEach((doc) => {
+                            const notification = {id: doc.id, ...doc.data()};
+                            delete notification.timestamp;
+                            notifications.push(notification);
+                        });
+                        dispatch(setUnreadNotifications(notifications))
+                    }, (error) => console.log('error in notifications snapshot: ', error))
                     // ---------------- end ------------------------- //
                 }
                 else {
@@ -58,7 +72,8 @@ const RootNavigation = () => {
         });
         return () => {
             unsub();
-            snapshotUnsub();
+            userSnapshotUnsub();
+            notificationsSnapshotUnsub();
         }
     }, [])
 

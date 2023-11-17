@@ -10,13 +10,16 @@ import { calculateAdjustedDimensions } from '../../../businessLogic/utilityFunct
 import ArrowUpIcon from '../../../../assets/svgs/Icons/screenTransitionIcons/upArrow.svg';
 import Animated, { useSharedValue, useAnimatedStyle, interpolate, Extrapolation, withTiming, withDelay, runOnJS } from 'react-native-reanimated';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import NotificationsListOverlay from '../../../components/ScreensComponents/HomeComponents/habitComponents/NotificationsListOverlay';
 
 
 const [lottieWidth, lottieHeight] = calculateAdjustedDimensions(1804, 1787);
 
 
 const HomeScreen = ({ navigation }) => {
-    const user = useSelector((state) => state.user.currentUser);
+    const user = useSelector(state => state.user.currentUser);
+    const { unreadNotifications } = useSelector(state => state.app);
+
     const startingPosition = useSharedValue(0);
     const positionMovement = useSharedValue(0);
 
@@ -51,52 +54,54 @@ const HomeScreen = ({ navigation }) => {
     })
 
     return (
-        <GestureDetector gesture={swipeUpGesture}>
-            <View style={styles.parentContainer}>
-                <View style={styles.locationBackgroundContainer}>
-                    <LottieView 
-                        source={require('../../../../assets/lottie/properties/favelapropertyOptimisedLottie.json')}
-                        width={lottieWidth}
-                        height={lottieHeight}
-                        loop={true}
-                        autoPlay={true}
-                    />
-                    <LinearGradient 
-                        start={{x:0, y:0.9}} 
-                        end={{x:0, y:0}} 
-                        colors={[colors.backgroundColorPrimary, 'transparent']} 
-                        style={styles.fade} 
-                    />
-                </View>
-                <View style={[styles.containerNoMargin, {paddingTop: 0}]}>
-                    <DaysLabel />
-                    {
-                        // render the primary habits
-                        Object.keys(user.todayHabits.habits.primary).map(key => {
-                            return ({
-                                habitName: user.todayHabits.habits.primary[key].name,
-                                habitStatus: user.todayHabits.habits.primary[key].status,
-                                habitNotes: user.todayHabits.habits.primary[key].notes,
-                                habitImageUrl: user.todayHabits.habits.primary[key].imageUrl,
-                                habitNotes: user.todayHabits.habits.primary[key].notes,
-                            })
-                        }).map((habitData, index) => {
-                            return (
-                                <HabitItem 
-                                    key={index} 
-                                    habitIndex={index} 
-                                    habitData={habitData}
-                                    primary={true} 
-                                />
-                            )
+        <View style={styles.parentContainer}>
+            <View style={styles.locationBackgroundContainer}>
+                <LottieView 
+                    source={require('../../../../assets/lottie/properties/favelapropertyOptimisedLottie.json')}
+                    width={lottieWidth}
+                    height={lottieHeight}
+                    loop={true}
+                    autoPlay={true}
+                />
+                <LinearGradient 
+                    start={{x:0, y:0.9}} 
+                    end={{x:0, y:0}} 
+                    colors={[colors.backgroundColorPrimary, 'transparent']} 
+                    style={styles.fade} 
+                />
+                {unreadNotifications?.length ? <NotificationsListOverlay notifications={unreadNotifications} /> : <></>}
+            </View>
+            <View style={[styles.containerNoMargin, {paddingTop: 0}]}>
+                <DaysLabel />
+                {
+                    // render the primary habits
+                    Object.keys(user.todayHabits.habits.primary).map(key => {
+                        return ({
+                            habitName: user.todayHabits.habits.primary[key].name,
+                            habitStatus: user.todayHabits.habits.primary[key].status,
+                            habitNotes: user.todayHabits.habits.primary[key].notes,
+                            habitImageUrl: user.todayHabits.habits.primary[key].imageUrl,
+                            habitNotes: user.todayHabits.habits.primary[key].notes,
                         })
-                    }
-                </View>
+                    }).map((habitData, index) => {
+                        return (
+                            <HabitItem 
+                                key={index} 
+                                habitIndex={index} 
+                                habitData={habitData}
+                                primary={true} 
+                            />
+                        )
+                    })
+                }
+            </View>
+            
+            <GestureDetector gesture={swipeUpGesture}>
                 <Animated.View style={[styles.arrowContainer, animatedArrowStyle]}>
                     <ArrowUpIcon />
-                </Animated.View>    
-            </View>
-        </GestureDetector>
+                </Animated.View> 
+            </GestureDetector>   
+        </View>
     )
 }
 

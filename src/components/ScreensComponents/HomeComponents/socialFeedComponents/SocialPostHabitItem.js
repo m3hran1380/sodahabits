@@ -7,9 +7,14 @@ import { availableScreenWidth2, textStyle } from '../../../../styles/generalStyl
 import Animated, { useSharedValue, useAnimatedStyle, withTiming } from 'react-native-reanimated';
 import { convertToLocaleTime } from '../../../../businessLogic/firestoreFunctions';
 import { getTime } from '../../../../businessLogic/utilityFunctions';
+import { useDispatch, useSelector } from 'react-redux';
+import { setNudgeOpen } from '../../../../features/appSlice';
 
 
-const SocialPostHabitItem = ({ habitData, style, setExpandedHabit, isPostOwner, postIndex, flashListRef, setShowNudgeOverlay }) => {
+const SocialPostHabitItem = ({ habitData, style, setExpandedHabit, isPostOwner, postIndex, flashListRef }) => {
+    const dispatch = useDispatch();
+
+    const { nudgeOpen } = useSelector(state => state.app);
 
     // following are used for the hovering effect:
     const translateX = useSharedValue(0);
@@ -55,9 +60,10 @@ const SocialPostHabitItem = ({ habitData, style, setExpandedHabit, isPostOwner, 
         }
     }
 
+    const handleNudge = async () => {        
+        if (nudgeOpen?.index === postIndex) dispatch(setNudgeOpen(null));
+        else dispatch(setNudgeOpen({index: postIndex, habitData: habitData}));
 
-    const handleNudge = async () => {
-        setShowNudgeOverlay(val => !val);
         flashListRef.current.scrollToIndex({ animated: true, index: postIndex })
     }
 

@@ -696,12 +696,14 @@ export const updateDeviceToken = async (deviceToken, userId) => {
 
 // following function is used to nudge a user (this happens as a by product via a cloud function)
 // users can only create notification documents if the targetId is in the friends list. (via security rules)
-export const nudgeUser = async (senderId, receiverId, message) => {
+export const nudgeUser = async (senderId, receiverId, message, habitName) => {
     try {
         await addDoc(collection(db, 'notifications'), {
             senderId: senderId,
             receiverId: receiverId, 
             message: message,
+            habitName: habitName,
+            read: false,
             timestamp: serverTimestamp(),
         });
     }
@@ -721,5 +723,22 @@ export const replyToNudge = async (notificationId, reply) => {
     }   
     catch (error) {
         console.log("error while trying to reply to a nudge ", error);
+    }
+}
+
+
+
+// following function is used to change the read status of a notification
+export const setNotificationsReadStatus = async (notificationIds) => {
+    try {
+        notificationIds.forEach(async (documentId) => {
+            await updateDoc(doc(db, 'notifications', documentId), {
+                read: true,
+            });
+        })
+
+    }   
+    catch (error) {
+        console.log("error while setting the read status of a notification document ", error);
     }
 }
