@@ -10,7 +10,8 @@ import { calculateAdjustedDimensions } from '../../../businessLogic/utilityFunct
 import ArrowUpIcon from '../../../../assets/svgs/Icons/screenTransitionIcons/upArrow.svg';
 import Animated, { useSharedValue, useAnimatedStyle, interpolate, Extrapolation, withTiming, withDelay, runOnJS } from 'react-native-reanimated';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
-import NotificationsListOverlay from '../../../components/ScreensComponents/HomeComponents/habitComponents/NotificationsListOverlay';
+import NotificationsListOverlay from '../../../components/ScreensComponents/HomeComponents/notificationComponents/NotificationsListOverlay';
+import { TextInput } from 'react-native';
 
 
 const [lottieWidth, lottieHeight] = calculateAdjustedDimensions(1804, 1787);
@@ -18,7 +19,7 @@ const [lottieWidth, lottieHeight] = calculateAdjustedDimensions(1804, 1787);
 
 const HomeScreen = ({ navigation }) => {
     const user = useSelector(state => state.user.currentUser);
-    const { unreadNotifications } = useSelector(state => state.app);
+    const { unreadNotifications } = useSelector(state => state.notifications);
 
     const startingPosition = useSharedValue(0);
     const positionMovement = useSharedValue(0);

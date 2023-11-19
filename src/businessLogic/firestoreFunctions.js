@@ -696,13 +696,14 @@ export const updateDeviceToken = async (deviceToken, userId) => {
 
 // following function is used to nudge a user (this happens as a by product via a cloud function)
 // users can only create notification documents if the targetId is in the friends list. (via security rules)
-export const nudgeUser = async (senderId, receiverId, message, habitName) => {
+export const nudgeUser = async (senderId, receiverId, message, habitName, defaultMessage) => {
     try {
         await addDoc(collection(db, 'notifications'), {
             senderId: senderId,
             receiverId: receiverId, 
             message: message,
             habitName: habitName,
+            defaultMessage: defaultMessage, 
             read: false,
             timestamp: serverTimestamp(),
         });
@@ -713,14 +714,20 @@ export const nudgeUser = async (senderId, receiverId, message, habitName) => {
 }
 
 
-// reply to a notification object - only allow edit if the users device token matches the receiver token of the notification documetn.
-export const replyToNudge = async (notificationId, reply) => {
+// reply to a notification object 
+export const replyToNudge = async (notificationData, reply, isEmoji) => {
     try {
-        console.log(notificationId);
-        await updateDoc(doc(db, 'notifications', notificationId), {
-            reply: reply
-        })
-    }   
+        await addDoc(collection(db, 'notifications'), {
+            senderId: notificationData.receiverId,
+            receiverId: notificationData.senderId, 
+            message: reply,
+            isEmoji: isEmoji,
+            habitName: notificationData.habitName,
+            read: false,
+            reply: true,
+            timestamp: serverTimestamp(),
+        });
+    }
     catch (error) {
         console.log("error while trying to reply to a nudge ", error);
     }
@@ -740,5 +747,18 @@ export const setNotificationsReadStatus = async (notificationIds) => {
     }   
     catch (error) {
         console.log("error while setting the read status of a notification document ", error);
+    }
+}
+
+
+// following function is used to add the notification id (not the document the actual notification) to the document itself
+export const addNotificationID = async (notificationId, notificationDocId) => {
+    try {
+        await updateDoc(doc(db, 'notifications', notificationDocId), {
+            notificationId: notificationId
+        })
+    }
+    catch (error) {
+        console.log("error while adding notification id ", error)
     }
 }

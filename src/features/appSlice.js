@@ -5,7 +5,6 @@ const initialState = {
     loading: false,
     camera: false,
     nudgeOpen: null,
-    unreadNotifications: [],
 }
 
 
@@ -22,13 +21,10 @@ const appSlice = createSlice({
         setNudgeOpen: (state, action) => {
             state.nudgeOpen = action.payload;
         },
-        setUnreadNotifications: (state, action) => {
-            state.unreadNotifications = action.payload;
-        },
     }
 });
 
 
-export const { setAppLoading, toggleCamera, setNudgeOpen, setUnreadNotifications } = appSlice.actions;
+export const { setAppLoading, toggleCamera, setNudgeOpen } = appSlice.actions;
 
 export default appSlice.reducer;

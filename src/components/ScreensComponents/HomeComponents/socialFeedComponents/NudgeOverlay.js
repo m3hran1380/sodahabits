@@ -20,9 +20,10 @@ const NudgeOverlay = ({ userData }) => {
     }
 
     const handleNudge = async () => {
-        await nudgeUser(user.uid, userData.id, nudgeMessage ? nudgeMessage : 'Complete your habit', nudgeOpen.habitData.name);
-        setNudgeMessage(null);
         dispatch(setNudgeOpen(null));
+        const nudgeText = nudgeMessage ? nudgeMessage : `Complete your habit: '${nudgeOpen.habitData.name}'`;
+        await nudgeUser(user.uid, userData.id, nudgeText, nudgeOpen.habitData.name, nudgeMessage ? false : true);
+        setNudgeMessage(null);
     }
 
     return (

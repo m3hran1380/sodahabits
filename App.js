@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 import { View, StyleSheet, Platform, PermissionsAndroid } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { useFonts } from 'expo-font';
@@ -10,14 +10,14 @@ import { Provider } from 'react-redux';
 import RootNavigation from './src/Navigation/RootNavigation';
 import messaging from '@react-native-firebase/messaging';
 import notifee, { AndroidImportance, AndroidColor, EventType } from '@notifee/react-native';
-import { replyToNudge } from './src/businessLogic/firestoreFunctions';
+import { replyToNudge, addNotificationID } from './src/businessLogic/firestoreFunctions';
 
 
 notifee.onBackgroundEvent(async ({ type, detail }) => {
     const { notification, pressAction } = detail;
 
     if (type === EventType.ACTION_PRESS && pressAction.id === 'reply') {
-        await replyToNudge(notification.data.notificationId, detail.input);
+        await replyToNudge(notification.data.notificationData, detail.input, false);
         notifee.cancelNotification(notification.id);
     }
 })
@@ -33,16 +33,20 @@ const handleNotification = async (notification) => {
     })
 
     const notificationSenderData = JSON.parse(notification.data.senderData);
+    const notificationData = JSON.parse(notification.data.notificationData);
 
-    console.log("hi ", notification.data.message);
+    const notificationTitle = notificationData?.reply ? `${notificationSenderData.username} replied to you!` : `${notificationSenderData.username} nudged you!`;
 
-    await notifee.displayNotification({
-        title: `${notificationSenderData.username} nudged you!`,
+    const createdNotificationId = await notifee.displayNotification({
+        title: notificationTitle,
         body: `${notification.data.message}!`,
-        data: {notificationId: notification.data.id},
+        data: {notificationData: notificationData},
         android: {
             channelId,
             largeIcon: notificationSenderData.pfpUrl,
+            pressAction: {
+                id: 'default',
+            },
             actions: [
                 {
                     title: 'Reply',
@@ -52,11 +56,13 @@ const handleNotification = async (notification) => {
             ]
         },
     });
+
+    await addNotificationID(createdNotificationId, notification.data.id);
 }
 
 // register notification handlers
 messaging().setBackgroundMessageHandler(handleNotification);
-
+messaging().onMessage(handleNotification);
 
 SplashScreen.preventAutoHideAsync();
 
@@ -71,6 +77,17 @@ export default function App() {
     if (Platform.OS === 'android') {
         PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS);
     }
+
+    useEffect(() => {
+        return notifee.onForegroundEvent(({ type, detail }) => {
+            const { notification, pressAction } = detail;
+
+            if (type === EventType.ACTION_PRESS && pressAction.id === 'reply') {
+                replyToNudge(notification.data.notificationData, detail.input, false);
+                notifee.cancelNotification(notification.id);
+            }
+        })
+    })
 
     const onLayoutRootView = useCallback(async () => {
         if (fontsLoaded) {
