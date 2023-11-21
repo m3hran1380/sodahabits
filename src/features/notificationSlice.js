@@ -3,6 +3,7 @@ import { createSlice } from "@reduxjs/toolkit";
 const initialState = {
     currentNotificationIndex: null,
     unreadNotifications: [],
+    unreadNotificationsData: [],
 }
 
 const notificationSlice = createSlice({
@@ -15,10 +16,13 @@ const notificationSlice = createSlice({
         setUnreadNotifications: (state, action) => {
             state.unreadNotifications = action.payload;
         },
+        setUnreadNotificationsData: (state, action) => {
+            state.unreadNotificationsData = action.payload;
+        }
     }
 });
 
 
-export const { setNotificationIndex, setUnreadNotifications } = notificationSlice.actions;
+export const { setNotificationIndex, setUnreadNotifications, setUnreadNotificationsData } = notificationSlice.actions;
 
 export default notificationSlice.reducer;

@@ -1,44 +1,67 @@
 import { StyleSheet, Text, View, Image, Pressable, TextInput } from 'react-native'
 import { actualScreenWidth, availableScreenWidth2, textStyle } from '../../../../styles/generalStyle'
 import DefaultPFP from '../../../../../assets/svgs/defaultPfps/default1.svg';
-import Animated, { Extrapolate, interpolate, useAnimatedStyle } from 'react-native-reanimated';
+import Animated, { Extrapolate, interpolate, useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
 import ReplyInput from './ReplyInput';
 import { memo, useState } from 'react';
-import { useEffect } from 'react';
+import { useEffect, useLayoutEffect } from 'react';
 import { useSelector } from 'react-redux';
+import { replyToNudge } from '../../../../businessLogic/firestoreFunctions';
 
 
-const NotificationElement = memo(({ data, listOffsetValue, index, flatListRef }) => {
+const NotificationElement = ({ listOffsetValue, flatListRef, index, viewableNotification }) => {
     const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
     const [replied, setReplied] = useState(false);
     const [showReplyMenu, setShowReplyMenu] = useState(false);
     const [showReplyInput, setShowReplyInput] = useState(false);
 
-    const {currentNotificationIndex} = useSelector(state => state.notifications);
+    const notificationsData = useSelector(state => state.notifications.unreadNotificationsData);
+    const calculatedIndex = useSharedValue(null);
+    const data = notificationsData[index];
+
+    useLayoutEffect(() => {
+        // console.log(viewableNotification);
+        if (!viewableNotification) {
+            const value = notificationsData.filter(notification => notification.notificationData.id === data.notificationData.id)[0].index;
+            calculatedIndex.value = value;
+        }
+    }, [viewableNotification]);
+
+
+    const marginLeftValues = useSharedValue(0);
 
     useEffect(() => {
         if (replied) {
             setShowReplyMenu(false);
             setShowReplyInput(false);
-            flatListRef.current.scrollToIndex({ index: currentNotificationIndex + 1, animated: true });
+            flatListRef.current.scrollToIndex({ index: viewableNotification + 1, animated: true });
         }
     }, [replied])
 
+
     const animatedStyle = useAnimatedStyle(() => {
+
+        const indexToUse = calculatedIndex.value ? calculatedIndex.value : index;
+
         const marginLeftValue = interpolate(
             listOffsetValue.value,
-            [(index - 1) * (actualScreenWidth - 20), (index) * (actualScreenWidth - 20)],
+            [(indexToUse - 1) * (actualScreenWidth - 20), (indexToUse) * (actualScreenWidth - 20)],
             [10, 20],
             Extrapolate.CLAMP
         );
-
+        // console.log(index, " ", marginLeftValue, " ", listOffsetValue.value);
         const opacityValue = interpolate(listOffsetValue.value,
-            [(index - 1) * (actualScreenWidth - 20), index * (actualScreenWidth - 20), (index + 1) * (actualScreenWidth - 20)],
+            [(indexToUse - 1) * (actualScreenWidth - 20), indexToUse * (actualScreenWidth - 20), (indexToUse + 1) * (actualScreenWidth - 20)],
             [1, 1, 0],
             Extrapolate.CLAMP,
         )
+
+        marginLeftValues.value = opacityValue;
         return {opacity: opacityValue, marginLeft: marginLeftValue}
     });
+
+    // console.log("element ", index);
+
 
     const handleNotificationPressed = () => {
         if (!data.notificationData?.reply && !replied) {
@@ -46,6 +69,12 @@ const NotificationElement = memo(({ data, listOffsetValue, index, flatListRef })
             setShowReplyInput(false);
         }
     }
+
+    const replyWithEmoji = async (emoji) => {
+        setReplied(true);
+        await replyToNudge(data.notificationData, emoji, false);
+    }
+
 
     if (!data?.dummy) {
         return (
@@ -67,7 +96,11 @@ const NotificationElement = memo(({ data, listOffsetValue, index, flatListRef })
                         {data.notificationData?.defaultMessage ?
                             <Text style={styles.text}>Complete your habit!</Text>
                                :
-                            <Text style={styles.text}>{data.notificationData.message}</Text>
+                            <>{data.notificationData?.isEmoji ? 
+                                <Text style={[styles.text, {fontSize: 20}]}>{String.fromCodePoint(data.notificationData.message)}</Text>
+                                :
+                                <Text style={styles.text}>{data.notificationData.message}</Text>
+                            }</>
                         }
                     </View>
                 </View>
@@ -79,13 +112,13 @@ const NotificationElement = memo(({ data, listOffsetValue, index, flatListRef })
                         </Pressable>
                         <Text style={styles.text}>or</Text>
                         <View style={styles.emojiContainer}>
-                            <Pressable style={styles.emoji}>
+                            <Pressable onPress={() => replyWithEmoji(String.fromCodePoint('0x1F44D'))} style={styles.emoji}>
                                 <Text>{String.fromCodePoint('0x1F44D')}</Text>
                             </Pressable>
-                            <Pressable style={styles.emoji}>
+                            <Pressable onPress={() => replyWithEmoji(String.fromCodePoint('0x2764'))} style={styles.emoji}>
                                 <Text>{String.fromCodePoint('0x2764')}</Text>
                             </Pressable>
-                            <Pressable style={styles.emoji}>
+                            <Pressable onPress={() => replyWithEmoji(String.fromCodePoint('0x1F64F'))} style={styles.emoji}>
                                 <Text>{String.fromCodePoint('0x1F64F')}</Text>
                             </Pressable>
                         </View>
@@ -100,17 +133,8 @@ const NotificationElement = memo(({ data, listOffsetValue, index, flatListRef })
     else return (
         <View style={[styles.container, {marginRight: 20, opacity: 0}]} />
     )
-},
-(r1, r2) => {
-    // prevent unnecessary re-render when flatlist data changes.
-    const { listOffsetValue: offset1, flatListRef: listRef1, ...r1Data } = r1;
-    const { listOffsetValue: offset2, flatListRef: listRef2, ...r2Data } = r2;
-    const r1DataString = JSON.stringify(r1Data);
-    const r2DataString = JSON.stringify(r2Data);
-    if (r1DataString.localeCompare(r2DataString) === 0) return true;
-    else return false;
 }
-)
+
 
 export default NotificationElement
 

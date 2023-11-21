@@ -6,14 +6,20 @@ import NotificationElement from './NotificationElement';
 import Animated, { useSharedValue, useAnimatedScrollHandler, runOnJS } from 'react-native-reanimated';
 import { setNotificationsReadStatus } from '../../../../businessLogic/firestoreFunctions';
 import notifee from '@notifee/react-native';
-import { setNotificationIndex } from '../../../../features/notificationSlice';
+import { setUnreadNotificationsData } from '../../../../features/notificationSlice';
 
 
 const NotificationsListOverlay = ({notifications}) => {
     const {friendsList} = useSelector(state => state.friends);
-    const [notificationsData, setNotificationsData] = useState([]);
+    const notificationsData = useSelector(state => state.notifications.unreadNotificationsData);
+
     const [updatingNotifications, setUpdatingNotifications] = useState(false);
-    const [viewableNotification, setViewableNotification] = useState(null);
+    const [viewableNotification, setViewableNotification] = useState(0);
+    
+    // const [canScroll, setCanScroll] = useState(true);
+    // const [currentlyScrolling, setCurrentlyScrolling] = useState(false);
+    // const [transientData, setTransientData] = useState(null);
+
     const flatListRef = useRef(null);
     const listOffsetValue = useSharedValue(0);
 
@@ -21,45 +27,99 @@ const NotificationsListOverlay = ({notifications}) => {
 
     useLayoutEffect(() => {
         // add the user data to the notifications
-        const notificationsDataArray = notifications.filter(notification => notification?.notificationId).map((notification) => {
-            const userData = friendsList.find((friend) => friend.id === notification.senderId);
-            return (
-                {
+        let notificationsDataArray = [];
+        if (!notificationsData.length) {
+            notificationsDataArray = notifications.filter(notification => notification?.notificationId).map((notification, index) => {
+                const userData = friendsList.find((friend) => friend.id === notification.senderId);
+                return (
+                    {
+                        userData: userData,
+                        notificationData: notification,
+                    }
+                )
+            });
+        }
+        else {
+            const newIDArray = notifications.filter(notification => notification?.notificationId).map(not => not.id);
+            const oldIDArray = notificationsData.map(not => not.notificationData.id).slice(0, -1);;
+
+            const difference = newIDArray.filter(id => !oldIDArray.includes(id));
+            difference.forEach((id) => {
+                const notificationData = notifications.filter(not => not.id === id)[0];
+                const userData = friendsList.find(friend => friend.id === notificationData.senderId);
+                notificationsDataArray = [...notificationsData.slice(0, -1), {
                     userData: userData,
-                    notificationData: notification,
-                }
-            )
-        });
-        notificationsDataArray.push({
-            dummy: true,
-        })
-        setNotificationsData(notificationsDataArray);   
+                    notificationData: notificationData,
+                }]
+            })
+        }
+        if (notificationsDataArray.length) {
+            notificationsDataArray.push({
+                dummy: true,
+                notificationData: {id: 'last-item'},
+            });
+        }
+        // check see if the array has actually changed:
+        const newArrayIDs = notificationsDataArray.map(item => item.notificationData.id);
+        const oldArrayIDs = notificationsData.map(item => item.notificationData.id);
+        if (newArrayIDs.length < oldArrayIDs.length) return;
+        if (newArrayIDs.length === oldArrayIDs.length && newArrayIDs.every((element, index) => element === oldArrayIDs[index])) return;
+        
+        if (updatingNotifications) setUpdatingNotifications(false);
+
+
+        dispatch(setUnreadNotificationsData(notificationsDataArray));
+
+        // if (!currentlyScrolling) {
+        //     dispatch(setUnreadNotificationsData(notificationsDataArray));
+        // }
+        // else {
+        //     setTransientData(notificationsDataArray);
+        // }
     }, [notifications]);
 
-
     // scroll to start of the notifications list when new notification appears.
-    useEffect(() => {
-        if (!notificationsData.length) return;
-        flatListRef.current.scrollToIndex({ index: 0, animated: true });
-    }, 
-    [notificationsData]);
+    // useEffect(() => {
+    //     if (!notificationsData.length || viewableNotification === 0) return;
+    //     setCanScroll(false);
+    //     setTimeout(() => {
+    //         setCanScroll(true)
+    //     }, 500);
+    //     flatListRef.current.scrollToIndex({ index: 0, animated: true });
+    //     listOffsetValue.value = 0;
+    // }, 
+    // [notificationsData]);
 
     // remove the associated notification from the users device as they scroll
     useEffect(() => {
         if (!viewableNotification) return;
-        notifee.cancelNotification(notifications[viewableNotification - 1].notificationId);
+        if (notifications[viewableNotification - 1]?.notificationId) {
+            notifee.cancelNotification(notifications[viewableNotification - 1].notificationId);
+        }
     }, [viewableNotification])
     
+
+    // const onScrollingFinished = () => {
+    //     setCurrentlyScrolling(false);
+    //     if (transientData) {
+    //         setTimeout(() => {
+    //             dispatch(setUnreadNotificationsData(transientData))
+    //         }, 500);
+    //     }
+    // }
+
     const handleScroll = useAnimatedScrollHandler({
         onScroll: e => listOffsetValue.value = e.contentOffset.x,
     });
 
-    const handleEndRached = async () => {
-        notifee.cancelNotification(notifications[notifications.length - 1].notificationId);
-        const notificationsIdArray = notifications.map(not => not.id);
+    const handleEndRached = () => {
         setUpdatingNotifications(true);
-        await setNotificationsReadStatus(notificationsIdArray);
-        setUpdatingNotifications(false);
+        dispatch(setUnreadNotificationsData([]));
+        if (notifications[notifications.length - 1]?.notificationId) {
+            notifee.cancelNotification(notifications[notifications.length - 1].notificationId);
+        }
+        const notificationsIdArray = notifications.map(not => not.id);
+        setNotificationsReadStatus(notificationsIdArray)
     }
 
     const viewabilityConfig = {
@@ -68,9 +128,8 @@ const NotificationsListOverlay = ({notifications}) => {
 
     const onViewableItemsChanged = ({ viewableItems }) => {
         if (!viewableItems.length) return;
-        if (viewableItems[0].index !== null) {
+        if (viewableItems[0].index !== null || viewableItems[0].index !== viewableNotification) {
             runOnJS(setViewableNotification)(viewableItems[0].index);
-            runOnJS(dispatch)(setNotificationIndex(viewableItems[0].index));
         }    
     }
 
@@ -78,18 +137,18 @@ const NotificationsListOverlay = ({notifications}) => {
         { viewabilityConfig, onViewableItemsChanged }
     ]);
 
-    const renderPost = useCallback(({item, index}) =>
+    const renderPost = ({_, index}) =>
         <NotificationElement 
             listLength={notificationsData.length} 
             listOffsetValue={listOffsetValue} 
-            data={item} 
-            index={index} 
+            index={index}
             flatListRef={flatListRef} 
+            viewableNotification={viewableNotification}
         />
-    ,[notificationsData])
+ 
+    const keyExtractor = useCallback((item) => item.notificationData.id, []);
 
-    const keyExtractor = useCallback((item) => item?.notificationData?.id ? item.notificationData.id : Math.floor(Math.random() * 1000), []);
-
+    if (!notificationsData.length) return <></>
     return (
         <View style={styles.container}>
             {!updatingNotifications &&
@@ -107,6 +166,9 @@ const NotificationsListOverlay = ({notifications}) => {
                     ref={flatListRef}
                     viewabilityConfigCallbackPairs={viewabilityConfigCallbackPairs.current}
                     keyboardShouldPersistTaps='always'
+                    // onScrollBeginDrag={() => {setCurrentlyScrolling(true)}}
+                    // onScrollEndDrag={onScrollingFinished}
+                    // scrollEnabled={canScroll}
                 />
             }
         </View>
