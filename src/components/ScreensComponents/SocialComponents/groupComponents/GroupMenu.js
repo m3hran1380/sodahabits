@@ -18,7 +18,7 @@ const GroupsMenu = ({ style }) => {
                     <Pressable onPress={() => {navigation.navigate('social search screen')}}>
                         <SearchIcon width={27} height={27}/>
                     </Pressable>
-                    <Pressable>
+                    <Pressable onPress={() => {navigation.navigate('group creation screen')}}>
                         <PlusIcon width={27} height={27}/>
                     </Pressable>
                 </View> 

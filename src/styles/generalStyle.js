@@ -66,6 +66,9 @@ export const textStyle = {
     allText: {
         fontFamily: 'space-grotesk',
     },
+    allTextBold: {
+        fontFamily: 'space-grotesk-bold',
+    },
     normalText: {
         fontSize: actualScreenWidth > 414 ? 18 : actualScreenWidth > 321 ? 16 : 14,
     },
