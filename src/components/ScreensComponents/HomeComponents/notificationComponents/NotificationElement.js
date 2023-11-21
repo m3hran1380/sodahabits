@@ -1,10 +1,9 @@
-import { StyleSheet, Text, View, Image, Pressable, TextInput } from 'react-native'
+import { StyleSheet, Text, View, Image, Pressable } from 'react-native'
 import { actualScreenWidth, availableScreenWidth2, textStyle } from '../../../../styles/generalStyle'
 import DefaultPFP from '../../../../../assets/svgs/defaultPfps/default1.svg';
-import Animated, { Extrapolate, interpolate, useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
+import Animated, { Extrapolate, interpolate, useAnimatedStyle } from 'react-native-reanimated';
 import ReplyInput from './ReplyInput';
-import { memo, useState } from 'react';
-import { useEffect, useLayoutEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { replyToNudge } from '../../../../businessLogic/firestoreFunctions';
 
@@ -15,20 +14,7 @@ const NotificationElement = ({ listOffsetValue, flatListRef, index, viewableNoti
     const [showReplyMenu, setShowReplyMenu] = useState(false);
     const [showReplyInput, setShowReplyInput] = useState(false);
 
-    const notificationsData = useSelector(state => state.notifications.unreadNotificationsData);
-    const calculatedIndex = useSharedValue(null);
-    const data = notificationsData[index];
-
-    useLayoutEffect(() => {
-        // console.log(viewableNotification);
-        if (!viewableNotification) {
-            const value = notificationsData.filter(notification => notification.notificationData.id === data.notificationData.id)[0].index;
-            calculatedIndex.value = value;
-        }
-    }, [viewableNotification]);
-
-
-    const marginLeftValues = useSharedValue(0);
+    const data = useSelector(state => state.notifications.unreadNotificationsData)[index];
 
     useEffect(() => {
         if (replied) {
@@ -40,27 +26,19 @@ const NotificationElement = ({ listOffsetValue, flatListRef, index, viewableNoti
 
 
     const animatedStyle = useAnimatedStyle(() => {
-
-        const indexToUse = calculatedIndex.value ? calculatedIndex.value : index;
-
         const marginLeftValue = interpolate(
             listOffsetValue.value,
-            [(indexToUse - 1) * (actualScreenWidth - 20), (indexToUse) * (actualScreenWidth - 20)],
+            [(index - 1) * (actualScreenWidth - 20), (index) * (actualScreenWidth - 20)],
             [10, 20],
             Extrapolate.CLAMP
         );
-        // console.log(index, " ", marginLeftValue, " ", listOffsetValue.value);
         const opacityValue = interpolate(listOffsetValue.value,
-            [(indexToUse - 1) * (actualScreenWidth - 20), indexToUse * (actualScreenWidth - 20), (indexToUse + 1) * (actualScreenWidth - 20)],
+            [(index - 1) * (actualScreenWidth - 20), index * (actualScreenWidth - 20), (index + 1) * (actualScreenWidth - 20)],
             [1, 1, 0],
             Extrapolate.CLAMP,
         )
-
-        marginLeftValues.value = opacityValue;
         return {opacity: opacityValue, marginLeft: marginLeftValue}
     });
-
-    // console.log("element ", index);
 
 
     const handleNotificationPressed = () => {
@@ -134,7 +112,6 @@ const NotificationElement = ({ listOffsetValue, flatListRef, index, viewableNoti
         <View style={[styles.container, {marginRight: 20, opacity: 0}]} />
     )
 }
-
 
 export default NotificationElement
 

@@ -725,6 +725,7 @@ export const replyToNudge = async (notificationData, reply, isEmoji) => {
             habitName: notificationData.habitName,
             read: false,
             reply: true,
+            originalDocumentId: notificationData.id,
             timestamp: serverTimestamp(),
         });
     }

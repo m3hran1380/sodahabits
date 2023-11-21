@@ -9,7 +9,7 @@ import OnboardingScreen from "../screens/onboardingScreens/OnboardingScreen";
 import AuthenticatedNavigation from "./AuthenticatedNavigation";
 import SplashScreen from "../components/loadingSpinners/SplashScreen";
 import { setAppLoading } from "../features/appSlice";
-import { setUnreadNotifications } from "../features/notificationSlice";
+import { setUnreadNotifications, setUnreadNotificationsData } from "../features/notificationSlice";
 import { initialiseApp } from "../businessLogic/initialisationFunctions";
 import { collection, doc, onSnapshot, query, where, orderBy } from "firebase/firestore";
 import { db, auth } from "../firestore/firestoreConfig";
@@ -64,6 +64,7 @@ const RootNavigation = () => {
                 }
                 else {
                     dispatch(clearUser())
+                    dispatch(setUnreadNotificationsData([]));
                 }
                 dispatch(setAppLoading(false));
             }

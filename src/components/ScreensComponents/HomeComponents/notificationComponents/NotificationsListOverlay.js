@@ -3,7 +3,7 @@ import { actualScreenWidth, availableScreenWidth2 } from '../../../../styles/gen
 import { useLayoutEffect, useState, useRef, useEffect, useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import NotificationElement from './NotificationElement';
-import Animated, { useSharedValue, useAnimatedScrollHandler, runOnJS } from 'react-native-reanimated';
+import Animated, { useSharedValue, useAnimatedScrollHandler, runOnJS, FadeIn } from 'react-native-reanimated';
 import { setNotificationsReadStatus } from '../../../../businessLogic/firestoreFunctions';
 import notifee from '@notifee/react-native';
 import { setUnreadNotificationsData } from '../../../../features/notificationSlice';
@@ -12,13 +12,8 @@ import { setUnreadNotificationsData } from '../../../../features/notificationSli
 const NotificationsListOverlay = ({notifications}) => {
     const {friendsList} = useSelector(state => state.friends);
     const notificationsData = useSelector(state => state.notifications.unreadNotificationsData);
-
     const [updatingNotifications, setUpdatingNotifications] = useState(false);
     const [viewableNotification, setViewableNotification] = useState(0);
-    
-    // const [canScroll, setCanScroll] = useState(true);
-    // const [currentlyScrolling, setCurrentlyScrolling] = useState(false);
-    // const [transientData, setTransientData] = useState(null);
 
     const flatListRef = useRef(null);
     const listOffsetValue = useSharedValue(0);
@@ -66,29 +61,9 @@ const NotificationsListOverlay = ({notifications}) => {
         if (newArrayIDs.length === oldArrayIDs.length && newArrayIDs.every((element, index) => element === oldArrayIDs[index])) return;
         
         if (updatingNotifications) setUpdatingNotifications(false);
-
-
         dispatch(setUnreadNotificationsData(notificationsDataArray));
 
-        // if (!currentlyScrolling) {
-        //     dispatch(setUnreadNotificationsData(notificationsDataArray));
-        // }
-        // else {
-        //     setTransientData(notificationsDataArray);
-        // }
     }, [notifications]);
-
-    // scroll to start of the notifications list when new notification appears.
-    // useEffect(() => {
-    //     if (!notificationsData.length || viewableNotification === 0) return;
-    //     setCanScroll(false);
-    //     setTimeout(() => {
-    //         setCanScroll(true)
-    //     }, 500);
-    //     flatListRef.current.scrollToIndex({ index: 0, animated: true });
-    //     listOffsetValue.value = 0;
-    // }, 
-    // [notificationsData]);
 
     // remove the associated notification from the users device as they scroll
     useEffect(() => {
@@ -97,16 +72,6 @@ const NotificationsListOverlay = ({notifications}) => {
             notifee.cancelNotification(notifications[viewableNotification - 1].notificationId);
         }
     }, [viewableNotification])
-    
-
-    // const onScrollingFinished = () => {
-    //     setCurrentlyScrolling(false);
-    //     if (transientData) {
-    //         setTimeout(() => {
-    //             dispatch(setUnreadNotificationsData(transientData))
-    //         }, 500);
-    //     }
-    // }
 
     const handleScroll = useAnimatedScrollHandler({
         onScroll: e => listOffsetValue.value = e.contentOffset.x,
@@ -153,6 +118,7 @@ const NotificationsListOverlay = ({notifications}) => {
         <View style={styles.container}>
             {!updatingNotifications &&
                 <Animated.FlatList 
+                    entering={FadeIn}
                     decelerationRate={0.50}
                     onScroll={handleScroll}
                     disableIntervalMomentum
@@ -166,9 +132,6 @@ const NotificationsListOverlay = ({notifications}) => {
                     ref={flatListRef}
                     viewabilityConfigCallbackPairs={viewabilityConfigCallbackPairs.current}
                     keyboardShouldPersistTaps='always'
-                    // onScrollBeginDrag={() => {setCurrentlyScrolling(true)}}
-                    // onScrollEndDrag={onScrollingFinished}
-                    // scrollEnabled={canScroll}
                 />
             }
         </View>
