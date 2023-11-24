@@ -13,8 +13,9 @@ import { setUnreadNotifications, setUnreadNotificationsData } from "../features/
 import { initialiseApp } from "../businessLogic/initialisationFunctions";
 import { collection, doc, onSnapshot, query, where, orderBy } from "firebase/firestore";
 import { db, auth } from "../firestore/firestoreConfig";
-import { getUsersById, retrieveIncomingFriendRequestsData } from "../businessLogic/firestoreFunctions";
+import { getUsersById, retrieveIncomingFriendRequestsData, getGroupsById } from "../businessLogic/firestoreFunctions";
 import { setFriends, setIncomingRequestsData } from "../features/friendSlice";
+import { setGroups } from "../features/groupSlice";
 
 
 const Stack = createStackNavigator();
@@ -36,11 +37,14 @@ const RootNavigation = () => {
                     const userData = await initialiseApp(user.uid);
                     // retrieve user's friends data:
                     const friendsData = await getUsersById(userData.friends ? userData.friends : []);
+                    // retrieve user's groups data:
+                    const groupsData = await getGroupsById(userData.membersOf ? userData.membersOf : []);
                     // retrieve incoming requests:
                     const incomingRequestsData = await retrieveIncomingFriendRequestsData(user.uid);
                     dispatch(setIncomingRequestsData(incomingRequestsData));
                     dispatch(setUser(userData));
                     dispatch(setFriends(friendsData));
+                    dispatch(setGroups(groupsData));
 
                     // set up a live listener on the userprivate document:
                     userSnapshotUnsub = onSnapshot(doc(db, 'usersprivate', user.uid), (snapshot) => {

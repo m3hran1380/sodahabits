@@ -1,4 +1,4 @@
-import { getDocs, getDoc, doc, query, collection, orderBy, limit, addDoc, serverTimestamp, writeBatch, updateDoc, startAt, endAt, runTransaction, deleteDoc, where, startAfter, setDoc } from 'firebase/firestore';
+import { getDocs, getDoc, doc, query, collection, orderBy, limit, addDoc, serverTimestamp, writeBatch, updateDoc, startAt, endAt, runTransaction, deleteDoc, where, startAfter, setDoc, getDocsFromCache, getDocsFromServer, arrayUnion } from 'firebase/firestore';
 import { ref, deleteObject } from "firebase/storage";
 import { storage } from '../firestore/firestoreConfig';
 import { db } from '../firestore/firestoreConfig';
@@ -463,6 +463,23 @@ export const getUsersById = async (ids) => {
     }
 }
 
+export const getGroupsById = async (ids) => {
+    const groupsDocuments = [];
+    try {
+        for (const id of ids) {
+            const retrievedDocument = await getDoc(doc(db, 'groups', id));
+            if (retrievedDocument.exists()) {
+                groupsDocuments.push({id: retrievedDocument.id, ...retrievedDocument.data()});
+            }
+        }
+        return groupsDocuments;
+    }
+    catch (error) {
+        console.log("error while getting group documents by id: ", error);
+        return [];
+    }
+}
+
 
 export const acceptFriendRequest = async (senderId, receiverId) => {
     try {
@@ -761,5 +778,49 @@ export const addNotificationID = async (notificationId, notificationDocId) => {
     }
     catch (error) {
         console.log("error while adding notification id ", error)
+    }
+}
+
+
+// following function is used to check if a particular group name already exists
+export const groupExists = async (groupName) => {
+    try {
+        const docQuery = query(collection(db, 'groups'), where('lowercasedname', '==', groupName.toLowerCase()));
+        const groupDoc = await getDocs(docQuery);
+        if (!groupDoc.empty) {
+            return true
+        }
+        else return false;
+
+    }
+    catch (error) {
+        console.log("error while looking for a group ", error);
+    }
+}
+
+
+// following function creates a group
+export const createGroup = async (userId, friendsToInvite, groupName, imageUrl) => {
+    try {
+        const docQuery = query(collection(db, 'groups'), where('lowercasedname', '==', groupName.toLowerCase()));
+        const groupDoc = await getDocs(docQuery);
+        if (!groupDoc.empty) {
+            throw new Error('Group already exists.');
+        }
+        const docRef = await addDoc(collection(db, 'groups'), {
+            ownerId: userId,
+            lowercasedname: groupName.toLowerCase(),
+            name: groupName,
+            members: [userId],
+            open: true,
+            invited: friendsToInvite,
+            groupImage: imageUrl ? imageUrl : null,
+        });
+        await updateDoc(doc(db, 'usersprivate', userId), {
+            membersOf: arrayUnion(docRef.id),
+        })
+    }
+    catch (error) {
+        throw error;
     }
 }

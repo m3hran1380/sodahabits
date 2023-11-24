@@ -8,7 +8,7 @@ const SocialScreen = () => {
     
     return (
         <View style={styles.parentContainer}>
-            <SafeAreaView style={[generalStyles.containerNoMargin, styles.container]}>
+            <SafeAreaView style={styles.container}>
                 <ScrollView>
                     <GroupsMenu style={styles.groupsMenu}/>
                     <FriendsMenu />               

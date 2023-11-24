@@ -11,7 +11,6 @@ import ArrowUpIcon from '../../../../assets/svgs/Icons/screenTransitionIcons/upA
 import Animated, { useSharedValue, useAnimatedStyle, interpolate, Extrapolation, withTiming, withDelay, runOnJS } from 'react-native-reanimated';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import NotificationsListOverlay from '../../../components/ScreensComponents/HomeComponents/notificationComponents/NotificationsListOverlay';
-import { TextInput } from 'react-native';
 
 
 const [lottieWidth, lottieHeight] = calculateAdjustedDimensions(1804, 1787);

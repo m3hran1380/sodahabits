@@ -1,19 +1,28 @@
-import { StyleSheet, View, Text, Pressable, Image, TextInput, KeyboardAvoidingView } from 'react-native';
-import generalStyles, { actualScreenHeight, availableScreenWidth2, colors, textStyle } from '../../../styles/generalStyle';
+import { StyleSheet, View, Text, Pressable, Image, TextInput } from 'react-native';
+import generalStyles, { actualScreenHeight, availableScreenWidth2, colors, textStyle } from '../../../../styles/generalStyle';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import BackButtonIcon from '../../../../assets/svgs/Icons/socialIcons/friendIcons/backButton.svg';
-import { useNavigation } from '@react-navigation/native';
-import { useState } from 'react';
+import BackButtonIcon from '../../../../../assets/svgs/Icons/socialIcons/friendIcons/backButton.svg';
+import { useState, useCallback } from 'react';
 import * as ImagePicker from 'expo-image-picker';
-import DefaultGroupPicture from '../../../../assets/svgs/defaultPfps/default1.svg';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
+import DefaultGroupPicture from '../../../../../assets/svgs/defaultPfps/default1.svg';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import { debounce } from 'lodash';
+import { groupExists } from '../../../../businessLogic/firestoreFunctions';
 
 
-
-const GroupCreationScreen = () => {
-    const navigation = useNavigation();
+const GroupCreationScreen = ({ navigation }) => {
     const [image, setImage] = useState(null);
-    const [clanName, setClanName] = useState(null);
+    const [groupName, setGroupName] = useState(null);
+    const [groupAlreadyExists, setGroupAlreadyExists] = useState(null);
+    const [searching, setSearching] = useState(false);
+
+    const debouncedGroupSearch = useCallback(
+        debounce((userInput) => {
+            groupExists(userInput).then((results) => {
+                setGroupAlreadyExists(results);
+                setSearching(false);
+            })
+    }, 500), []);
 
     const pickImage = async () => {
         const result = await ImagePicker.launchImageLibraryAsync({
@@ -26,7 +35,12 @@ const GroupCreationScreen = () => {
     }
 
     const handleInput = (input) => {
-        setClanName(input)
+        setGroupName(input);
+        if (!input) setGroupAlreadyExists(null);
+        if (input) {
+            setSearching(true);
+            debouncedGroupSearch(input);
+        }
     }
 
     return (
@@ -36,6 +50,7 @@ const GroupCreationScreen = () => {
                     enableOnAndroid={true} 
                     style={{flex: 1}}
                     extraScrollHeight={0.15 * actualScreenHeight}
+                    keyboardShouldPersistTaps='always'
                 >               
                     <View style={styles.headerTextContainer}>
                         <Text style={[generalStyles.h2, styles.headerText]}>Create a gorup</Text>
@@ -54,16 +69,26 @@ const GroupCreationScreen = () => {
                         </View>
                         <TextInput 
                             placeholderTextColor={'#838383'}
-                            value={clanName} 
+                            value={groupName} 
                             onChangeText={handleInput} 
-                            style={styles.textInput} 
+                            style={[
+                                styles.textInput, 
+                                {borderColor: !groupName ? 'black' : groupAlreadyExists === null ? 'black' : groupAlreadyExists ? 'red' : 'green'}, 
+                                searching && {borderColor: 'black'}
+                            ]} 
                             placeholder='Enter group name' 
                             multiline={true}
                         />
                         <Text style={styles.paragraph}>As a group you can grow together, contribute towards a group fund to purchase exclusive properties and more.</Text>
                         
-                        <Pressable onPress={pickImage} style={styles.nextBtn}>
-                            {({pressed}) => <Text style={[styles.nextBtnText, pressed && {color: 'black'}]}>Next</Text>}
+                        <Pressable 
+                            disabled={searching || !groupName || groupAlreadyExists} 
+                            onPress={() => navigation.navigate('invite friends screen', {groupName: groupName, image: image})} 
+                            style={[styles.nextBtn, (searching || !groupName || groupAlreadyExists) && styles.nextBtnDisabled]}
+                        >
+                            {({pressed}) => 
+                                <Text style={[styles.nextBtnText, pressed && {color: 'black'}, (searching || !groupName || groupAlreadyExists) && styles.nextBtnDisabled]}>Next</Text>
+                            }
                         </Pressable>
 
                     </View>
@@ -95,7 +120,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         marginTop: 30,
-        marginBottom: 25,
+        marginBottom: 10,
     },
     backBtn: {
         height: 20,
@@ -170,7 +195,12 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         borderRadius: 5,
         marginTop: 20,
+        borderWidth: 1,
     },
+    nextBtnDisabled: {
+        backgroundColor: '#878787',
+        color: '#4c4c4c'
+    }
 })
 
 

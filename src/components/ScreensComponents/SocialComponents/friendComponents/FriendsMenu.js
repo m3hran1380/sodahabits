@@ -52,6 +52,7 @@ export default FriendsMenu
 const styles = StyleSheet.create({
     container: {
         marginTop: 20,
+        paddingHorizontal: 20,
     },
     friendList: {
         width: '100%',
