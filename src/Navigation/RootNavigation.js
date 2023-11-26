@@ -15,7 +15,7 @@ import { collection, doc, onSnapshot, query, where, orderBy } from "firebase/fir
 import { db, auth } from "../firestore/firestoreConfig";
 import { getUsersById, retrieveIncomingFriendRequestsData, getGroupsById } from "../businessLogic/firestoreFunctions";
 import { setFriends, setIncomingRequestsData } from "../features/friendSlice";
-import { setGroups } from "../features/groupSlice";
+import { setGroups, setIncomingInvitations } from "../features/groupSlice";
 
 
 const Stack = createStackNavigator();
@@ -27,8 +27,10 @@ const RootNavigation = () => {
     const userState = useSelector((state) => state.user.currentUser);
     // check for authentication status:
     useEffect(() => {
-        let userSnapshotUnsub = () => {pass}
-        let notificationsSnapshotUnsub = () => {pass}
+        let userSnapshotUnsub = () => {return null}
+        let notificationsSnapshotUnsub = () => {return null}
+        let groupSnapshotUnsub = () => {return null}
+        let groupInvitationSnapshotUnsub = () => {return null}
         const unsub = onAuthStateChanged(auth, async (user) => {
             try {
                 // don't go to home page till we have retrieved the necessary data.
@@ -37,14 +39,11 @@ const RootNavigation = () => {
                     const userData = await initialiseApp(user.uid);
                     // retrieve user's friends data:
                     const friendsData = await getUsersById(userData.friends ? userData.friends : []);
-                    // retrieve user's groups data:
-                    const groupsData = await getGroupsById(userData.membersOf ? userData.membersOf : []);
                     // retrieve incoming requests:
                     const incomingRequestsData = await retrieveIncomingFriendRequestsData(user.uid);
                     dispatch(setIncomingRequestsData(incomingRequestsData));
                     dispatch(setUser(userData));
                     dispatch(setFriends(friendsData));
-                    dispatch(setGroups(groupsData));
 
                     // set up a live listener on the userprivate document:
                     userSnapshotUnsub = onSnapshot(doc(db, 'usersprivate', user.uid), (snapshot) => {
@@ -65,6 +64,34 @@ const RootNavigation = () => {
                         dispatch(setUnreadNotifications(notifications))
                     }, (error) => console.log('error in notifications snapshot: ', error))
                     // ---------------- end ------------------------- //
+
+                    // set up a live listener on the group invitations
+                    const invitationQuery = query(collection(db, 'notifications'), where('receiverId', '==', user.uid)
+                        ,where('type', '==', 'group-invitation'), where('status', '==', 'pending'), orderBy('timestamp', 'desc')    
+                    );
+                    groupInvitationSnapshotUnsub = onSnapshot(invitationQuery, (snapshot) => {
+                        const groupInvites = [];
+                        snapshot.forEach(doc => {
+                            const invite = {id: doc.id, ...doc.data()};
+                            delete invite.timestamp;
+                            groupInvites.push(invite);
+                        });
+                        dispatch(setIncomingInvitations(groupInvites));
+                    }, (error) => console.log('error in group invite snapshot: ', error));
+
+                    // set up a live listener on the groups documents:
+                    const groupsQuery = query(collection(db, 'groups'), 
+                        where('members', 'array-contains', user.uid));
+                        groupSnapshotUnsub = onSnapshot(groupsQuery, (snapshot) => {
+                        const groups = [];
+                        snapshot.forEach((doc) => {
+                            const group = {id: doc.id, ...doc.data()};
+                            delete group.timestamp;
+                            groups.push(group);
+                        });
+                        dispatch(setGroups(groups))
+                    }, (error) => console.log('error in groups snapshot: ', error))
+                    // ---------------- end ------------------------- //
                 }
                 else {
                     dispatch(clearUser())
@@ -80,6 +107,8 @@ const RootNavigation = () => {
             unsub();
             userSnapshotUnsub();
             notificationsSnapshotUnsub();
+            groupSnapshotUnsub();
+            groupInvitationSnapshotUnsub();
         }
     }, [])
 

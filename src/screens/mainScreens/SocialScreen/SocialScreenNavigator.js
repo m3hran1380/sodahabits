@@ -7,8 +7,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { setFriends, setIncomingRequests, setOutgoingRequests, setIncomingRequestsData } from '../../../features/friendSlice';
 import { onSnapshot, where, query, collection, orderBy } from 'firebase/firestore';
 import { db } from '../../../firestore/firestoreConfig';
-import { getGroupsById, getUsersById } from '../../../businessLogic/firestoreFunctions';
-import { setGroups } from '../../../features/groupSlice';
+import { getUsersById } from '../../../businessLogic/firestoreFunctions';
 
 
 const Stack = createStackNavigator();
@@ -17,7 +16,6 @@ const SocialScreenNavigator = () => {
     const isFetching = useRef(false);
     const user = useSelector(state => state.user.currentUser);
     const {friendsList, incomingRequests, incomingRequestsData} = useSelector(state => state.friends);
-    const {groups} = useSelector(state => state.groups);
     const dispatch = useDispatch();
 
     // setup a live listener on the incoming/outgoing friend requests
@@ -34,7 +32,7 @@ const SocialScreenNavigator = () => {
             });
             dispatch(setIncomingRequests(incomingRequests));
             isFetching.current = false;
-        }, (error) => console.log('error in incoming snapshot: ', error))
+        }, (error) => console.log('error in incoming snapshot: ', error));
 
         const outgoingFriendRequestQuery = query(collection(db, 'friendrequests'),
          where('senderId', '==', user.uid), where('status', '==', 'pending'), orderBy('timestamp', 'desc'));
@@ -46,7 +44,7 @@ const SocialScreenNavigator = () => {
                 outgoingRequests.push(request);
             });
             dispatch(setOutgoingRequests(outgoingRequests));
-        }, (error) => console.log('error in outgoing snapshot: ', error))
+        }, (error) => console.log('error in outgoing snapshot: ', error));
 
         return () => {
             unsubIncoming();
@@ -117,39 +115,6 @@ const SocialScreenNavigator = () => {
             }
         }
     }, [user])
-
-    // this side effect runs everytime the user state changes - it checks for changes in membersOf (groups) array.
-    useEffect(() => {
-        if (!user.membersOf) return;
-        
-        const currentGroupsIds = groups.map((group) => group.id);
-         // compare the updated user document's membersOf array to what we have in redux
-        const currentGroupsSet = new Set(currentGroupsIds);
-        const retrievedGroupsSet = new Set(user.membersOf);
-
-        const areArraysEqual = currentGroupsIds.length === user.membersOf.length && 
-            [...currentGroupsSet].every(item => retrievedGroupsSet.has(item));
-
-        if (!areArraysEqual) {
-            // find out if a group has been added or removed
-            if (currentGroupsSet.size < retrievedGroupsSet.size) {
-                const difference = [...retrievedGroupsSet].filter(item => !currentGroupsSet.has(item));
-                // retrieve the data for the new group:
-                (async () => {
-                    const gorupsData = await getGroupsById(difference);
-                    const modifiedGroupsArray = [...groups, ...gorupsData];
-                    dispatch(setGroups(modifiedGroupsArray));
-                })();
-            }
-            else {
-                const difference = [...currentGroupsSet].filter(item => !retrievedGroupsSet.has(item));
-                // dispatch new groups state:
-                const modifiedGroupsArray = groups.filter(item => !difference.includes(item.id));
-                dispatch(setGroups(modifiedGroupsArray));
-            }
-        }
-    }, [user])
-
 
     return (
         <Stack.Navigator screenOptions={{headerShown: false}}>

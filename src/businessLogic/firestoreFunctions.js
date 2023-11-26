@@ -818,9 +818,38 @@ export const createGroup = async (userId, friendsToInvite, groupName, imageUrl) 
         });
         await updateDoc(doc(db, 'usersprivate', userId), {
             membersOf: arrayUnion(docRef.id),
+        });
+        // invite the users
+        friendsToInvite.forEach(async id => {
+            await addDoc(collection(db, 'notifications'), {
+                receiverId: id,
+                senderId: userId,
+                read: false,
+                status: 'pending',
+                timestamp: serverTimestamp(),
+                type: 'group-invitation',
+                groupName: groupName,
+                groupId: docRef.id,
+                groupImage: imageUrl ? imageUrl : null,
+                members: [userId]
+            })
         })
     }
     catch (error) {
+        console.log("error during group creation ", error);
         throw error;
+    }
+}
+
+
+// following function responds to a group invitation
+export const respondToGroupInvite = async (notificationId, response) => {
+    try {
+        await updateDoc(doc(db, 'notifications', notificationId), {
+            status: response,
+        })
+    }   
+    catch (error) {
+        console.log("error while responding to group invite ", error);
     }
 }

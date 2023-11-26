@@ -8,7 +8,7 @@ import { useSelector } from 'react-redux';
 import { replyToNudge } from '../../../../businessLogic/firestoreFunctions';
 
 
-const NotificationElement = ({ listOffsetValue, flatListRef, index, viewableNotification }) => {
+const NudgeNotificationElement = ({ listOffsetValue, flatListRef, index, viewableNotification }) => {
     const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
     const [replied, setReplied] = useState(false);
     const [showReplyMenu, setShowReplyMenu] = useState(false);
@@ -113,7 +113,7 @@ const NotificationElement = ({ listOffsetValue, flatListRef, index, viewableNoti
     )
 }
 
-export default NotificationElement
+export default NudgeNotificationElement
 
 const styles = StyleSheet.create({
     container: {

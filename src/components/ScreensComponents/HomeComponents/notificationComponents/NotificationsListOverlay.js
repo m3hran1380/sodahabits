@@ -2,7 +2,8 @@ import { StyleSheet, View } from 'react-native'
 import { actualScreenWidth, availableScreenWidth2 } from '../../../../styles/generalStyle'
 import { useLayoutEffect, useState, useRef, useEffect, useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import NotificationElement from './NotificationElement';
+import NudgeNotificationElement from './NudgeNotificationElement';
+import InvitationNotificationElement from './InvitationNotificationElement';
 import Animated, { useSharedValue, useAnimatedScrollHandler, runOnJS, FadeIn } from 'react-native-reanimated';
 import { setNotificationsReadStatus } from '../../../../businessLogic/firestoreFunctions';
 import notifee from '@notifee/react-native';
@@ -102,14 +103,30 @@ const NotificationsListOverlay = ({notifications}) => {
         { viewabilityConfig, onViewableItemsChanged }
     ]);
 
-    const renderPost = ({_, index}) =>
-        <NotificationElement 
-            listLength={notificationsData.length} 
-            listOffsetValue={listOffsetValue} 
-            index={index}
-            flatListRef={flatListRef} 
-            viewableNotification={viewableNotification}
-        />
+    const renderPost = ({item, index}) => {
+        if (item.notificationData?.type === 'group-invitation') {
+            return (
+                <InvitationNotificationElement 
+                    listLength={notificationsData.length} 
+                    listOffsetValue={listOffsetValue} 
+                    index={index}
+                    flatListRef={flatListRef} 
+                    viewableNotification={viewableNotification}
+                />
+            )
+        }
+        else {
+            return (
+                <NudgeNotificationElement 
+                    listLength={notificationsData.length} 
+                    listOffsetValue={listOffsetValue} 
+                    index={index}
+                    flatListRef={flatListRef} 
+                    viewableNotification={viewableNotification}
+                />
+            )
+        }
+    }
  
     const keyExtractor = useCallback((item) => item.notificationData.id, []);
 

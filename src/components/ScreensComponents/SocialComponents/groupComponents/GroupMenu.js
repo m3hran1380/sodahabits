@@ -5,11 +5,29 @@ import SearchIcon from '../../../../../assets/svgs/Icons/socialIcons/groupIcons/
 import { useNavigation } from '@react-navigation/native';
 import { useSelector } from 'react-redux';
 import GroupItem from './GroupItem';
+import { useLayoutEffect, useState } from 'react';
 
 
 const GroupsMenu = ({ style }) => {
-    const { groups } = useSelector(state => state.groups);
+    const { groups, incomingInvitations } = useSelector(state => state.groups);
+    const [groupData, setGroupData] = useState(null);
     const navigation = useNavigation();
+
+    useLayoutEffect(() => {
+        const groupInvitations = [];
+        incomingInvitations.forEach(invitation => {
+            groupInvitations.push({
+                groupImage: invitation.groupImage,
+                id: invitation.groupId,
+                notificationId: invitation.id,
+                members: invitation.members,
+                name: invitation.groupName,
+                invitation: true,
+            });
+        });
+        setGroupData([...groupInvitations, ...groups]);
+    }, [groups, incomingInvitations])
+
 
     return (
         <View style={style}>
@@ -26,8 +44,8 @@ const GroupsMenu = ({ style }) => {
             </View>
             <View style={styles.groupsContainer}>
                 <FlatList 
-                    data={groups}
-                    renderItem={({item, index}) => <GroupItem lastIndex={groups.length - 1} groupData={item} index={index} /> }
+                    data={groupData}
+                    renderItem={({item, index}) => <GroupItem lastIndex={groupData.length - 1} groupData={item} index={index} /> }
                     keyExtractor={(item) => item.id}
                     horizontal={true}
                     showsHorizontalScrollIndicator={false}
@@ -49,6 +67,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         height: 40,
         paddingHorizontal: 20,
+        marginBottom: 5,
     },
     iconsContainer: {
         flexDirection: 'row',

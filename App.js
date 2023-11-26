@@ -35,11 +35,29 @@ const handleNotification = async (notification) => {
     const notificationSenderData = JSON.parse(notification.data.senderData);
     const notificationData = JSON.parse(notification.data.notificationData);
 
-    const notificationTitle = notificationData?.reply ? `${notificationSenderData.username} replied to you!` : `${notificationSenderData.username} nudged you!`;
+    let notificationTitle;
+    let notificationMessage;
+    let possibleInteractions;
+
+    if (notificationData.type === 'group-invitation') {
+        notificationTitle = 'Group invitation!';
+        notificationMessage = `The user ${notificationSenderData.username} has invited you to join the group: ${notificationData.groupName}`
+        possibleInteractions = [
+            {title: 'Accept', pressAction: { id: 'accept-group-invite' }},
+            {title: 'Reject', pressAction: { id: 'reject-group-invite' }},
+        ]
+    }   
+    else { 
+        notificationTitle = notificationData?.reply ? `${notificationSenderData.username} replied to you!` : `${notificationSenderData.username} nudged you!`;
+        notificationMessage = notification.data.message;
+        possibleInteractions = [
+            {title: 'Reply', pressAction: { id: 'reply' }, input: true}
+        ]
+    }
 
     const createdNotificationId = await notifee.displayNotification({
         title: notificationTitle,
-        body: `${notification.data.message}!`,
+        body: `${notificationMessage}!`,
         data: {notificationData: notificationData},
         android: {
             channelId,
@@ -48,11 +66,7 @@ const handleNotification = async (notification) => {
                 id: 'default',
             },
             actions: [
-                {
-                    title: 'Reply',
-                    pressAction: { id: 'reply' },
-                    input: true,
-                }
+                ...possibleInteractions
             ]
         },
     });

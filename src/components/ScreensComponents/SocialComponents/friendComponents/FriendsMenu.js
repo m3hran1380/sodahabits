@@ -23,8 +23,6 @@ const FriendsMenu = ({ style }) => {
         setCombinedData(dataCombined);
         
     }, [incomingRequestsData, friendsList, setCombinedData]);
-    
-
 
     return (
         <View style={[styles.container, style]}>
@@ -51,7 +49,7 @@ export default FriendsMenu
 
 const styles = StyleSheet.create({
     container: {
-        marginTop: 20,
+        marginTop: 10,
         paddingHorizontal: 20,
     },
     friendList: {
@@ -62,6 +60,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
+        top: 5,
     },
     addIconContainer: {
         justifyContent: 'center',
