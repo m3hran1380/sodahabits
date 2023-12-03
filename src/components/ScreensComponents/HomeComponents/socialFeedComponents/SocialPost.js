@@ -1,9 +1,9 @@
 import { StyleSheet, Text, View, Image, Pressable } from 'react-native';
 import { useState, memo, useLayoutEffect } from 'react';
 import generalStyles, { availableScreenWidth2, textStyle } from '../../../../styles/generalStyle';
-import DefaultPFP from '../../../../../assets/svgs/defaultPfps/default1.svg';
 import { formatDate } from '../../../../businessLogic/utilityFunctions';
 import SocialPostHabitItem from './SocialPostHabitItem';
+import DefaultPFP from '../../../../../assets/svgs/defaultPfps/default1.svg';
 import { Canvas, Circle, RadialGradient, vec } from "@shopify/react-native-skia";
 import HabitCompletionStatusDot from './HabitCompletionStatusDot';
 import ExpandedHabitOverlay from './ExpandedHabitOverlay';

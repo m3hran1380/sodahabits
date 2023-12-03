@@ -5,15 +5,20 @@ import MembersIcon from '../../../../../assets/svgs/Icons/socialIcons/groupIcons
 import { LinearGradient } from 'expo-linear-gradient';
 import { useState } from 'react';
 import { respondToGroupInvite } from '../../../../businessLogic/firestoreFunctions';
+import { useNavigation } from '@react-navigation/native';
 
 
 const GroupItem = ({ groupData, index, lastIndex }) => {
 
     const [showInvitationOptions, setShowInvitationOptions] = useState(false);
-
+    const navigation = useNavigation();
+    
     const groupPressed = () => {
         if (groupData?.invitation) {
             setShowInvitationOptions(val => !val);
+        }
+        else {
+            navigation.navigate('group screen', {groupData: groupData});
         }
     }
 
@@ -44,7 +49,7 @@ const GroupItem = ({ groupData, index, lastIndex }) => {
             />
             <View style={styles.memberCount}>
                 <MembersIcon height='65%' />
-                <Text style={styles.text}>5</Text>
+                <Text style={styles.text}></Text>
             </View>
             <Text style={styles.groupName}>{groupData.name}</Text>
             {showInvitationOptions &&

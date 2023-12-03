@@ -11,7 +11,7 @@ const generalStyles = {
         flex: 1,
         paddingHorizontal: 20,
         paddingTop: 75,
-        paddingBottom: 40,
+        paddingBottom: 60,
     },
     backgroundImage: {
         flex: 1,
