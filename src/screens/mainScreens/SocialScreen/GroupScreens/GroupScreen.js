@@ -1,8 +1,8 @@
 import { StyleSheet, Text, View } from 'react-native'
-import generalStyles, { actualScreenHeight, availableScreenWidth2, colors } from '../../../styles/generalStyle';
-import SocialFeedPosts from '../../../components/sharedComponents/SocialFeedPosts';
+import { colors } from '../../../../styles/generalStyle';
+import SocialFeedPosts from '../../../../components/sharedComponents/SocialFeedPosts';
 import { useSelector } from 'react-redux';
-import GroupScreenInfo from '../../../components/ScreensComponents/SocialComponents/groupComponents/GroupScreenInfo';
+import GroupScreenInfo from '../../../../components/ScreensComponents/SocialComponents/groupComponents/GroupScreenInfo';
 
 
 const GroupScreen = ({ route }) => {

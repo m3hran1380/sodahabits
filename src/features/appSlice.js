@@ -5,6 +5,7 @@ const initialState = {
     loading: false,
     camera: false,
     nudgeOpen: null,
+    hideTabBar: false,
 }
 
 
@@ -21,10 +22,13 @@ const appSlice = createSlice({
         setNudgeOpen: (state, action) => {
             state.nudgeOpen = action.payload;
         },
+        toggleTabBar: (state) => {
+            state.hideTabBar = !state.hideTabBar;
+        }
     }
 });
 
 
-export const { setAppLoading, toggleCamera, setNudgeOpen } = appSlice.actions;
+export const { setAppLoading, toggleCamera, setNudgeOpen, toggleTabBar } = appSlice.actions;
 
 export default appSlice.reducer;

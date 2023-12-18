@@ -8,7 +8,8 @@ import { setFriends, setIncomingRequests, setOutgoingRequests, setIncomingReques
 import { onSnapshot, where, query, collection, orderBy } from 'firebase/firestore';
 import { db } from '../../../firestore/firestoreConfig';
 import { getUsersById } from '../../../businessLogic/firestoreFunctions';
-import GroupScreen from './GroupScreen';
+import GroupScreen from './GroupScreens/GroupScreen';
+import JourneyNavigator from './GroupScreens/JourneyScreens/JourneyNavigator';
 
 
 const Stack = createStackNavigator();
@@ -123,6 +124,7 @@ const SocialScreenNavigator = () => {
             <Stack.Screen component={SocialSearchScreen} name='social search screen' />
             <Stack.Screen component={GroupCreationNavigator} name='group creation navigator' />
             <Stack.Screen component={GroupScreen} name='group screen' />
+            <Stack.Screen component={JourneyNavigator} name='group journey screen' />
         </Stack.Navigator>
     )
 }

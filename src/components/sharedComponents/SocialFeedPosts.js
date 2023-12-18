@@ -2,7 +2,7 @@ import { StyleSheet, View } from 'react-native'
 import { availableScreenWidth2 } from '../../styles/generalStyle';
 import { useCallback, useEffect, useState, useRef } from 'react';
 import { FlashList } from '@shopify/flash-list';
-import { retrieveMorePosts } from '../../businessLogic/firestoreFunctions';
+import { getUsersById, retrieveMorePosts } from '../../businessLogic/firestoreFunctions';
 import { useSelector } from 'react-redux';
 import SocialPost from '../ScreensComponents/HomeComponents/socialFeedComponents/SocialPost';
 import LoadingSpinner from '../ScreensComponents/HomeComponents/socialFeedComponents/LoadingSpinner';
@@ -58,12 +58,19 @@ const SocialFeedPosts = ({ userIds, ListHeaderComponent }) => {
     // retrieve the latest posts - run only on start
     const retrievePosts = async (cursorDoc, reset) => {
         const retrievedPosts = await retrieveMorePosts(user.uid, userIds, cursorDoc);
+        
+        // get the data of users who are in the group but not in the current user's friendlist
+        const idList = [user.uid, ...friendsList.map(friend => friend.id)];
+        const notFriendIds = retrievedPosts.map(post => post.ownerId).filter(id => !idList.includes(id));
+        const uniqueNotFriendIds = Array.from(new Set(notFriendIds));
+        const notFriendData = await getUsersById(uniqueNotFriendIds);
+        const allUsersData = [...notFriendData, ...friendsList];
 
         // add the user data to its retrieved post data:
         const combinedData = retrievedPosts.map((post) => {
             return {
                 habitsData: post,
-                userData: post.ownerId === user.uid ? user : friendsList.find((friend) => friend.id === post.ownerId),
+                userData: post.ownerId === user.uid ? user : allUsersData.find((user) => user.id === post.ownerId),
                 // following property indicates whether this post is user's post or his/her friends post:
                 isPostOwner: post.ownerId === user.uid ? true : false,
             }

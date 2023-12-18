@@ -24,7 +24,6 @@ const GroupScreenInfo = ({ groupData }) => {
         setMembersData(membersData);
     }, [friendsList]);
 
-    console.log(membersData);
 
     return (
         <View style={{marginBottom: 10}}>
@@ -39,7 +38,7 @@ const GroupScreenInfo = ({ groupData }) => {
                     <Text style={styles.canCount}>30</Text>
                 </Pressable>
                 <Pressable style={styles.milestoneIcon} onPress={() => {console.log("pressed")}}><GroupMilestoneIcon width='100%' height='100%' /></Pressable>
-                <Pressable style={styles.journeyIcon} onPress={() => {console.log("pressed")}}><GroupJourneyIcons width='100%' height='100%' /></Pressable>
+                <Pressable style={styles.journeyIcon} onPress={() => {navigation.navigate('group journey screen')}}><GroupJourneyIcons width='100%' height='100%' /></Pressable>
             </View>
 
             <GroupInfoBox style={styles.bestMemberContainer}>

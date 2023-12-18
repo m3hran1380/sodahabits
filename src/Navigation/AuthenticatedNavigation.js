@@ -18,7 +18,6 @@ import messaging from '@react-native-firebase/messaging';
 import { updateDeviceToken } from '../businessLogic/firestoreFunctions';
 
 
-
 const barStyle = {
     justifyContent: 'center',
     alignItems: 'center',
@@ -42,10 +41,11 @@ const AuthenticatedNavigation = () => {
     // as it doesn't work nicely with the fadeout animation of the options component.
     const [loggingOut, setLoggingOut] = useState(false);
     const camera = useSelector(state => state.app.camera);
+    const { hideTabBar } = useSelector(state => state.app);
 
     const user = useSelector((state) => state.user.currentUser);
-
     const dispatch = useDispatch();
+
 
     // this section involves the timers that are set out to perform actions in specific times
     const executeAtMidnight = async () => {
@@ -123,8 +123,15 @@ const AuthenticatedNavigation = () => {
                     }}
                 />
                 <Tab.Screen name='social' component={SocialScreenNavigator} 
-                    options={{
-                        tabBarButton: (props) => <TabBarButton screen='social' {...props} />
+                    options={() => {
+                        if (hideTabBar) {
+                            return {
+                                tabBarStyle: { display: 'none' }
+                            }
+                        }
+                        return {
+                            tabBarButton: (props) => <TabBarButton screen='social' {...props} />
+                        }
                     }}
                 />
                 <Tab.Screen name='vending machine' component={VendingMachineScreen} 
