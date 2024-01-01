@@ -3,20 +3,23 @@ import { availableScreenWidth2 } from '../../styles/generalStyle';
 import { useCallback, useEffect, useState, useRef } from 'react';
 import { FlashList } from '@shopify/flash-list';
 import { getUsersById, retrieveMorePosts } from '../../businessLogic/firestoreFunctions';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import SocialPost from '../ScreensComponents/HomeComponents/socialFeedComponents/SocialPost';
 import LoadingSpinner from '../ScreensComponents/HomeComponents/socialFeedComponents/LoadingSpinner';
 import { Accelerometer } from 'expo-sensors';
 import { debounce } from 'lodash';
+import { setGroupMembersData } from '../../features/groupSlice';
 
 
-const SocialFeedPosts = ({ userIds, ListHeaderComponent }) => {
+const SocialFeedPosts = ({ userIds, ListHeaderComponent, groupId }) => {
     const {friendsList} = useSelector(state => state.friends);
     const user = useSelector(state => state.user.currentUser); 
     const [friendPosts, setFriendPosts] = useState([]);
     const [allRetrieved, setAllRetrieved] = useState(false);
 
     const flashListRef = useRef(null);
+
+    const dispatch = useDispatch();
 
     // ----------- following chunk of code is for the shake detection ------------------- //
     let lastUpdate = Date.now();
@@ -61,10 +64,16 @@ const SocialFeedPosts = ({ userIds, ListHeaderComponent }) => {
         
         // get the data of users who are in the group but not in the current user's friendlist
         const idList = [user.uid, ...friendsList.map(friend => friend.id)];
-        const notFriendIds = retrievedPosts.map(post => post.ownerId).filter(id => !idList.includes(id));
-        const uniqueNotFriendIds = Array.from(new Set(notFriendIds));
-        const notFriendData = await getUsersById(uniqueNotFriendIds);
+        const notFriendIds = [user.uid, ...userIds].filter(id => !idList.includes(id));
+
+        const notFriendData = await getUsersById(notFriendIds);
         const allUsersData = [...notFriendData, ...friendsList];
+    
+        if (groupId) {
+            const membersData = allUsersData.filter((user) => userIds.includes(user.id));
+            membersData.push({...user, id: user.uid});
+            dispatch(setGroupMembersData({groupId: groupId, membersData: membersData}))
+        }
 
         // add the user data to its retrieved post data:
         const combinedData = retrievedPosts.map((post) => {

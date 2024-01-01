@@ -853,3 +853,23 @@ export const respondToGroupInvite = async (notificationId, response) => {
         console.log("error while responding to group invite ", error);
     }
 }
+
+
+
+// following function retrieves all the active journeys within the provided group.
+export const retrieveJourneys = async (groupId) => {
+    try {
+        const retrievedJourneys = [];
+        const retrievedDocuments = await getDocs(collection(db, 'groups', groupId, 'journeys'));
+        retrievedDocuments.forEach((doc) => {
+            retrievedJourneys.push({
+                id: doc.id, 
+                ...doc.data(),
+            })
+        });
+        return retrievedJourneys;
+    }
+    catch (error) {
+        console.log("error while retrieving the active journeys in the group ", error);
+    }
+}

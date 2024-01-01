@@ -28,7 +28,6 @@ const GroupsMenu = ({ style }) => {
         setGroupData([...groupInvitations, ...groups]);
     }, [groups, incomingInvitations])
 
-
     return (
         <View style={style}>
             <View style={styles.headerContainer}>

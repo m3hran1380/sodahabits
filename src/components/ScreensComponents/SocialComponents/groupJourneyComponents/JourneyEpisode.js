@@ -2,16 +2,32 @@ import { Image, Pressable, StyleSheet, Text, View } from 'react-native'
 import { availableScreenWidth2, textStyle } from '../../../../styles/generalStyle';
 import LockedIcon from '../../../../../assets/svgs/Icons/groupJourneyIcons/locked.svg';
 import { useNavigation } from '@react-navigation/native';
+import JourneyCreationScreens from './JourneyCreationScreens';
+import { useState } from 'react';
 
 
-const JourneyEpisode = ({ episodeNumber, episodeName, unlocked, index, children }) => {
+const JourneyEpisode = ({ groupId, episodeNumber, episodeName, unlocked, index, children }) => {
     
+    const [startJourney, setStartJourney] = useState(false);
     const navigation = useNavigation();
+
+    // currently set to true - later implement the logic to check if user is in a journey or not.
+    const alreadyInJourney = false;
+
+    const handleEpisodeInteraction = () => {
+        if (alreadyInJourney) {
+            navigation.navigate('journey challenge screen')
+        }
+        else if (episodeNumber === 'EP.1') {
+            setStartJourney(true);
+        }
+    }
+
 
     return (
         <View style={styles.container}>
             <View style={[styles.innerContainer, (index%2 === 1) && {alignSelf: 'flex-end'}]}>
-                <Pressable onPress={() => {navigation.navigate('journey challenge screen')}} style={styles.imageContainer}>
+                <Pressable onPress={handleEpisodeInteraction} style={styles.imageContainer}>
                     {children}
                     {!unlocked &&
                         <View style={styles.unlockedContainer}>
@@ -22,6 +38,8 @@ const JourneyEpisode = ({ episodeNumber, episodeName, unlocked, index, children 
                 <Text style={styles.text}>{episodeNumber}</Text>
                 <Text style={[styles.text, {top: -6}]}>{episodeName}</Text>
             </View>
+
+            {startJourney && <JourneyCreationScreens groupId={groupId} setStartJourney={setStartJourney} />}
         </View>
     )
 }

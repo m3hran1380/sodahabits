@@ -12,6 +12,7 @@ const GroupItem = ({ groupData, index, lastIndex }) => {
 
     const [showInvitationOptions, setShowInvitationOptions] = useState(false);
     const navigation = useNavigation();
+
     
     const groupPressed = () => {
         if (groupData?.invitation) {
@@ -48,8 +49,8 @@ const GroupItem = ({ groupData, index, lastIndex }) => {
                 style={styles.fade2} 
             />
             <View style={styles.memberCount}>
-                <MembersIcon height='65%' />
-                <Text style={styles.text}></Text>
+                <MembersIcon height='15' width='25' />
+                <Text style={styles.text}>{groupData.members.length}</Text>
             </View>
             <Text style={styles.groupName}>{groupData.name}</Text>
             {showInvitationOptions &&

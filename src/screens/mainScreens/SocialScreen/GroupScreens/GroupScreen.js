@@ -15,6 +15,7 @@ const GroupScreen = ({ route }) => {
                 <SocialFeedPosts 
                     ListHeaderComponent={<GroupScreenInfo groupData={groupData} />}
                     userIds={groupData.members.filter(id => id !== user.uid)} 
+                    groupId={groupData.id}
                 />
             </View>
         </View>

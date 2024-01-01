@@ -24,11 +24,14 @@ const appSlice = createSlice({
         },
         toggleTabBar: (state) => {
             state.hideTabBar = !state.hideTabBar;
+        },
+        setTabBar: (state, action) => {
+            state.hideTabBar = action.payload;
         }
     }
 });
 
 
-export const { setAppLoading, toggleCamera, setNudgeOpen, toggleTabBar } = appSlice.actions;
+export const { setAppLoading, toggleCamera, setNudgeOpen, toggleTabBar, setTabBar } = appSlice.actions;
 
 export default appSlice.reducer;

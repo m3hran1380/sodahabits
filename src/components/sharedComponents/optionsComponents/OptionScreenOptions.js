@@ -8,9 +8,13 @@ import LogoutIcon from '../../../../assets/svgs/Icons/optionIcons/logout.svg';
 import Animated, {FadeIn} from 'react-native-reanimated';
 import { signOut } from 'firebase/auth';
 import { auth } from '../../../firestore/firestoreConfig';
+import { useDispatch } from 'react-redux';
+import { setTabBar } from '../../../features/appSlice';
 
 
 const OptionScreenOptions = ({ adjustedWidth, adjustedHeight, setSpecificOptionSelected, setLoggingOut, setSelectedScreenIndex }) => {
+
+    const dispatch = useDispatch();
 
     const parentContainerStyle = {
         width: adjustedWidth,
@@ -69,6 +73,7 @@ const OptionScreenOptions = ({ adjustedWidth, adjustedHeight, setSpecificOptionS
     const handleSignOut = async () => {
         try {
             setLoggingOut(true);
+            dispatch(setTabBar(false));
             await signOut(auth);
         }
         catch (error) {

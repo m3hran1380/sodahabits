@@ -5,7 +5,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import JourneyEpisode from '../../../../../../components/ScreensComponents/SocialComponents/groupJourneyComponents/JourneyEpisode';
 
 
-const SaharaSurvival = () => {
+const SaharaSurvival = ({ groupData }) => {
 
     const episodesData = [
         {
@@ -56,7 +56,7 @@ const SaharaSurvival = () => {
                 <FlatList 
                     data={episodesData}
                     renderItem={({ item, index }) => 
-                        <JourneyEpisode index={index} episodeNumber={item.episodeNumber} episodeName={item.episodeName} unlocked={item.unlocked}>
+                        <JourneyEpisode index={index} groupId={groupData.id} episodeNumber={item.episodeNumber} episodeName={item.episodeName} unlocked={item.unlocked}>
                             {item.episodeImage}
                         </JourneyEpisode> 
                     }
