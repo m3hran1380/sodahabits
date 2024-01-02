@@ -26,7 +26,7 @@ const GroupsMenu = ({ style }) => {
             });
         });
         setGroupData([...groupInvitations, ...groups]);
-    }, [groups, incomingInvitations])
+    }, [groups, incomingInvitations]);
 
     return (
         <View style={style}>

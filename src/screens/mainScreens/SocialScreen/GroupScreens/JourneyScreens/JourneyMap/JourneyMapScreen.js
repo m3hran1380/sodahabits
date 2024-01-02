@@ -1,11 +1,10 @@
 import { FlatList, StyleSheet, Text, View } from 'react-native'
-import React, { useLayoutEffect, useEffect } from 'react'
+import React, { useLayoutEffect, useEffect, useState } from 'react'
 import SaharaSurvival from './SaharaSurvival'
 import MountainAscend from './MountainAscend'
 import { toggleTabBar } from '../../../../../../features/appSlice';
 import { useDispatch, useSelector } from 'react-redux'
-import { retrieveJourneys } from '../../../../../../businessLogic/firestoreFunctions';
-import { setGroupJourneys } from '../../../../../../features/groupSlice';
+import { setCurrentJourney, setGroupJourneys } from '../../../../../../features/groupSlice';
 import { collection, onSnapshot, query } from 'firebase/firestore';
 import { db } from '../../../../../../firestore/firestoreConfig';
 
@@ -14,6 +13,7 @@ const JourneyMapScreen = ({ navigation, route }) => {
     const dispatch = useDispatch();
     const {groupData} = route.params; 
     const groupJourneys = useSelector(state => state.groups.journeys)[groupData.id];
+    const user = useSelector(state => state.user.currentUser);
 
     useLayoutEffect(() => {
         const toggleNavigationBar = () => {
@@ -44,7 +44,13 @@ const JourneyMapScreen = ({ navigation, route }) => {
         }
     }, []);
 
-    
+    // check to see if user is already in a journey - if there is, set the currentJourney redux state.
+    useEffect(() => {
+        if (!groupJourneys) return;
+        const currentJourney = groupJourneys.filter(journey => journey.members.includes(user.uid));
+        if (currentJourney.length) dispatch(setCurrentJourney({groupId: groupData.id, currentJourney: currentJourney[0]}));
+    }, [groupJourneys]);
+
     const maps = [
         <SaharaSurvival groupData={groupData} />,
         <MountainAscend groupData={groupData} />

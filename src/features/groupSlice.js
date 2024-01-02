@@ -6,6 +6,7 @@ const initialState = {
     incomingInvitations: [],
     journeys: {},
     members: {},
+    currentJourney: {}
 }
 
 const groupSlice = createSlice({
@@ -26,11 +27,14 @@ const groupSlice = createSlice({
         },
         setGroupMembersData: (state, action) => {
             state.members = {...state.members, [action.payload.groupId]: action.payload.membersData}
+        },
+        setCurrentJourney: (state, action) => {
+            state.currentJourney = {...state.currentJourney, [action.payload.groupId]: action.payload.currentJourney};
         }
     }
 });
 
 
-export const { setInvitation, setGroups, setIncomingInvitations, setGroupJourneys, setGroupMembersData } = groupSlice.actions;
+export const { setInvitation, setGroups, setIncomingInvitations, setGroupJourneys, setGroupMembersData, setCurrentJourney } = groupSlice.actions;
 
 export default groupSlice.reducer;

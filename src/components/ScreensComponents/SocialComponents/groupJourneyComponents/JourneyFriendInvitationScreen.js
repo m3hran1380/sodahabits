@@ -4,6 +4,7 @@ import { useSelector } from 'react-redux';
 import MemberItem from './MemberItem';
 import { textStyle, availableScreenWidth2 } from '../../../../styles/generalStyle';
 import BlueButton from '../../../buttons/BlueButton';
+import { startJourney } from '../../../../businessLogic/firestoreFunctions';
 
 
 const JourneyFriendInvitationScreen = ({groupId}) => {
@@ -35,6 +36,10 @@ const JourneyFriendInvitationScreen = ({groupId}) => {
         }
     }
 
+    const handleJourneyStart = async () => {
+        await startJourney(groupId, user.uid, membersToInvite);
+    }
+
     return (
         <View style={styles.container}>
             <View style={styles.headerContainer}> 
@@ -51,7 +56,7 @@ const JourneyFriendInvitationScreen = ({groupId}) => {
                 />
             </View>
 
-            <BlueButton label='Invite friends' disabled={membersToInvite.length < 2}/>
+            <BlueButton onPress={handleJourneyStart} label='Invite friends' disabled={membersToInvite.length < 2}/>
         </View>
     )
 }

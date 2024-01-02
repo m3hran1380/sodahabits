@@ -1,7 +1,6 @@
 import { StyleSheet, SafeAreaView, View, Text, FlatList, Pressable } from 'react-native';
-import generalStyles, { actualScreenHeight, actualScreenWidth, availableScreenWidth2, colors, textStyle } from '../../../../styles/generalStyle';
+import generalStyles, { actualScreenHeight, availableScreenWidth2, colors, textStyle } from '../../../../styles/generalStyle';
 import { useDispatch, useSelector } from 'react-redux';
-import { useState } from 'react';
 import GroupFriendItem from '../../../../components/ScreensComponents/SocialComponents/groupComponents/GroupFriendItem';
 import BackButtonIcon from '../../../../../assets/svgs/Icons/socialIcons/friendIcons/backButton.svg';
 import { setInvitation } from '../../../../features/groupSlice';

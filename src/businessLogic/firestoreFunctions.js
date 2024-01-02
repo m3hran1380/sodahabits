@@ -847,6 +847,7 @@ export const respondToGroupInvite = async (notificationId, response) => {
     try {
         await updateDoc(doc(db, 'notifications', notificationId), {
             status: response,
+            read: true,
         })
     }   
     catch (error) {
@@ -871,5 +872,29 @@ export const retrieveJourneys = async (groupId) => {
     }
     catch (error) {
         console.log("error while retrieving the active journeys in the group ", error);
+    }
+}
+
+
+
+// following function creates a journey for the provided group
+export const startJourney = async (groupId, userId, usersToInvite) => {
+    const invitations = [];
+    usersToInvite.forEach(memberId => {
+        invitations.push({
+            from: userId,
+            to: memberId, 
+        })
+    })
+    
+    try {
+        await addDoc(collection(db, 'groups', groupId, 'journeys'), {
+            members: [userId],
+            invitations: invitations,
+            currentEpisodeIndex: 0,
+        })
+    }
+    catch (error) {
+        console.log("error while starting a journey ", error);
     }
 }
